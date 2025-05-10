@@ -2,11 +2,11 @@
 Pérgola Joyería es una tienda de joyas y accesorios elaborados con productos de alta calidad con un proceso de producción artesanal. Inspirándose en los valores de la autenticidad, elegancia y empoderamiento. Este proyecto nace para ofrecer una experiencia personalizada, conectando el arte de la joyería tradicional con el estilo de vida contemporáneo, permitiendo a las clientas encontrar piezas que se conviertan en una extensión de su identidad.
 
 ### 🧑🏻‍🎓 Integrantes del proyecto
-- Juan Pablo Ayala Menjívar - @pablo-menjivar
-- Aldo André Molina Maldonado - @AndreMolina77
-- Carlos Mateo Amaya Meléndez - @MateoMri
-- Rafael Alejandro Menéndez Alfaro @Alejandroo08
-- Rafael Alberto Vargas Landaverde @RafaVargas70
+- Juan Pablo Ayala Menjívar - [@pablo-menjivar](https://github.com/pablo-menjivar)
+- Aldo André Molina Maldonado - [@AndreMolina77](https://github.com/AndreMolina77)
+- Carlos Mateo Amaya Meléndez - [@MateoMri](https://github.com/MateoMri)
+- Rafael Alejandro Menéndez Alfaro - [@Alejandroo08](https://github.com/Alejandroo08)
+- Rafael Alberto Vargas Landaverde - [@RafaVargas70](https://github.com/RafaVargas70)
 
 ### 🛍️ Descripción del proyecto:
 Pérgola Joyería Artesanal se aliará con un conjunto de desarrolladores de software, quienes colaborarán con el emprendimiento por medio de la construcción de una aplicación web para escritorio y una aplicación web para teléfonos, la aplicación web se encargará de gestionar la parte administrativa de la tienda, englobando análisis del flujo de la tienda, tales como ventas, devoluciones, movimiento de productos, materia prima, interacciones de parte del cliente con los productos y gestión del inventario. La aplicación móvil estará enfocada hacia los usuarios finales, es decir, los clientes, ofreciendo servicios como compras en línea, realización de pedidos, personalización de productos y comentarios, tales como sugerencias, reseñas, etc.
@@ -24,7 +24,7 @@ A medida que el repositorio vaya creciendo, se podrá observar el uso de las tec
 
 ### 📚 Librerías a utilizar:
 (Este apartado irá creciendo a medida que el proyecto sea construido)
-Cada una de las siguientes librerías se instalarán utilizando `Bash` de Windows, utilizando el comando `npm i - [nombre-librería]`.
+Cada una de las siguientes librerías se instalarán utilizando `Bash` de Windows, utilizando el comando `npm i [nombre-librería]`.
 #### Backend:
 - `mongoose`
 - `express`
