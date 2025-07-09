@@ -5,7 +5,7 @@ import dotenv from "dotenv"
 import cookieParser from "cookie-parser"
 // Aqui importo todas las rutas que tiene el sistema de Pérgola
 import productsRoutes from "./src/routes/products.js"
-import customDesignsRoutes from "./src/routes/customDesigns.js"
+import customDesignsRoutes from "./src/routes/customDesigns.js";
 import designElementsRoutes from "./src/routes/designElement.js"
 import rawMaterialsRoutes from "./src/routes/rawMaterials.js"
 import employeesRoutes from "./src/routes/employees.js"
