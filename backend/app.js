@@ -26,6 +26,7 @@ import recoveryPasswordRoutes from "./src/routes/recoveryPassword.js"
 import validateAuthTokenRoutes from "./src/routes/validateAuthToken.js"
 import validatePasswordRoutes from "./src/routes/validatePassword.js"
 import adminProfileRoutes from "./src/routes/adminProfile.js"
+import customersRoutes from "./src/routes/customers.js"
 // Importo middlewares para validar el token de autenticación
 import { validateAuthToken } from "./src/middlewares/validateAuthToken.js"
 
