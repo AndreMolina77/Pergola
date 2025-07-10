@@ -17,7 +17,7 @@ customersController.postCustomers = async (req,res) => {
      if (!existingCustomers){
         return res.status(400).json({message: "El cliente ya existe"})
     }
-     const newCustomers = new Customers({name,lastName, username,email,phone,birthDate: birthDate ? new Date(birthDate): null, username,email,phone, birthDate,DUI,password, profilePic,address,isVerified, preferredColors,preferredMaterials,preferredJewelStyle,purchaseOpportunity,allergies,jewelSize,budget });
+     const newCustomers = new Customers({name,lastName, username,email,phone,birthDate: birthDate ? new Date(birthDate): null, username,email,phone,DUI,password, profilePic,address,isVerified, preferredColors,preferredMaterials,preferredJewelStyle,purchaseOpportunity,allergies,jewelSize,budget });
      await newCustomers.save();
      res.status(201).json({ message: "Cliente creado con exito", data: newCustomers})
     }catch(error){

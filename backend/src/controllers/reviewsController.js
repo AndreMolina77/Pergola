@@ -44,7 +44,7 @@ reviewsController.getReviews = async (req, res) => {
     };
 };
 // READ (GET ONE BY ID)
-reviewsController.getReviews = async (req, res) => {
+reviewsController.getReview = async (req, res) => {
     try {
         // Buscar una sola devolución
         const review = await Reviews.findById(req.params.id).populate('customer', 'username email').populate({path: "items.itemId", select: "name price" });
@@ -61,7 +61,7 @@ reviewsController.getReviews = async (req, res) => {
     }
 };
 // UPDATE (PUT)
-reviewController.putReviews = async (req, res) => {
+reviewController.putReview = async (req, res) => {
     try {
         const updates = req.body;
         // Verificar si se intenta cambiar el código de pedido
