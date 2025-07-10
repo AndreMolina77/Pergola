@@ -61,7 +61,7 @@ reviewsController.getReview = async (req, res) => {
     }
 };
 // UPDATE (PUT)
-reviewController.putReview = async (req, res) => {
+reviewsController.putReviews = async (req, res) => {
     try {
         const updates = req.body;
         // Verificar si se intenta cambiar el código de pedido

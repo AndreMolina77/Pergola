@@ -10,7 +10,7 @@ router.route()
  router.route("/:id")
  .post(reviewsController.postReviews)
  .get(reviewsController.getReview)
- .put(reviewsController.putReview)
+ .put(reviewsController.putReviews)
  .delete(reviewsController.deleteReviews)
 
  export default router
