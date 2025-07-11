@@ -57,10 +57,19 @@ categoriesController.getCategories = async (req,res) => {
 
 categoriesController.putCategories = async (req,res) => {
     try{
-        const updates = req.body;
+        const  {name,description,isActive} = req.body;
+        let imageURL = ""
+                   
+                      if (req.file) {
+                          const result = await cloudinary.uploader.upload(req.file.path, {
+                              folder: "public",
+                              allowed_formats: ["jpg", "jpeg", "png", "gif"],
+                          })
+                          imageURL = result.secure_url
+                      }
         
         // Actualizar la devolución
-        const updatedCategories = await Categories.findByIdAndUpdate( req.params.id, updates, { new: true })
+        const updatedCategories = await Categories.findByIdAndUpdate( req.params.id, {name,description,image: imageURL,isActive}, { new: true })
         // Validar que la devolución si exista
         if (!updatedCategories) {
             // ESTADO DE NO ENCONTRADO

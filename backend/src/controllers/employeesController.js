@@ -57,10 +57,18 @@ employeesController.getEmployees = async (req,res) => {
 
 employeesController.putEmployees = async (req,res) => {
     try{
-        const updates = req.body;
-        
+        const {name,lastName,username,email,phone, birthDate, DUI,password, userType,hireDate,isVerified} = req.body;
+        let imageURL = ""
+                           
+                              if (req.file) {
+                                  const result = await cloudinary.uploader.upload(req.file.path, {
+                                      folder: "public",
+                                      allowed_formats: ["jpg", "jpeg", "png", "gif"],
+                                  })
+                                  imageURL = result.secure_url
+                              }
         // Actualizar la devolución
-        const updatedEmployees = await Employees.findByIdAndUpdate( req.params.id, updates, { new: true })
+        const updatedEmployees = await Employees.findByIdAndUpdate( req.params.id, {name,lastName,username,email,phone, birthDate, DUI,password, userType,hireDate,isVerified}, { new: true })
         // Validar que la devolución si exista
         if (!updatedEmployees) {
             // ESTADO DE NO ENCONTRADO

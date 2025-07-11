@@ -58,10 +58,19 @@ SubcategoriesController.getSubCategories = async (req,res) => {
 
 SubcategoriesController.putSubCategories = async (req,res) => {
     try{
-        const updates = req.body;
+        const {name,description,isActive} = req.body;
+        let imageURL = ""
+           
+              if (req.file) {
+                  const result = await cloudinary.uploader.upload(req.file.path, {
+                      folder: "public",
+                      allowed_formats: ["jpg", "jpeg", "png", "gif"],
+                  })
+                  imageURL = result.secure_url
+              }
         
         // Actualizar la devolución
-        const updatedSubCategories = await SubCategories.findByIdAndUpdate( req.params.id, updates, { new: true })
+        const updatedSubCategories = await SubCategories.findByIdAndUpdate( req.params.id, {name,description,isActive}, { new: true })
         // Validar que la devolución si exista
         if (!updatedSubCategories) {
             // ESTADO DE NO ENCONTRADO

@@ -12,7 +12,7 @@ router.route()
  router.route("/:id")
  .post(upload.single("image"),customersController.postCustomers)
  .get(customersController.getCustomer)
- .put(customersController.putCustomers)
+ .put(upload.single("image"), customersController.putCustomers)
  .delete(customersController.deleteCustomers)
 
  export default router

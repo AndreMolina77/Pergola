@@ -11,7 +11,7 @@ router.route("/")
   //Rutas que requieren d eun parametro de id 
 router.route("/:id")
   .get(employeesController.getEmployee)
-  .put(employeesController.putEmployees)
+  .put(upload.single("image"), employeesController.putEmployees)
   .delete(employeesController.deleteEmployees)
 
  export default router
