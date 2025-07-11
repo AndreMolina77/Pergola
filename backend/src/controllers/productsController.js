@@ -1,7 +1,7 @@
 import Product from "../models/Products.js";
 
 // Obtener todos los productos
-export const getProducts = async (req, res) => {
+const getProducts = async (req, res) => {
   try {
     const products = await Product.find()
       .populate("collection category subcategory rawMaterialsUsed");
@@ -12,7 +12,7 @@ export const getProducts = async (req, res) => {
 };
 
 // Obtener producto por ID
-export const getProductById = async (req, res) => {
+const getProductById = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id)
       .populate("collection category subcategory rawMaterialsUsed");
@@ -23,10 +23,17 @@ export const getProductById = async (req, res) => {
   }
 };
 
-// Crear nuevo producto
-export const createProduct = async (req, res) => {
+// Crear nuevo producto (ahora usando Cloudinary)
+const createProduct = async (req, res) => {
   try {
-    const newProduct = new Product(req.body);
+    const files = req.files || [];
+    const imageUrls = files.map(file => file.path); // .path viene de Cloudinary
+
+    const newProduct = new Product({
+      ...req.body,
+      images: imageUrls,
+    });
+
     const savedProduct = await newProduct.save();
     res.status(201).json(savedProduct);
   } catch (error) {
@@ -35,7 +42,7 @@ export const createProduct = async (req, res) => {
 };
 
 // Actualizar producto
-export const updateProduct = async (req, res) => {
+const updateProduct = async (req, res) => {
   try {
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
@@ -50,7 +57,7 @@ export const updateProduct = async (req, res) => {
 };
 
 // Eliminar producto
-export const deleteProduct = async (req, res) => {
+const deleteProduct = async (req, res) => {
   try {
     const deletedProduct = await Product.findByIdAndDelete(req.params.id);
     if (!deletedProduct) return res.status(404).json({ message: "Producto no encontrado" });
@@ -58,4 +65,12 @@ export const deleteProduct = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: "Error al eliminar producto", error });
   }
+};
+
+export {
+  getProducts,
+  getProductById,
+  createProduct,
+  updateProduct,
+  deleteProduct
 };
