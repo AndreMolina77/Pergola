@@ -11,13 +11,22 @@ const categoriesController = {};
 
 categoriesController.postCategories = async (req,res) => {
     try{
-     const {name,description,image,isActive} = req.body;
+     const {name,description, isActive} = req.body;
+     let imageURL = ""
+ 
+    if (req.file) {
+        const result = await cloudinary.uploader.upload(req.file.path, {
+            folder: "public",
+            allowed_formats: ["jpg", "jpeg", "png", "gif"],
+        })
+        imageURL = result.secure_url
+    }
      //Verficacion si ya existe el cliente
      const existingCategories = await Categories.finById(req.params.id);
      if (!existingCategories){
         return res.status(400).json({message: "La categoria ya existe"})
     }
-     const newCategories = new Categories({name,description,image,isActive});
+     const newCategories = new Categories({name,description,image: imageURL,isActive});
      await newCategories.save();
      res.status(201).json({ message: "Categoria creada con exito", data: newCategories})
     }catch(error){

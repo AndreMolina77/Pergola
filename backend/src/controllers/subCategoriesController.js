@@ -12,13 +12,22 @@ const SubcategoriesController = {};
 
 SubcategoriesController.postSubCategories = async (req,res) => {
     try{
-     const {name,description,image,isActive} = req.body;
+     const {name,description,isActive} = req.body;
+     let imageURL = ""
+           
+              if (req.file) {
+                  const result = await cloudinary.uploader.upload(req.file.path, {
+                      folder: "public",
+                      allowed_formats: ["jpg", "jpeg", "png", "gif"],
+                  })
+                  imageURL = result.secure_url
+              }
      //Verficacion si ya existe el cliente
      const existingSubCategories = await SubCategories.finById(req.params.id);
      if (!existingSubCategories){
         return res.status(400).json({message: "La Subcategoria ya existe"})
     }
-     const newSubCategories = new SubCategories({name,description,image,isActive});
+     const newSubCategories = new SubCategories({name,description,image: imageURL,isActive});
      await newSubCategories.save();
      res.status(201).json({ message: "SubCategoria creada con exito", data: newSubCategories})
     }catch(error){
