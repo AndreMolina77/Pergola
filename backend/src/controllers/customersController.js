@@ -11,13 +11,24 @@ const customersController = {};
 
 customersController.postCustomers = async (req,res) => {
     try{
-     const {name,lastName, username,email,phone, birthDate,DUI,password, profilePic,address,isVerified, preferredColors,preferredMaterials,preferredJewelStyle,purchaseOpportunity,allergies,jewelSize,budget} = req.body;
+     const {name,lastName, username,email,phone, birthDate,DUI,password,address,isVerified, preferredColors,preferredMaterials,preferredJewelStyle,purchaseOpportunity,allergies,jewelSize,budget} = req.body;
+     let imageURL = ""
+ 
+    if (req.file) {
+        const result = await cloudinary.uploader.upload(req.file.path, {
+            folder: "public",
+            allowed_formats: ["jpg", "jpeg", "png", "gif"],
+        })
+        imageURL = result.secure_url
+    }
+ 
+
      //Verficacion si ya existe el cliente
      const existingCustomers = await Customers.finById(req.params.id);
      if (!existingCustomers){
         return res.status(400).json({message: "El cliente ya existe"})
     }
-     const newCustomers = new Customers({name,lastName, username,email,phone,birthDate: birthDate ? new Date(birthDate): null, username,email,phone,DUI,password, profilePic,address,isVerified, preferredColors,preferredMaterials,preferredJewelStyle,purchaseOpportunity,allergies,jewelSize,budget });
+     const newCustomers = new Customers({name,lastName, username,email,phone,birthDate: birthDate ? new Date(birthDate): null, username,email,phone,DUI,password, image: imageURL,address,isVerified, preferredColors,preferredMaterials,preferredJewelStyle,purchaseOpportunity,allergies,jewelSize,budget });
      await newCustomers.save();
      res.status(201).json({ message: "Cliente creado con exito", data: newCustomers})
     }catch(error){

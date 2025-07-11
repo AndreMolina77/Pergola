@@ -11,13 +11,22 @@ const employeesController = {};
 
 employeesController.postEmployees = async (req,res) => {
     try{
-     const {name,lastName,username,email,phone, birthDate, DUI,password, userType,profilePic,hireDate,isVerified} = req.body;
+     const {name,lastName,username,email,phone, birthDate, DUI,password, userType,hireDate,isVerified} = req.body;
+      let imageURL = ""
+      
+         if (req.file) {
+             const result = await cloudinary.uploader.upload(req.file.path, {
+                 folder: "public",
+                 allowed_formats: ["jpg", "jpeg", "png", "gif"],
+             })
+             imageURL = result.secure_url
+         }
      //Verficacion si ya existe el cliente
      const existingEmployees = await Employees.finById(req.params.id);
      if (!existingEmployees){
         return res.status(400).json({message: "El empleado ya existe"})
     }
-     const newEmployees = new Employees({name,lastName,username,email,phone, birthDate: birthDate ? new Date(birthDate): null, DUI,password, userType,profilePic,hireDate: hireDate ? new Date(hireDate): null, isVerified});
+     const newEmployees = new Employees({name,lastName,username,email,phone, birthDate: birthDate ? new Date(birthDate): null, DUI,password, userType,image: imageURL,hireDate: hireDate ? new Date(hireDate): null, isVerified});
      await newEmployees.save();
      res.status(201).json({ message: "Empleado creado con exito", data: newEmployees})
     }catch(error){
