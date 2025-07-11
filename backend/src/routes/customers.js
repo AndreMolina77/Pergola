@@ -9,7 +9,7 @@ router.route()
  //Rutas que requieren d eun parametro de id 
  router.route("/:id")
  .post(customersController.postCustomers)
- .get(customersController.postCustomers)
+ .get(customersController.getCustomer)
  .put(customersController.putCustomers)
  .delete(customersController.deleteCustomers)
 

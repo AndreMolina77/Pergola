@@ -1,12 +1,11 @@
 import Employees from "../models/Employees.js";
 import {v2 as cloudinary} from "cloudinary";
-
+import { config } from '../utils/config.js'
 
 cloudinary.config({
-    cloud_name: config.CLOUDINARY.cloudinary_name,
-    api_key: config.CLOUDINARY.cloudinary_api_key,
-    api_secret: config.CLOUDINARY.cloudinary_api_secret
-
+    CLOUD_NAME: config.CLOUDINARY.CLOUD_NAME,
+    API_KEY: config.CLOUDINARY.API_KEY,
+    API_SECRET: config.CLOUDINARY.API_SECRET
 })
 const employeesController = {};
 
@@ -26,7 +25,7 @@ employeesController.postEmployees = async (req,res) => {
     }
 };
 
-employessController.getEmployees = async (req,res) => {
+employeesController.getEmployees = async (req,res) => {
     try{
      const employees = await Employees.find();
      res.status(200).json(employees);
@@ -64,8 +63,6 @@ employeesController.putEmployees = async (req,res) => {
         res.status(500).json({message: "Error al actualizar cliente", error: error.message});  
     }
 };
-
-
 employeesController.deleteEmployees = async (req,res) => {
     try{
      const employees = await Employees.findById(req.params.id);
@@ -78,5 +75,4 @@ employeesController.deleteEmployees = async (req,res) => {
         res.status(500).json({message: "Error al eliminar empleado", error: error.message}); 
     }
 }
-
 export default employeesController;

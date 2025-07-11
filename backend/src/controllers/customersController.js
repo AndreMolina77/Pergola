@@ -34,7 +34,7 @@ customersController.getCustomers = async (req,res) => {
     };
 };
 
-customersController.getCustomers = async (req,res) => {
+customersController.getCustomer = async (req,res) => {
     try{
     const customers = await Customers.finById(req.params.id);
     if(!customers){
