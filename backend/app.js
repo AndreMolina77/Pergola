@@ -18,6 +18,7 @@ import signupCustomerRoutes from "./src/routes/signupCustomer.js"
 import recoveryPasswordRoutes from "./src/routes/recoveryPassword.js"
 import validateAuthTokenRoutes from "./src/routes/validateAuthToken.js"
 import validatePasswordRoutes from "./src/routes/validatePassword.js"
+import ordersRouters from "./src/routes/orders.js"
 // Importo middlewares para validar el token de autenticación
 import { validateAuthToken } from "./src/middlewares/validateAuthToken.js"
 
@@ -46,5 +47,6 @@ app.use("/api/customers", validateAuthToken(["admin", "colaborador", "customer"]
 app.use("/api/reviews", validateAuthToken(["admin", "colaborador", "customer"]), reviewsRoutes) 
 app.use("/api/refunds", validateAuthToken(["admin", "colaborador", "customer"]), refundsRoutes)
 app.use("/api/transactions", validateAuthToken(["admin", "colaborador", "customer"]), transactionsRoutes)
+app.use("/api/orders", validateAuthToken(["admin", "colaborador", "customer"]), ordersRouters)
 
 export default app
