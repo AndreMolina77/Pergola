@@ -1,7 +1,7 @@
 import Product from "../models/Products.js";
 
 // Obtener todos los productos
-const getProducts = async (req, res) => {
+export const getProducts = async (req, res) => {
   try {
     const products = await Product.find()
       .populate("collection category subcategory rawMaterialsUsed");
@@ -12,7 +12,7 @@ const getProducts = async (req, res) => {
 };
 
 // Obtener producto por ID
-const getProductById = async (req, res) => {
+export const getProductById = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id)
       .populate("collection category subcategory rawMaterialsUsed");
@@ -23,11 +23,11 @@ const getProductById = async (req, res) => {
   }
 };
 
-// Crear nuevo producto (ahora usando Cloudinary)
-const createProduct = async (req, res) => {
+// Crear nuevo producto
+export const createProduct = async (req, res) => {
   try {
     const files = req.files || [];
-    const imageUrls = files.map(file => file.path); // .path viene de Cloudinary
+    const imageUrls = files.map(file => file.path); // Cloudinary devuelve file.path
 
     const newProduct = new Product({
       ...req.body,
@@ -42,7 +42,7 @@ const createProduct = async (req, res) => {
 };
 
 // Actualizar producto
-const updateProduct = async (req, res) => {
+export const updateProduct = async (req, res) => {
   try {
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
@@ -57,7 +57,7 @@ const updateProduct = async (req, res) => {
 };
 
 // Eliminar producto
-const deleteProduct = async (req, res) => {
+export const deleteProduct = async (req, res) => {
   try {
     const deletedProduct = await Product.findByIdAndDelete(req.params.id);
     if (!deletedProduct) return res.status(404).json({ message: "Producto no encontrado" });
@@ -65,12 +65,4 @@ const deleteProduct = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: "Error al eliminar producto", error });
   }
-};
-
-export {
-  getProducts,
-  getProductById,
-  createProduct,
-  updateProduct,
-  deleteProduct
 };
