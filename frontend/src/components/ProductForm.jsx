@@ -159,22 +159,25 @@ export default function ProductForm({ onSuccess, onClose }) {
   />
 </div>
 
-        {/* Botones */}
-        <div className="flex justify-end gap-2 pt-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 rounded border border-gray-300 hover:bg-gray-100"
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-          >
-            Guardar
-          </button>
-        </div>
+       {/* Botones */}
+<div className="flex justify-end gap-2 pt-4">
+  <button
+    type="button"
+    onClick={onClose}
+    style={{ backgroundColor: "#FF0000" }}
+    className="text-white px-4 py-2 rounded hover:bg-red-700"
+  >
+    Cancelar
+  </button>
+  <button
+    type="submit"
+    style={{ backgroundColor: "#A73249" }}
+    className="text-white px-4 py-2 rounded hover:bg-[#8B283A]"
+  >
+    Guardar
+  </button>
+</div>
+
       </form>
     </div>
   );
