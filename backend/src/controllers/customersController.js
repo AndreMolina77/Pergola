@@ -24,7 +24,7 @@ customersController.postCustomers = async (req,res) => {
  
 
      //Verficacion si ya existe el cliente
-     const existingCustomers = await Customers.finById(req.params.id);
+     const existingCustomers = await Customers.findById(req.params.id);
      if (!existingCustomers){
         return res.status(400).json({message: "El cliente ya existe"})
     }
@@ -47,7 +47,7 @@ customersController.getCustomers = async (req,res) => {
 
 customersController.getCustomer = async (req,res) => {
     try{
-    const customers = await Customers.finById(req.params.id);
+    const customers = await Customers.findById(req.params.id);
     if(!customers){
         return res.status(404).json({message: "Cliente no encontrado"})
     }
@@ -57,6 +57,7 @@ customersController.getCustomer = async (req,res) => {
     }
 };
 
+//UPDATE
 customersController.putCustomers = async (req,res) => {
     try{
         const {name,lastName, username,email,phone, birthDate,DUI,password,address,isVerified, preferredColors,preferredMaterials,preferredJewelStyle,purchaseOpportunity,allergies,jewelSize,budget} = req.body;
@@ -83,7 +84,7 @@ customersController.putCustomers = async (req,res) => {
     }
 };
 
-
+//Delete
 customersController.deleteCustomers = async (req,res) => {
     try{
      const customers = await Customers.findById(req.params.id);
