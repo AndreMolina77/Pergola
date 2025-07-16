@@ -1,7 +1,18 @@
 import Product from "../models/Products.js";
+import { v2 as cloudinary } from "cloudinary";
+import { config } from '../utils/config.js';
+
+cloudinary.config({
+    CLOUD_NAME: config.CLOUDINARY.CLOUD_NAME,
+  api_key: config.CLOUDINARY.cloudinary_api_key,
+  api_secret: config.CLOUDINARY.cloudinary_api_secret
+});
+
+// Definir el controlador como un objeto
+const productsController = {};
 
 // Obtener todos los productos
-export const getProducts = async (req, res) => {
+productsController.getProducts = async (req, res) => {
   try {
     const products = await Product.find()
       .populate("collection category subcategory rawMaterialsUsed");
@@ -12,7 +23,7 @@ export const getProducts = async (req, res) => {
 };
 
 // Obtener producto por ID
-export const getProductById = async (req, res) => {
+productsController.getProductById = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id)
       .populate("collection category subcategory rawMaterialsUsed");
@@ -24,7 +35,7 @@ export const getProductById = async (req, res) => {
 };
 
 // Crear nuevo producto
-export const createProduct = async (req, res) => {
+productsController.createProduct = async (req, res) => {
   try {
     const files = req.files || [];
     const imageUrls = files.map(file => file.path); // Cloudinary devuelve file.path
@@ -42,7 +53,7 @@ export const createProduct = async (req, res) => {
 };
 
 // Actualizar producto
-export const updateProduct = async (req, res) => {
+productsController.updateProduct = async (req, res) => {
   try {
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
@@ -57,7 +68,7 @@ export const updateProduct = async (req, res) => {
 };
 
 // Eliminar producto
-export const deleteProduct = async (req, res) => {
+productsController.deleteProduct = async (req, res) => {
   try {
     const deletedProduct = await Product.findByIdAndDelete(req.params.id);
     if (!deletedProduct) return res.status(404).json({ message: "Producto no encontrado" });
@@ -66,3 +77,6 @@ export const deleteProduct = async (req, res) => {
     res.status(500).json({ message: "Error al eliminar producto", error });
   }
 };
+
+// Exportar el controlador
+export default productsController;

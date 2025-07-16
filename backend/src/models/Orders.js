@@ -77,3 +77,5 @@ const ordersSchema = new Schema({
         min: [0, "El total no puede ser negativo"]
     }
     }, { timestamps: true });
+
+    export default model("Order", ordersSchema)

@@ -6,7 +6,6 @@ import cookieParser from "cookie-parser"
 // Aqui importo todas las rutas que tiene el sistema de Pérgola
 import productsRoutes from "./src/routes/products.js"
 import customDesignsRoutes from "./src/routes/customDesigns.js"
-import designElementsRoutes from "./src/routes/designElement.js"
 import rawMaterialsRoutes from "./src/routes/rawMaterials.js"
 import employeesRoutes from "./src/routes/employees.js"
 import categoriesRoutes from "./src/routes/categories.js"
@@ -25,7 +24,6 @@ import signupCustomerRoutes from "./src/routes/signupCustomer.js"
 import recoveryPasswordRoutes from "./src/routes/recoveryPassword.js"
 import validateAuthTokenRoutes from "./src/routes/validateAuthToken.js"
 import validatePasswordRoutes from "./src/routes/validatePassword.js"
-import adminProfileRoutes from "./src/routes/adminProfile.js"
 // Importo middlewares para validar el token de autenticación
 import { validateAuthToken } from "./src/middlewares/validateAuthToken.js"
  
@@ -50,10 +48,8 @@ app.use("/api/admin/profile", adminProfileRoutes) // Esta será pública para /d
 // Rutas que SÍ requieren login (protegidas)
 app.use("/api/products", validateAuthToken(["admin", "colaborador",]), productsRoutes)
 app.use("/api/rawmaterials", validateAuthToken(["admin", "colaborador"]), rawMaterialsRoutes)
-app.use("/api/designelements", validateAuthToken(["admin", "colaborador"]), designElementsRoutes)
 app.use("/api/customdesigns", validateAuthToken(["admin", "colaborador", "customer"]), customDesignsRoutes)
 app.use("/api/employees", validateAuthToken(["admin"]), employeesRoutes)
-app.use("/api/admin/profile", validateAuthToken(["admin"]), adminProfileRoutes) // Solo admin
 app.use("/api/collections", validateAuthToken(["admin", "colaborador"]), collectionsRoutes)
 app.use("/api/categories", validateAuthToken(["admin", "colaborador"]), categoriesRoutes)
 app.use("/api/subcategories", validateAuthToken(["admin", "colaborador"]), subcategoriesRoutes)
