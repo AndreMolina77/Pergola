@@ -1,15 +1,17 @@
+// Libreria para enrutamiento express
 import express from "express"
+// Importo el controlador de proveedores
 import suppliersController from "../controllers/suppliersController.js"
 
 const router = express.Router()
-//Rutas que no requieren ningun parametro en especifico
+// Rutas que no requieren ningún parámetro en específico
 router.route("/")
-.post(suppliersController.postSuppliers)
-.get(suppliersController.getSuppliers)
- //Rutas que requieren d eun parametro de id 
- router.route("/:id")
- .get(suppliersController.getSuppliers)
- .put(suppliersController.putSuppliers)
- .delete(suppliersController.deleteSuppliers)
+    .get(suppliersController.getSuppliers)
+    .post(suppliersController.postSuppliers)
+// Rutas que requieren un parámetro de id 
+router.route("/:id")
+    .get(suppliersController.getSupplier)
+    .put(suppliersController.putSuppliers)
+    .delete(suppliersController.deleteSuppliers)
 
- export default router
+export default router

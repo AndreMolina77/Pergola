@@ -1,15 +1,17 @@
+// Libreria para enrutamiento express
 import express from "express"
-import rawMaterialsController from "../controllers/rawMaterialController.js"
+// Importo el controlador de materias primas
+import rawMaterialsController from "../controllers/rawMaterialsController.js"
 
 const router = express.Router()
-//Rutas que no requieren ningun parametro en especifico
+// Rutas que no requieren ningún parámetro en específico
 router.route("/")
- .post(rawMaterialsController.postRawMaterials)
- .get(rawMaterialsController.getRawMaterials)
- //Rutas que requieren d eun parametro de id 
- router.route("/:id")
- .get(rawMaterialsController.getRawMaterials)
- .put(rawMaterialsController.putRawMaterials)
- .delete(rawMaterialsController.deleteRawMaterials)
+    .get(rawMaterialsController.getRawMaterials)
+    .post(rawMaterialsController.postRawMaterials)
+// Rutas que requieren un parámetro de id 
+router.route("/:id")
+    .get(rawMaterialsController.getRawMaterial)
+    .put(rawMaterialsController.putRawMaterials)
+    .delete(rawMaterialsController.deleteRawMaterials)
 
- export default router
+export default router

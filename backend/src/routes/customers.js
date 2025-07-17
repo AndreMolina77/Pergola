@@ -1,18 +1,20 @@
+// Libreria para enrutamiento express y para guardar registros de archivos multimedia localmente
 import express from "express"
 import multer from "multer"
+// Importo el controlador de clientes
 import customersController from "../controllers/customersController.js"
 
-const upload = multer({dest: "public/"})
 const router = express.Router()
+// Especificamos que los archivos multimedia se guarden en la carpeta public
+const upload = multer({dest: "public/"})
+// Rutas que no requieren ningún parámetro en específico
 router.route("/")
-//Rutas que no requieren ningun parametro en especifico
-router.route()
- .get(customersController.getCustomers)
- //Rutas que requieren d eun parametro de id 
- router.route("/:id")
- .post(upload.single("image"),customersController.postCustomers)
- .get(customersController.getCustomer)
- .put(upload.single("image"), customersController.putCustomers)
- .delete(customersController.deleteCustomers)
+    .get(customersController.getCustomers)
+    .post(upload.single("customerImage"), customersController.postCustomers)
+// Rutas que requieren un parámetro de id 
+router.route("/:id")
+    .get(customersController.getCustomer)
+    .put(upload.single("customerImage"), customersController.putCustomers)
+    .delete(customersController.deleteCustomers)
 
- export default router
+export default router
