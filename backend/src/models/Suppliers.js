@@ -7,14 +7,22 @@ const supplierSchema = new Schema({
     required: [true, 'El nombre del proveedor es obligatorio'],
     trim: true,
     minlength: [3, 'El nombre debe tener al menos 3 caracteres'],
-    maxlength: [255, 'El nombre no puede exceder los 255 caracteres']
+    maxlength: [255, 'El nombre no puede exceder los 255 caracteres'],
+    validate: {
+      validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+      message: "El nombre no puede estar vacío"
+    }
   },
   contactPerson: {
     type: String,
     required: [true, 'El nombre de la persona de contacto es obligatorio'],
     trim: true,
     minlength: [3, 'El nombre debe tener al menos 3 caracteres'],
-    maxlength: [255, 'El nombre no puede exceder los 255 caracteres']
+    maxlength: [255, 'El nombre no puede exceder los 255 caracteres'],
+    validate: {
+      validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+      message: "El nombre de la persona de contacto no puede estar vacío"
+    }
   },
   phoneNumber: {
     type: String,
@@ -24,6 +32,10 @@ const supplierSchema = new Schema({
     validate: {
       validator: v => /^[\d\s()+-]{5,50}$/.test(v),
       message: props => `${props.value} no es un número de teléfono válido`
+    },
+    validate: {
+      validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+      message: "El teléfono no puede estar vacío"
     }
   },
   email: {
@@ -36,6 +48,10 @@ const supplierSchema = new Schema({
     validate: {
       validator: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v),
       message: props => `${props.value} no es un email válido`
+    },
+    validate: {
+      validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+      message: "El correo no puede estar vacío"
     }
   },
   address: {
@@ -43,7 +59,11 @@ const supplierSchema = new Schema({
     required: [true, 'La dirección es obligatoria'],
     trim: true,
     minlength: [5, 'La dirección debe tener al menos 5 caracteres'],
-    maxlength: [500, 'La dirección no puede exceder los 500 caracteres']
+    maxlength: [500, 'La dirección no puede exceder los 500 caracteres'],
+    validate: {
+      validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+      message: "La dirección no puede estar vacía"
+    }
   }
 }, {
   timestamps: true,

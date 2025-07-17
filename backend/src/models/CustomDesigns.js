@@ -7,7 +7,11 @@ const customDesignsSchema = new Schema({
         required: [true, "El código de solicitud es obligatorio"],
         trim: true,
         unique: true,
-        minlength: [5, "El código debe tener al menos 5 caracteres"]
+        minlength: [5, "El código debe tener al menos 5 caracteres"],
+        validate: {
+            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            message: "El código de solicitud no puede estar vacío"
+        }
     },
     piece: {
         type: String,
@@ -15,12 +19,20 @@ const customDesignsSchema = new Schema({
         enum: {
             values: ["Pulsera", "Cadena", "Tobillera"],
             message: "La pieza debe ser Pulsera, Cadena o Tobillera"
+        },
+        validate: {
+            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            message: "El nombre de pieza no puede estar vacío"
         }
     },
     base: {
         type: String,
         required: [true, "La base es obligatoria"],
-        trim: true
+        trim: true,
+        validate: {
+            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            message: "El nombre de base no puede estar vacía"
+        }
     },
     baseLength: {
         type: String,
@@ -30,23 +42,39 @@ const customDesignsSchema = new Schema({
                 return /^\d{1,3}(cm|mm)?$/.test(v)
             },
             message: "La longitud debe ser un número seguido opcionalmente por 'cm' o 'mm' (ej: '18cm')"
+        },
+        validate: {
+            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            message: "La longitud de base no puede estar vacía"
         }
     },
     decoration: [{
         type: String,
         required: true,
-        trim: true
+        trim: true,
+        validate: {
+            validator: v => Array.isArray(v) && v.length > 0,  // Asegurarse de que no sea un array vacío
+            message: "El array de decoración no puede estar vacío"
+        }
     }],
     clasp: {
         type: String,
         required: [true, "El cierre es obligatorio"],
-        trim: true
+        trim: true,
+        validate: {
+            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            message: "El cierre no puede estar vacío"
+        }
     },
     customerComments: {
         type: String,
         maxlength: [300, "El comentario no puede exceder los 300 caracteres"],
         default: "",
-        trim: true
+        trim: true,
+        validate: {
+            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            message: "Los comentarios no pueden estar vacíos"
+        }
     }
 }, {
     timestamps: true,

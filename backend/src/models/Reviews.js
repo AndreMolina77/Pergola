@@ -26,12 +26,20 @@ const reviewsSchema = new Schema({
         type: String,
         trim: true,
         minlength: [10, "El comentario debe tener al menos 10 caracteres"],
-        maxlength: [500, "El comentario no puede exceder los 500 caracteres"]
+        maxlength: [500, "El comentario no puede exceder los 500 caracteres"],
+        validate: {
+            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            message: "Los comentarios no puede estar vacíos"
+        }
     },
     response: {
         type: String,
         trim: true,
-        maxlength: [500, "La respuesta no puede exceder los 500 caracteres"]
+        maxlength: [500, "La respuesta no puede exceder los 500 caracteres"],
+        validate: {
+            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            message: "La respuesta no puede estar vacía"
+        }
     }
 }, {
     timestamps: true,

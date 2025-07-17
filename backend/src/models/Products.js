@@ -7,7 +7,11 @@ const productsSchema = new Schema({
         required: [true, "El nombre del producto es obligatorio"],
         trim: true,
         minlength: [3, "El nombre debe tener al menos 3 caracteres"],
-        maxlength: [100, "El nombre no puede exceder los 100 caracteres"]
+        maxlength: [100, "El nombre no puede exceder los 100 caracteres"],
+        validate: {
+            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            message: "El nombre del producto no puede estar vacío"
+        }
     },
     description: {
         type: String,
