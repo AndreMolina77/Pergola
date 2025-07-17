@@ -22,7 +22,7 @@ employeesController.postEmployees = async (req,res) => {
              imageURL = result.secure_url
          }
      //Verficacion si ya existe el cliente
-     const existingEmployees = await Employees.finById(req.params.id);
+     const existingEmployees = await Employees.findById(req.params.id);
      if (!existingEmployees){
         return res.status(400).json({message: "El empleado ya existe"})
     }
@@ -45,7 +45,7 @@ employeesController.getEmployees = async (req,res) => {
 
 employeesController.getEmployees = async (req,res) => {
     try{
-    const employees = await Employees.finById(req.params.id);
+    const employees = await Employees.findById(req.params.id);
     if(!employees){
         return res.status(404).json({message: "Empleado no encontrado"})
     }

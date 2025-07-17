@@ -22,7 +22,7 @@ categoriesController.postCategories = async (req,res) => {
         imageURL = result.secure_url
     }
      //Verficacion si ya existe el cliente
-     const existingCategories = await Categories.finById(req.params.id);
+     const existingCategories = await Categories.findById(req.params.id);
      if (!existingCategories){
         return res.status(400).json({message: "La categoria ya existe"})
     }
@@ -45,7 +45,7 @@ categoriesController.getCategories = async (req,res) => {
 
 categoriesController.getCategories = async (req,res) => {
     try{
-    const categories = await Categories.finById(req.params.id);
+    const categories = await Categories.findById(req.params.id);
     if(!categories){
         return res.status(404).json({message: "Categoria no encontrada"})
     }

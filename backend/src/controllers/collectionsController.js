@@ -25,7 +25,7 @@ collectionsController.postCollections = async (req,res) => {
               }
 
      //Verficacion si ya existe la coleccion
-     const existingCollections = await Collections.finById(req.params.id);
+     const existingCollections = await Collections.findById(req.params.id);
      if (!existingCollections){
         return res.status(400).json({message: "La coleccion ya existe"})
     }
@@ -48,7 +48,7 @@ collectionsController.getCollections = async (req,res) => {
 
 collectionsController.getCollection = async (req,res) => {
     try{
-    const collections = await Collections.finById(req.params.id);
+    const collections = await Collections.findById(req.params.id);
     if(!collections){
         return res.status(404).json({message: "Coleccion no encontrada"})
     }
