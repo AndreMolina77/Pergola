@@ -49,7 +49,7 @@ const customersSchema = new Schema({
         message: "El correo electrónico debe ser válido"
         }
     },
-    phone: {
+    phoneNumber: {
         type: String,
         required: [true, "El número de teléfono es obligatorio"],
         trim: true,

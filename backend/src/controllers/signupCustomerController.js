@@ -8,7 +8,7 @@ import crypto from 'crypto'
 import { config } from "../utils/config.js"
 //Post (CREATE)
 signupCustomerController.registerCustomer = async (req, res) => {
-    const {name, lastName, username, email, phoneNumber, birthDate, DUI, password, isVerified} = req.body
+    const {name, lastName, username, email, phoneNumber, birthDate, DUI, password, address, isVerified} = req.body
     try {
         const customerExist = await customersModel.findOne({email})
         //Si existe un empleado, entonces se va a responder con un mensaje de error
@@ -17,7 +17,7 @@ signupCustomerController.registerCustomer = async (req, res) => {
         }
         //Encriptacion de contraseña
         const hashedPassword = await bcryptjs.hash(password, 10)
-        const newCustomer = new customersModel({name, lastName, username, email, phoneNumber, birthDate, DUI, password: hashedPassword, isVerified: isVerified || false})
+        const newCustomer = new customersModel({name, lastName, username, email, phoneNumber, birthDate, DUI, password: hashedPassword, address, isVerified: isVerified || false})
 
         await newCustomer.save()
         const verCode = crypto.randomBytes(3).toString('hex')
@@ -37,15 +37,14 @@ signupCustomerController.registerCustomer = async (req, res) => {
             to: email,
             subject: 'Verificación de cuenta',
             text: `Por favor, ingrese el siguiente código para verificar su cuenta: ${verCode}`
-        }
+        } 
         //Enviar el correo electrónico
         transporter.sendMail(mailOptions, (error, info) => {
             if (error) {
-                console.log("error", error)
                 return res.status(500).json({message: "Error al enviar el correo electrónico", error: error.message})
             }
             console.log("Correo electrónico enviado", info.response)
-            res.json({message: "Código de verificación enviado"});
+            res.json({message: "Código de verificación enviado"}); 
         })
         res.json({message: "Cliente registrado, por favor verifica tu correo"})
     } catch (error) {

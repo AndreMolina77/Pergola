@@ -50,13 +50,13 @@ const employeesSchema = new Schema({
       message: "El correo electrónico debe ser válido"
     }
   },
-  phone: {
+  phoneNumber: {
     type: String,
     required: [true, "El número de teléfono es obligatorio"],
     trim: true,
     validate: {
       validator: v => /^(?:\+503\s?)?(6|7)\d{3}-?\d{4}$/.test(v),
-      message: "El teléfono debe ser válido en formato salvadoreño"
+      message: "El teléfono debe ser válido en formato salvadoreño."
     }
   },
   birthDate: {
@@ -85,8 +85,7 @@ const employeesSchema = new Schema({
     validate: {
       validator: v => /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(v),
       message: "La contraseña debe incluir mayúsculas, minúsculas, números y caracteres especiales"
-    },
-    select: false
+    }
   },
   userType: {
     type: String,
