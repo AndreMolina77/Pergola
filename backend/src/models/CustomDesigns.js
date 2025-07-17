@@ -39,13 +39,9 @@ const customDesignsSchema = new Schema({
         required: [true, "La longitud de la base es obligatoria"],
         validate: {
             validator: function(v) {
-                return /^\d{1,3}(cm|mm)?$/.test(v)
+                return v.trim() !== '' && /^\d{1,3}(cm|mm)?$/.test(v);
             },
-            message: "La longitud debe ser un número seguido opcionalmente por 'cm' o 'mm' (ej: '18cm')"
-        },
-        validate: {
-            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
-            message: "La longitud de base no puede estar vacía"
+            message: "La longitud no puede estar vacía y debe tener formato: 123cm o 123mm"
         }
     },
     decoration: [{

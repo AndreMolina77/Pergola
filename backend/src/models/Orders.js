@@ -8,8 +8,10 @@ const ordersSchema = new Schema({
         trim: true,
         unique: true,
         validate: {
-            validator: v => /^[A-Z0-9-]+$/.test(v),
-            message: "El código solo puede contener letras mayúsculas, números y guiones"
+            validator: function(v) {
+                return v.trim() !== '' && /^[A-Z0-9-]+$/.test(v);
+            },
+            message: "El código no puede estar vacío y solo puede contener letras mayúsculas, números y guiones"
         }
     },
     customer: {
@@ -22,19 +24,31 @@ const ordersSchema = new Schema({
         required: [true, "El nombre del receptor es obligatorio"],
         trim: true,
         minlength: [5, "El nombre debe tener al menos 5 caracteres"],
-        maxlength: [100, "El nombre no puede exceder los 100 caracteres"]
+        maxlength: [100, "El nombre no puede exceder los 100 caracteres"],
+        validate: {
+            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            message: "El nombre del del receptor no puede estar vacío"
+        }
     },
     timetable: {
         type: String,
         trim: true,
-        maxlength: [100, "El horario no puede exceder los 100 caracteres"]
+        maxlength: [100, "El horario no puede exceder los 100 caracteres"],
+        validate: {
+            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            message: "El horario no puede estar vacío"
+        }
     },
     mailingAddress: {
         type: String,
         required: [true, "La dirección de envío es obligatoria"],
         trim: true,
         minlength: [10, "La dirección debe tener al menos 10 caracteres"],
-        maxlength: [200, "La dirección no puede exceder los 200 caracteres"]
+        maxlength: [200, "La dirección no puede exceder los 200 caracteres"],
+        validate: {
+            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            message: "La dirección de envío no puede estar vacía"
+        }
     },
     paymentMethod: {
         type: String,
@@ -42,6 +56,10 @@ const ordersSchema = new Schema({
         enum: {
             values: ["efectivo", "tarjeta de crédito", "transferencia", "paypal", "otro"],
             message: "Método de pago no válido"
+        },
+        validate: {
+            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            message: "El método de pago no puede estar vacío"
         }
     },
     status: {
@@ -51,7 +69,11 @@ const ordersSchema = new Schema({
             values: ["pendiente", "en proceso", "enviado", "entregado", "cancelado"],
             message: "Estado de pedido no válido"
         },
-        default: "pendiente"
+        default: "pendiente",
+        validate: {
+            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            message: "El estado no puede estar vacío"
+        }
     },
     paymentStatus: {
         type: String,
@@ -60,7 +82,11 @@ const ordersSchema = new Schema({
             values: ["pendiente", "pagado", "reembolsado", "fallido"],
             message: "Estado de pago no válido"
         },
-        default: "pendiente"
+        default: "pendiente",
+        validate: {
+            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            message: "El estado del pago no puede estar vacío"
+        }
     },
     deliveryDate: {
         type: Date,

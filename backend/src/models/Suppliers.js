@@ -27,15 +27,13 @@ const supplierSchema = new Schema({
   phoneNumber: {
     type: String,
     required: [true, 'El número de teléfono es obligatorio'],
+    required: [true, "El número de teléfono es obligatorio"],
     trim: true,
-    maxlength: [50, 'El teléfono no puede exceder los 50 caracteres'],
     validate: {
-      validator: v => /^[\d\s()+-]{5,50}$/.test(v),
-      message: props => `${props.value} no es un número de teléfono válido`
-    },
-    validate: {
-      validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
-      message: "El teléfono no puede estar vacío"
+        validator: function(v) {
+            return v.trim() !== '' && /^(?:\+503\s?)?(6|7)\d{3}-?\d{4}$/.test(v);
+        },
+        message: "El teléfono no puede estar vacío y debe ser válido en El Salvador"
     }
   },
   email: {
@@ -46,12 +44,10 @@ const supplierSchema = new Schema({
     trim: true,
     match: [/.+@.+\..+/, 'Formato de email inválido'],
     validate: {
-      validator: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v),
-      message: props => `${props.value} no es un email válido`
-    },
-    validate: {
-      validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
-      message: "El correo no puede estar vacío"
+      validator: function(v) {
+        return v.trim() !== '' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+      },
+      message: "El correo no puede estar vacío y debe tener un formato válido"
     }
   },
   address: {
