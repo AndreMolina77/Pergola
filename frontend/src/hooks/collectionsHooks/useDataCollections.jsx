@@ -1,96 +1,96 @@
 import { useEffect, useState } from "react"
 import { toast } from "react-hot-toast"
 
-// Hook personalizado para manejar la lógica de colecciones
+// Hook para manejar datos de colecciones
 const useDataCollections = () => {
-  const API = "http://localhost:4000/api/collections" // URL base de la API de colecciones
-  const [collections, setCollections] = useState([])  // Estado para almacenar las colecciones
-  const [loading, setLoading] = useState(true)        // Estado de carga
+  const API = "http://localhost:4000/api/collections"
+  const [collections, setCollections] = useState([]) // estado con colecciones
+  const [loading, setLoading] = useState(true) // estado de carga
 
-  // Función para obtener las colecciones desde la API
+  // Trae las colecciones del backend
   const fetchCollections = async () => {
     try {
-      const response = await fetch(API, {
-        credentials: "include" // Incluye cookies (por si hay sesión/autenticación)
-      })
-
-      // Si el usuario no tiene permisos (403), no se muestra error
-      if (response.status === 403) {
-        console.log("⚠️ Sin permisos para ver colecciones - usuario no autorizado")
+      const response = await fetch(API, { credentials: "include" })
+      if (response.status === 403) { // sin permisos
+        console.log("⚠️ Sin permisos para colecciones")
         setCollections([])
         setLoading(false)
         return
       }
-
-      // Si la respuesta no es OK, lanzar error
-      if (!response.ok) {
-        throw new Error("Hubo un error al obtener las colecciones")
-      }
-
-      // Convertir la respuesta a JSON y guardar en estado
+      if (!response.ok) throw new Error("Hubo un error al obtener las colecciones")
       const data = await response.json()
       setCollections(data)
       setLoading(false)
     } catch (error) {
-      console.error("Error al obtener las colecciones:", error)
-      // Solo mostrar notificación si el error no es por permisos
-      if (!error.message.includes("403") && !error.message.includes("sin permisos")) {
-        toast.error("Error al cargar colecciones")
-      }
+      console.error("Error al obtener colecciones:", error)
+      if (!error.message.includes("403")) toast.error("Error al cargar colecciones")
       setLoading(false)
     }
   }
 
-  // Ejecuta `fetchCollections` cuando se monta el componente
   useEffect(() => {
-    fetchCollections()
+    fetchCollections() // carga inicial al montar
   }, [])
 
-  // Función que devuelve handlers para operaciones CRUD
+  // Handlers para CRUD
   const createHandlers = (API) => ({
-    data: collections, // Datos actuales
-    loading,           // Estado de carga
-
-    // Agregar una nueva colección
+    data: collections,
+    loading,
     onAdd: async (data) => {
       try {
+        let body
+        let headers = { credentials: "include" }
+        // Usa FormData si hay imagen
+        if (data.image && data.image instanceof File) {
+          const formData = new FormData()
+          Object.keys(data).forEach(key => formData.append(key, data[key]))
+          body = formData
+        } else {
+          headers["Content-Type"] = "application/json"
+          body = JSON.stringify(data)
+        }
         const response = await fetch(`${API}/collections`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers,
           credentials: "include",
-          body: JSON.stringify(data)
+          body
         })
-
         if (!response.ok) {
           const errorData = await response.json()
-          throw new Error(errorData.message || "Error al registrar colecciones")
+          throw new Error(errorData.message || "Error al registrar colección")
         }
-
-        toast.success("Colección registrada exitosamente")
-        fetchCollections() // Refrescar la lista
+        toast.success('Colección registrada exitosamente')
+        fetchCollections()
       } catch (error) {
         console.error("Error:", error)
-        toast.error(error.message || "Error al registrar colecciones")
+        toast.error(error.message || "Error al registrar colección")
         throw error
       }
     },
-
-    // Editar una colección existente
     onEdit: async (id, data) => {
       try {
+        let body
+        let headers = { credentials: "include" }
+        // Igual: usa FormData si hay imagen
+        if (data.image && data.image instanceof File) {
+          const formData = new FormData()
+          Object.keys(data).forEach(key => formData.append(key, data[key]))
+          body = formData
+        } else {
+          headers["Content-Type"] = "application/json"
+          body = JSON.stringify(data)
+        }
         const response = await fetch(`${API}/collections/${id}`, {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers,
           credentials: "include",
-          body: JSON.stringify(data)
+          body
         })
-
         if (!response.ok) {
           const errorData = await response.json()
           throw new Error(errorData.message || "Error al actualizar colección")
         }
-
-        toast.success("Colección actualizada exitosamente")
+        toast.success('Colección actualizada exitosamente')
         fetchCollections()
       } catch (error) {
         console.error("Error:", error)
@@ -98,39 +98,31 @@ const useDataCollections = () => {
         throw error
       }
     },
-
-    // Eliminar colección
-    onDelete: deleteCollections
+    onDelete: deleteCollection // usa la función de borrar
   })
 
-  // Función para eliminar una colección por ID
-  const deleteCollections = async (id) => {
+  // Borra colección por ID
+  const deleteCollection = async (id) => {
     try {
       const response = await fetch(`${API}/${id}`, {
         method: "DELETE",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         credentials: "include"
       })
-
-      if (!response.ok) {
-        throw new Error("Hubo un error al eliminar la colección")
-      }
-
-      toast.success("Colección eliminada exitosamente")
-      fetchCollections() // Refrescar lista
+      if (!response.ok) throw new Error("Hubo un error al eliminar la colección")
+      toast.success('Colección eliminada exitosamente')
+      fetchCollections() // recarga lista
     } catch (error) {
       console.error("Error al eliminar colección:", error)
       toast.error("Error al eliminar colección")
     }
   }
 
-  // Retornar datos y funciones necesarias para usar el hook
+  // Retorna estados y funciones
   return {
     collections,
     loading,
-    deleteCategory, // ⚠️ ERROR: esta propiedad está mal nombrada, debería ser `deleteCollections`
+    deleteCollection,
     fetchCollections,
     createHandlers
   }
