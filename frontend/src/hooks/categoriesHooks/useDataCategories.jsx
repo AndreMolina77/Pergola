@@ -32,7 +32,7 @@ const useDataCollections = () => {
     fetchCollections() // carga inicial 
   }, [])
 
-  // Handlers para CRUD
+  // Handlers para CRUD es una función o bloque de código que se ejecuta en respuesta a un evento o acción específica,
   const createHandlers = (API) => ({
     data: collections,
     loading,
