@@ -1,20 +1,10 @@
 // Importar modelo y schema de mongoose
 import { Schema, model } from 'mongoose';
-// Definir el schema para RawMaterials
-const rawMaterialsSchema = new Schema({
-    correlative: {
-        type: String,
-        required: [true, "El correlativo es obligatorio"],
-        trim: true,
-        unique: true,
-        validate: {
-            validator: v => /^[A-Z0-9-]+$/.test(v),
-            message: "El correlativo solo puede contener letras mayúsculas, números y guiones"
-        }
-    },
+// Definir el schema para Products
+const productsSchema = new Schema({
     name: {
         type: String,
-        required: [true, "El nombre es obligatorio"],
+        required: [true, "El nombre del producto es obligatorio"],
         trim: true,
         minlength: [3, "El nombre debe tener al menos 3 caracteres"],
         maxlength: [100, "El nombre no puede exceder los 100 caracteres"]
@@ -24,86 +14,106 @@ const rawMaterialsSchema = new Schema({
         required: [true, "La descripción es obligatoria"],
         trim: true,
         minlength: [10, "La descripción debe tener al menos 10 caracteres"],
-        maxlength: [500, "La descripción no puede exceder los 500 caracteres"]
+        maxlength: [1000, "La descripción no puede exceder los 1000 caracteres"]
     },
-    type: {
+    codeProduct: {
         type: String,
-        required: [true, "El tipo es obligatorio"]
-    },
-    color: {
-        type: String,
-        trim: true
-    },
-    tone: {
-        type: String,
-        trim: true
-    },
-    toneType: {
-        type: String,
-        trim: true
-    },
-    texture: {
-        type: String,
-        trim: true
-    },
-    shape: {
-        type: String,
-        trim: true
-    },
-    dimension: {
-        type: String,
-        trim: true
-    },
-    provider: {
-        type: Schema.Types.ObjectId,
-        ref: 'Supplier',
-        required: [true, "El proveedor es obligatorio"]
-    },
-    brand: {
-        type: String,
-        trim: true
-    },
-    presentation: {
-        type: String,
-        required: [true, "La presentación es obligatoria"],
-        trim: true
-    },
-    quantity: {
-        type: Number,
-        required: [true, "La cantidad es obligatoria"],
-        min: [0, "La cantidad no puede ser negativa"]
-    },
-    piecesPerPresentation: {
-        type: Number,
-        required: [true, "Las piezas por presentación son obligatorias"],
-        min: [1, "Debe haber al menos 1 pieza por presentación"]
-    },
-    totalPieces: {
-        type: Number,
-        required: [true, "El total de piezas es obligatorio"],
-        min: [0, "El total de piezas no puede ser negativo"]
-    },
-    piecePrice: {
-        type: Number,
-        required: [true, "El precio por pieza es obligatorio"],
-        min: [0.01, "El precio debe ser mayor a 0"]
-    },
-    purchaseDate: {
-        type: Date,
-        required: [true, "La fecha de compra es obligatoria"],
+        required: [true, "El código de producto es obligatorio"],
+        trim: true,
+        unique: true,
         validate: {
-            validator: v => v <= new Date(),
-            message: "La fecha de compra debe ser anterior o igual a la fecha actual"
+            validator: v => /^[A-Z0-9-]+$/.test(v),
+            message: "El código de producto solo puede contener letras mayúsculas, números y guiones"
         }
     },
     stock: {
         type: Number,
         required: [true, "El stock es obligatorio"],
         min: [0, "El stock no puede ser negativo"]
+    },
+    price: {
+        type: Number,
+        required: [true, "El precio es obligatorio"],
+        min: [0.01, "El precio debe ser mayor a 0"]
+    },
+    productionCost: {
+        type: Number,
+        required: [true, "El costo de producción es obligatorio"],
+        min: [0, "El costo de producción no puede ser negativo"]
+    },
+    discount: {
+        type: Number,
+        default: 0,
+        min: [0, "El descuento no puede ser negativo"],
+        max: [1, "El descuento máximo es 1 (100%)"]
+    },
+    images: {
+        type: [String],
+        validate: {
+            validator: function(v) {
+                // Solo valida si el campo tiene un valor y no está vacío
+                if (!v || v.length === 0) return true;
+                return v.every(img => img && img.trim() !== '' && /^https?:\/\/.+\.(jpg|jpeg|png|webp|svg)$/.test(img));
+            },
+            message: "Todas las URLs de imágenes deben ser válidas"
+        }
+    },
+    collection: {
+        type: Schema.Types.ObjectId,
+        ref: 'Collections',
+        required: [true, "La colección es obligatoria"]
+    },
+    category: {
+        type: Schema.Types.ObjectId,
+        ref: 'Categories',
+        required: [true, "La categoría es obligatoria"]
+    },
+    subcategory: {
+        type: Schema.Types.ObjectId,
+        ref: 'Subcategories',
+        required: [true, "La subcategoría es obligatoria"]
+    },
+    rawMaterialsUsed: [{
+        type: Schema.Types.ObjectId,
+        ref: 'RawMaterials',
+        required: [true, "Al menos un material es obligatorio"]
+    }],
+    highlighted: {
+        type: Boolean,
+        default: false
+    },
+    correlative: {
+        type: String,
+        required: [true, "El correlativo es obligatorio"],
+        trim: true
+    },
+    movementType: {
+        type: String,
+        required: [true, "El tipo de movimiento es obligatorio"],
+        enum: {
+            values: ["venta", "exhibición", "producción", "otro"],
+            message: "Tipo de movimiento no válido"
+        }
+    },
+    status: {
+        type: String,
+        required: [true, "El estado es obligatorio"],
+        enum: {
+            values: ["disponible", "agotado", "en producción", "descontinuado"],
+            message: "Estado no válido"
+        }
+    },
+    applicableCosts: {
+        type: String,
+        trim: true
+    },
+    hasDiscount: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true,
     strict: false
 });
 // El tercer argumento sirve para indicar el nombre de la colección en MongoDB
-export default model("RawMaterials", rawMaterialsSchema, "RawMaterials")
+export default model("Products", productsSchema, "Products");
