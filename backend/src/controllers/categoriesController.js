@@ -1,96 +1,118 @@
+const categoriesController = {};
+// Importo el modelo de subcategorías
 import Categories from "../models/Categories.js";
-import {v2 as cloudinary} from "cloudinary";
-import { config } from '../utils/config.js'
+// Archivo config y librería cloudinary
+import { v2 as cloudinary } from 'cloudinary'
+import { config } from "../utils/config.js"
 
 cloudinary.config({
-    CLOUD_NAME: config.CLOUDINARY.CLOUD_NAME,
-    API_KEY: config.CLOUDINARY.API_KEY,
-    API_SECRET: config.CLOUDINARY.API_SECRET
+    cloud_name: config.CLOUDINARY.CLOUD_NAME,
+    api_key: config.CLOUDINARY.API_KEY,
+    api_secret: config.CLOUDINARY.API_SECRET
 })
-const categoriesController = {};
-
-categoriesController.postCategories = async (req,res) => {
-    try{
-     const {name,description, isActive} = req.body;
-     let imageURL = ""
- 
-    if (req.file) {
-        const result = await cloudinary.uploader.upload(req.file.path, {
-            folder: "public",
-            allowed_formats: ["jpg", "jpeg", "png", "gif"],
-        })
-        imageURL = result.secure_url
-    }
-     //Verficacion si ya existe el cliente
-     const existingCategories = await Categories.finById(req.params.id);
-     if (!existingCategories){
-        return res.status(400).json({message: "La categoria ya existe"})
-    }
-     const newCategories = new Categories({name,description,image: imageURL,isActive});
-     await newCategories.save();
-     res.status(201).json({ message: "Categoria creada con exito", data: newCategories})
-    }catch(error){
-        res.status(400).json({message: "Error al crear Categoria", error: error.message});
-    }
-};
-
-categoriesController.getCategories = async (req,res) => {
-    try{
-     const categories = await Categories.find();
-     res.status(200).json(categories);
-    }catch(error){
-        res.status(500).json({message: "Error al encontrar categorias", error: error.message});
-    };
-};
-
-categoriesController.getCategories = async (req,res) => {
-    try{
-    const categories = await Categories.finById(req.params.id);
-    if(!categories){
-        return res.status(404).json({message: "Categoria no encontrada"})
-    }
-    res.status(200).json(categories);
-    }catch(error){
-        res.status(500).json({message: "La categoria no se encuentra!", error: error.message});
-    }
-};
-
-categoriesController.putCategories = async (req,res) => {
-    try{
-        const  {name,description,isActive} = req.body;
+// CREATE (POST)
+categoriesController.postCategories = async (req, res) => {
+    try {
+        const { name, description, isActive } = req.body;
+        // Link de imagen
         let imageURL = ""
-                   
-                      if (req.file) {
-                          const result = await cloudinary.uploader.upload(req.file.path, {
-                              folder: "public",
-                              allowed_formats: ["jpg", "jpeg", "png", "gif"],
-                          })
-                          imageURL = result.secure_url
-                      }
-        
-        // Actualizar la devolución
-        const updatedCategories = await Categories.findByIdAndUpdate( req.params.id, {name,description,image: imageURL,isActive}, { new: true })
-        // Validar que la devolución si exista
-        if (!updatedCategories) {
+        // Subir imagen a cloudinary si se proporciona una imagen en el cuerpo de la solicitud
+        if (req.file) {
+            const result = await cloudinary.uploader.upload(req.file.path, {
+                folder: "categories",
+                allowed_formats: ["jpg", "jpeg", "png", "gif"],
+            })
+            imageURL = result.secure_url
+        }
+        const newCategory = new Categories({ name, description, image: imageURL, isActive });
+        // Guardar categoría
+        await newCategory.save();
+        // ESTADO DE CREACIÓN
+        res.status(201).json({ message: "Categoría creada con éxito", data: newCategory });
+    } catch (error) {
+        // ESTADO DE ERROR EN INPUT DEL CLIENTE
+        res.status(400).json({ message: "Error al crear categoría", error: error.message });
+    }
+};
+// READ (GET ALL)
+categoriesController.getCategories = async (req, res) => {
+    try {
+        // Buscar categorías
+        const categories = await Categories.find();
+        // ESTADO DE OK
+        res.status(200).json(categories);
+    } catch (error) {
+        // ESTADO DE ERROR DEL SERVIDOR
+        res.status(500).json({ message: "Error al obtener categorías", error: error.message });
+    }
+};
+// READ (GET ONE BY ID)
+categoriesController.getCategory = async (req, res) => {
+    try {
+        // Buscar una sola categoría
+        const category = await Categories.findById(req.params.id);
+        // Validar que la categoría si exista
+        if (!category) {
             // ESTADO DE NO ENCONTRADO
-            return res.status(404).json({ message: "Categoria no encontrada" });
+            return res.status(404).json({ message: "Categoría no encontrada" });
         }
         // ESTADO DE OK
-        res.status(200).json({ message: "Categoria actualizada con exito", data: updatedCategories });
-    }catch(error){
-        res.status(500).json({message: "Error al actualizar la categoria", error: error.message});  
+        res.status(200).json(category);
+    } catch (error) {
+        // ESTADO DE ERROR DEL SERVIDOR
+        res.status(500).json({ message: "Error al obtener categoría", error: error.message });
     }
 };
-categoriesController.deleteCategories = async (req,res) => {
-    try{
-     const categories = await Categories.findById(req.params.id);
-     if(!categories){
-        return res.status(404).json({message: "Categoria no encontrada"});
-     }
-     await Categories.findByIdAndDelete(req.params.id);
-     res.status(204).json({message: "Categoria eliminada con exito"})
-    }catch(error){
-        res.status(500).json({message: "Error al eliminar categoria", error: error.message}); 
+// UPDATE (PUT)
+categoriesController.putCategories = async (req, res) => {
+    try {
+        const { name, description, isActive } = req.body;
+        // Link de imagen
+        let imageURL = ""
+        // Subir imagen a cloudinary si se proporciona una imagen en el cuerpo de la solicitud
+        if (req.file) {
+            const result = await cloudinary.uploader.upload(req.file.path, {
+                folder: "categories",
+                allowed_formats: ["jpg", "jpeg", "png", "gif"],
+            })
+            imageURL = result.secure_url
+        }
+        // Actualizar categoría
+        const updatedCategory = await Categories.findByIdAndUpdate( req.params.id, { name, description, image: imageURL, isActive }, { new: true });
+        // Validar que la categoría si exista
+        if (!updatedCategory) {
+            // ESTADO DE NO ENCONTRADO
+            return res.status(404).json({ message: "Categoría no encontrada" });
+        }
+        // ESTADO DE OK
+        res.status(200).json({ message: "Categoría actualizada con éxito", data: updatedCategory });
+    } catch (error) {
+        // ESTADO DE ERROR EN INPUT DEL CLIENTE
+        res.status(400).json({ message: "Error al actualizar categoría", error: error.message });
     }
-}
+};
+// DELETE (DELETE)
+categoriesController.deleteCategories = async (req, res) => {
+    try {
+        // Primero obtener la categoría para eliminar la imagen de Cloudinary si existe
+        const category = await Categories.findById(req.params.id);
+        // Validar que la categoría si exista
+        if (!category) {
+            // ESTADO DE NO ENCONTRADO
+            return res.status(404).json({ message: "Categoría no encontrada" });
+        }
+        // Eliminar imagen de Cloudinary si existe
+        if (category.image) {
+            const publicId = category.image.split('/').pop().split('.')[0];
+            await cloudinary.uploader.destroy(`categories/${publicId}`);
+        }
+        // Eliminar categoría
+        await Categories.findByIdAndDelete(req.params.id);
+        // ESTADO DE OK
+        res.status(200).json({ message: "Categoría eliminada con éxito" });
+    } catch (error) {
+        // ESTADO DE ERROR DEL SERVIDOR
+        res.status(500).json({ message: "Error al eliminar categoría", error: error.message })
+    }
+};
 export default categoriesController;

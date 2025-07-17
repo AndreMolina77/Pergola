@@ -1,104 +1,118 @@
+const collectionsController = {};
+// Importo el modelo de colecciones
 import Collections from "../models/Collections.js";
-import {v2 as cloudinary} from "cloudinary";
-import { config } from '../utils/config.js';
+// Archivo config y librería cloudinary
+import { v2 as cloudinary } from 'cloudinary'
+import { config } from "../utils/config.js"
 
 cloudinary.config({
-    cloud_name: config.CLOUDINARY.cloudinary_name,
-    api_key: config.CLOUDINARY.cloudinary_api_key,
-    api_secret: config.CLOUDINARY.cloudinary_api_secret
-
+    cloud_name: config.CLOUDINARY.CLOUD_NAME,
+    api_key: config.CLOUDINARY.API_KEY,
+    api_secret: config.CLOUDINARY.API_SECRET
 })
-const collectionsController = {};
-
-collectionsController.postCollections = async (req,res) => {
-    try{
-     const {name, description, isActive} = req.body;
-
-     let imageURL = ""
-           
-              if (req.file) {
-                  const result = await cloudinary.uploader.upload(req.file.path, {
-                      folder: "public",
-                      allowed_formats: ["jpg", "jpeg", "png", "gif"],
-                  })
-                  imageURL = result.secure_url
-              }
-
-     //Verficacion si ya existe la coleccion
-     const existingCollections = await Collections.finById(req.params.id);
-     if (!existingCollections){
-        return res.status(400).json({message: "La coleccion ya existe"})
-    }
-     const newCollections = new Collections({name, description, image: imageURL, isActive});
-     await newCollections.save();
-     res.status(201).json({ message: "Coleccion creada con exito", data: newCollections})
-    }catch(error){
-        res.status(400).json({message: "Error al crear la coleccion", error: error.message});
-    }
-};
-
-collectionsController.getCollections = async (req,res) => {
-    try{
-     const collections = await Collections.find();
-     res.status(200).json(collections);
-    }catch(error){
-        res.status(500).json({message: "Error al obtener colecciones", error: error.message});
-    };
-};
-
-collectionsController.getCollection = async (req,res) => {
-    try{
-    const collections = await Collections.finById(req.params.id);
-    if(!collections){
-        return res.status(404).json({message: "Coleccion no encontrada"})
-    }
-    res.status(200).json(collections);
-    }catch(error){
-        res.status(500).json({message: "Error al obtener colecciones", error: error.message});
-    }
-};
-
-collectionsController.putCollections = async (req,res) => {
-    try{
-        const {name, description, isActive} = req.body;
-
+// CREATE (POST)
+collectionsController.postCollections = async (req, res) => {
+    try {
+        const { name, description, isActive } = req.body;
+        // Link de imagen
         let imageURL = ""
-           
-              if (req.file) {
-                  const result = await cloudinary.uploader.upload(req.file.path, {
-                      folder: "public",
-                      allowed_formats: ["jpg", "jpeg", "png", "gif"],
-                  })
-                  imageURL = result.secure_url
-              }
-        
-        // Actualizar la devolución
-        const updatedCollections = await Collections.findByIdAndUpdate( req.params.id, {name, description, image: imageURL, isActive}, { new: true })
-        // Validar que la devolución si exista
-        if (!updatedCollections) {
+        // Subir imagen a cloudinary si se proporciona una imagen en el cuerpo de la solicitud
+        if (req.file) {
+            const result = await cloudinary.uploader.upload(req.file.path, {
+                folder: "collections",
+                allowed_formats: ["jpg", "jpeg", "png", "gif", "webp"],
+            })
+            imageURL = result.secure_url
+        } 
+        const newCollection = new Collections({ name, description, image: imageURL, isActive });
+        // Guardar colección
+        await newCollection.save();
+        // ESTADO DE CREACIÓN
+        res.status(201).json({ message: "Colección creada con éxito", data: newCollection });
+    } catch (error) {
+        // ESTADO DE ERROR EN INPUT DEL CLIENTE
+        res.status(400).json({ message: "Error al crear colección", error: error.message });
+    }
+};
+// READ (GET ALL)
+collectionsController.getCollections = async (req, res) => {
+    try {
+        // Buscar colecciones
+        const collections = await Collections.find();
+        // ESTADO DE OK
+        res.status(200).json(collections);
+    } catch (error) {
+        // ESTADO DE ERROR DEL SERVIDOR
+        res.status(500).json({ message: "Error al obtener colecciones", error: error.message });
+    }
+};
+// READ (GET ONE BY ID)
+collectionsController.getCollection = async (req, res) => {
+    try {
+        // Buscar una sola colección
+        const collection = await Collections.findById(req.params.id);
+        // Validar que la colección si exista
+        if (!collection) {
             // ESTADO DE NO ENCONTRADO
-            return res.status(404).json({ message: "Coleccion no encontrada" });
+            return res.status(404).json({ message: "Colección no encontrada" });
         }
         // ESTADO DE OK
-        res.status(200).json({ message: "Coleccion actualizada con éxito", data: updatedCollections });
-    }catch(error){
-        res.status(500).json({message: "Error al actualizar coleccion", error: error.message});  
+        res.status(200).json(collection);
+    } catch (error) {
+        // ESTADO DE ERROR DEL SERVIDOR
+        res.status(500).json({ message: "Error al obtener colección", error: error.message });
     }
 };
-
-
-collectionsController.deleteCollections = async (req,res) => {
-    try{
-     const collections = await Collections.findById(req.params.id);
-
-     if(!collections){
-        return res.status(404).json({message: "Coleccion no encontrada"});
-     }
-     await Collections.findByIdAndDelete(req.params.id);
-     res.status(204).json({message: "Coleccion eliminada con exito"})
-    }catch(error){
-        res.status(500).json({message: "Error al eliminar coleccion", error: error.message}); 
+// UPDATE (PUT)
+collectionsController.putCollections = async (req, res) => {
+    try {
+        const { name, description, isActive } = req.body;
+        // Link de imagen
+        let imageURL = ""
+        // Subir imagen a cloudinary si se proporciona una imagen en el cuerpo de la solicitud
+        if (req.file) {
+            const result = await cloudinary.uploader.upload(req.file.path, {
+                folder: "collections",
+                allowed_formats: ["jpg", "jpeg", "png", "gif"],
+            })
+            imageURL = result.secure_url
+        }
+        // Actualizar categoría
+        const updatedCollection = await Collections.findByIdAndUpdate( req.params.id, { name, description, image: imageURL, isActive }, { new: true });
+        // Validar que la categoría si exista
+        if (!updatedCollection) {
+            // ESTADO DE NO ENCONTRADO
+            return res.status(404).json({ message: "Colección no encontrada" });
+        }
+        // ESTADO DE OK
+        res.status(200).json({ message: "Colección actualizada con éxito", data: updatedCollection });
+    } catch (error) {
+        // ESTADO DE ERROR EN INPUT DEL CLIENTE
+        res.status(400).json({ message: "Error al actualizar colección", error: error.message });
     }
-}
-
+};
+// DELETE (DELETE)
+collectionsController.deleteCollections = async (req, res) => {
+    try {
+        // Primero obtener la colección para eliminar la imagen de Cloudinary si existe
+        const collection = await Collections.findById(req.params.id);
+        // Validar que la colección si exista
+        if (!collection) {
+            // ESTADO DE NO ENCONTRADO
+            return res.status(404).json({ message: "Colección no encontrada" });
+        }
+        // Eliminar imagen de Cloudinary si existe
+        if (collection.image) {
+            const publicId = collection.image.split('/').pop().split('.')[0];
+            await cloudinary.uploader.destroy(`collections/${publicId}`);
+        }
+        // Eliminar colección
+        await Collections.findByIdAndDelete(req.params.id);
+        // ESTADO DE OK
+        res.status(200).json({ message: "Colección eliminada con éxito" });
+    } catch (error) {
+        // ESTADO DE ERROR DEL SERVIDOR
+        res.status(500).json({ message: "Error al eliminar colección", error: error.message })
+    }
+};
 export default collectionsController;

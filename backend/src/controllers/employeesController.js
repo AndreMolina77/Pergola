@@ -1,95 +1,120 @@
+const employeesController = {};
+// Importo el modelo de empleados
 import Employees from "../models/Employees.js";
-import {v2 as cloudinary} from "cloudinary";
-import { config } from '../utils/config.js'
+// Archivo config y librería cloudinary
+import { v2 as cloudinary } from 'cloudinary';
+import { config } from "../utils/config.js";
 
 cloudinary.config({
-    CLOUD_NAME: config.CLOUDINARY.CLOUD_NAME,
-    API_KEY: config.CLOUDINARY.API_KEY,
-    API_SECRET: config.CLOUDINARY.API_SECRET
-})
-const employeesController = {};
-
-employeesController.postEmployees = async (req,res) => {
-    try{
-     const {name,lastName,username,email,phone, birthDate, DUI,password, userType,hireDate,isVerified} = req.body;
-      let imageURL = ""
-      
-         if (req.file) {
-             const result = await cloudinary.uploader.upload(req.file.path, {
-                 folder: "public",
-                 allowed_formats: ["jpg", "jpeg", "png", "gif"],
-             })
-             imageURL = result.secure_url
-         }
-     //Verficacion si ya existe el cliente
-     const existingEmployees = await Employees.finById(req.params.id);
-     if (!existingEmployees){
-        return res.status(400).json({message: "El empleado ya existe"})
-    }
-     const newEmployees = new Employees({name,lastName,username,email,phone, birthDate: birthDate ? new Date(birthDate): null, DUI,password, userType,image: imageURL,hireDate: hireDate ? new Date(hireDate): null, isVerified});
-     await newEmployees.save();
-     res.status(201).json({ message: "Empleado creado con exito", data: newEmployees})
-    }catch(error){
-        res.status(400).json({message: "Error al crear Empleado", error: error.message});
-    }
-};
-
-employeesController.getEmployees = async (req,res) => {
-    try{
-     const employees = await Employees.find();
-     res.status(200).json(employees);
-    }catch(error){
-        res.status(500).json({message: "Error al obtener empleados", error: error.message});
-    };
-};
-
-employeesController.getEmployees = async (req,res) => {
-    try{
-    const employees = await Employees.finById(req.params.id);
-    if(!employees){
-        return res.status(404).json({message: "Empleado no encontrado"})
-    }
-    res.status(200).json(employees);
-    }catch(error){
-        res.status(500).json({message: "Error al obtener empleados", error: error.message});
+    cloud_name: config.CLOUDINARY.CLOUD_NAME,
+    api_key: config.CLOUDINARY.API_KEY,
+    api_secret: config.CLOUDINARY.API_SECRET
+});
+// CREATE (POST)
+employeesController.postEmployees = async (req, res) => {
+    try {
+        const { name, lastName, username, email, phoneNumber, birthDate, DUI, password, userType, hireDate, isVerified } = req.body;
+        // Link de imagen
+        let profilePicURL = "";
+        // Subir imagen a cloudinary si se proporciona una imagen en el cuerpo de la solicitud
+        if (req.file) {
+            const result = await cloudinary.uploader.upload(req.file.path, {
+                folder: "employees",
+                allowed_formats: ["jpg", "jpeg", "png", "webp"]
+            });
+            profilePicURL = result.secure_url;
+        }
+        const newEmployee = new Employees({ name, lastName, username, email, phoneNumber, birthDate: new Date(birthDate), DUI, password, profilePic: profilePicURL, userType, hireDate: new Date(hireDate), isVerified: isVerified || false });
+        // Guardar empleado
+        await newEmployee.save();
+        // ESTADO DE CREACIÓN
+        res.status(201).json({ message: "Empleado creado con éxito", data: {
+                ...newEmployee.toObject(),
+                password: undefined // Excluir la contraseña de la respuesta
+            }
+        });
+    } catch (error) {
+        // ESTADO DE ERROR EN INPUT DEL EMPLEADO
+        res.status(400).json({ message: "Error al crear empleado", error: error.message });
     }
 };
-
-employeesController.putEmployees = async (req,res) => {
-    try{
-        const {name,lastName,username,email,phone, birthDate, DUI,password, userType,hireDate,isVerified} = req.body;
-        let imageURL = ""
-                           
-                              if (req.file) {
-                                  const result = await cloudinary.uploader.upload(req.file.path, {
-                                      folder: "public",
-                                      allowed_formats: ["jpg", "jpeg", "png", "gif"],
-                                  })
-                                  imageURL = result.secure_url
-                              }
-        // Actualizar la devolución
-        const updatedEmployees = await Employees.findByIdAndUpdate( req.params.id, {name,lastName,username,email,phone, birthDate, DUI,password, userType,hireDate,isVerified}, { new: true })
-        // Validar que la devolución si exista
-        if (!updatedEmployees) {
+// READ (GET ALL)
+employeesController.getEmployees = async (req, res) => {
+    try {
+        // Buscar empleados
+        const employees = await Employees.find().select('-password');
+        // ESTADO DE OK
+        res.status(200).json(employees);
+    } catch (error) {
+        // ESTADO DE ERROR DEL SERVIDOR
+        res.status(500).json({ message: "Error al obtener empleados", error: error.message });
+    }
+};
+// READ (GET ONE BY ID)
+employeesController.getEmployee = async (req, res) => {
+    try {
+        // Buscar un solo empleado
+        const employee = await Employees.findById(req.params.id).select('-password');
+        // Validar que el empleado si exista
+        if (!employee) {
             // ESTADO DE NO ENCONTRADO
             return res.status(404).json({ message: "Empleado no encontrado" });
         }
         // ESTADO DE OK
-        res.status(200).json({ message: "Empleado actualizado con éxito", data: updatedEmployees });
-    }catch(error){
-        res.status(500).json({message: "Error al actualizar cliente", error: error.message});  
+        res.status(200).json(employee);
+    } catch (error) {
+        // ESTADO DE ERROR DEL SERVIDOR
+        res.status(500).json({ message: "Error al obtener cliente", error: error.message });
     }
 };
-employeesController.deleteEmployees = async (req,res) => {
-    try{
-     const employees = await Employees.findById(req.params.id);
-     if(!employees){
-        return res.status(404).json({message: "Empleado no encontrado"});
-     }
-     await Employees.findByIdAndDelete(req.params.id);
-     res.status(204).json({message: "Empleado eliminado con exito"})
-    }catch(error){
-        res.status(500).json({message: "Error al eliminar empleado", error: error.message}); 
+// UPDATE (PUT)
+employeesController.putEmployees = async (req, res) => {
+    try {
+        const updates = req.body;
+        // Manejar la imagen si se proporciona
+        if (req.file) {
+            const result = await cloudinary.uploader.upload(req.file.path, {
+                folder: "customers",
+                allowed_formats: ["jpg", "jpeg", "png", "webp"]
+            });
+            updates.profilePic = result.secure_url;
+        }
+        // Actualizar empleado
+        const updatedEmployee = await Customers.findByIdAndUpdate( req.params.id, updates, { new: true } ).select('-password');
+        // Validar que el cliente si exista
+        if (!updatedEmployee) {
+            // ESTADO DE NO ENCONTRADO
+            return res.status(404).json({ message: "Empleado no encontrado" });
+        }
+        // ESTADO DE OK
+        res.status(200).json({ message: "Empleado actualizado con éxito", data: updatedEmployee });
+    } catch (error) {
+        // ESTADO DE ERROR EN INPUT DEL CLIENTE
+        res.status(400).json({ message: "Error al actualizar empleado", error: error.message });
     }
-}
+};
+// DELETE (DELETE)
+employeesController.deleteEmployees = async (req, res) => {
+    try {
+        // Primero obtener el empleado para eliminar la imagen de Cloudinary si existe
+        const employee = await Employees.findById(req.params.id);
+        // Validar que el empleado si exista
+        if (!employee) {
+            // ESTADO DE NO ENCONTRADO
+            return res.status(404).json({ message: "Empleado no encontrado" });
+        }
+        // Eliminar imagen de Cloudinary si existe
+        if (employee.profilePic) {
+            const publicId = employee.profilePic.split('/').pop().split('.')[0];
+            await cloudinary.uploader.destroy(`employees/${publicId}`);
+        }
+        // Eliminar el empleado
+        await Employees.findByIdAndDelete(req.params.id);
+        // ESTADO DE OK
+        res.status(200).json({ message: "Empleado eliminado con éxito" });
+    } catch (error) {
+        // ESTADO DE ERROR DEL SERVIDOR
+        res.status(500).json({ message: "Error al eliminar empleado", error: error.message });
+    }
+};
 export default employeesController;

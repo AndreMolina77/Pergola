@@ -4,6 +4,7 @@ import Products from "../models/Products.js";
 // Importo el modelo de clientes
 import Customers from "../models/Customers.js";
 import reviews from "../models/reviews.js";
+const reviewsController = {}
 
 reviewsController.postReviews = async (req, res) => {
     try {

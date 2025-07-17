@@ -1,4 +1,3 @@
-// Importo las librerias express para el servidor, cors para la seguridad y cookie-parser para manejar cookies
 import express from "express"
 import cors from "cors"
 import dotenv from "dotenv"
@@ -9,7 +8,7 @@ import customDesignsRoutes from "./src/routes/customDesigns.js"
 import rawMaterialsRoutes from "./src/routes/rawMaterials.js"
 import employeesRoutes from "./src/routes/employees.js"
 import categoriesRoutes from "./src/routes/categories.js"
-import subcategoriesRoutes from "./src/routes/subcategories.js"
+import subcategoriesRoutes from "./src/routes/subCategories.js"
 import collectionsRoutes from "./src/routes/collections.js"
 import customersRoutes from "./src/routes/customers.js"
 import ordersRoutes from "./src/routes/orders.js"
@@ -32,8 +31,8 @@ const app = express()
 app.use(express.json())
 app.use(cookieParser())
 app.use(cors({
-  origin: ["http://localhost:5174", "http://localhost:5173"],
-  credentials: true
+  origin: "http://localhost:5173",
+  credentials: true 
 }))
 // Rutas que NO requieren login
 app.use("/api/login", loginRoutes)
@@ -44,20 +43,19 @@ app.use("/api/recoveryPassword", recoveryPasswordRoutes)
 app.use("/api/validatePassword", validatePasswordRoutes)
 // Ruta especial para validar token (acepta cualquier tipo de usuario válido)
 app.use("/api/validateAuthToken", validateAuthTokenRoutes)
-app.use("/api/admin/profile", adminProfileRoutes) // Esta será pública para /data-public
-// Rutas que SÍ requieren login (protegidas)
-app.use("/api/products", validateAuthToken(["admin", "colaborador",]), productsRoutes)
+// Rutas que SÍ requieren login (protegidas) 
+app.use("/api/products", validateAuthToken(["admin", "colaborador"]), productsRoutes)
 app.use("/api/rawmaterials", validateAuthToken(["admin", "colaborador"]), rawMaterialsRoutes)
-app.use("/api/customdesigns", validateAuthToken(["admin", "colaborador", "customer"]), customDesignsRoutes)
-app.use("/api/employees", validateAuthToken(["admin"]), employeesRoutes)
-app.use("/api/collections", validateAuthToken(["admin", "colaborador"]), collectionsRoutes)
+app.use("/api/customdesigns", validateAuthToken(["admin", "colaborador", "customers"]), customDesignsRoutes)
+app.use("/api/employees", validateAuthToken(["admin", "colaborador"]), employeesRoutes)
+app.use("/api/collections", validateAuthToken(["admin", "colaborador"]), collectionsRoutes) 
 app.use("/api/categories", validateAuthToken(["admin", "colaborador"]), categoriesRoutes)
-app.use("/api/subcategories", validateAuthToken(["admin", "colaborador"]), subcategoriesRoutes)
-app.use("/api/customers", validateAuthToken(["admin", "customer"]), customersRoutes)
-app.use("/api/orders", validateAuthToken(["admin", "customer"]), ordersRoutes)
-app.use("/api/reviews", validateAuthToken(["admin", "colaborador", "customer"]), reviewsRoutes)
-app.use("/api/refunds", validateAuthToken(["admin", "customer"]), refundsRoutes)
-app.use("/api/transactions", validateAuthToken(["admin", "customer"]), transactionsRoutes)
-app.use("/api/suppliers", validateAuthToken(["admin", "colaborador"]), suppliersRoutes)
- 
+app.use("/api/subcategories", validateAuthToken(["admin", "colaborador"]), subcategoriesRoutes) 
+app.use("/api/customers", validateAuthToken(["admin", "colaborador", "customer"]), customersRoutes)
+app.use("/api/orders", validateAuthToken(["admin", "colaborador", "customer"]), ordersRoutes)
+app.use("/api/reviews", validateAuthToken(["admin", "colaborador", "customer"]), reviewsRoutes) 
+app.use("/api/refunds", validateAuthToken(["admin", "colaborador", "customer"]), refundsRoutes)
+app.use("/api/transactions", validateAuthToken(["admin", "colaborador", "customer"]), transactionsRoutes)
+app.use("/api/suppliers", validateAuthToken(["admin", "colaborador"]), suppliersRoutes) 
+
 export default app

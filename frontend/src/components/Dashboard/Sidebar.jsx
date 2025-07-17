@@ -1,0 +1,130 @@
+import { useState } from 'react'
+import { Menu, X } from 'lucide-react'
+import { useAuth } from '../../hooks/useAuth.js'
+import menuItems from '../../data/MenuData.js'
+import BlackLogo from '../../assets/logoforsidebar.png' 
+import Monogram from '../../assets/logoforsidebar2.png'
+
+const Sidebar = ({ currentView, setCurrentView, onLogout }) => {
+  const [isCollapsed, setIsCollapsed] = useState(false)
+  const { user } = useAuth() 
+  // Función para filtrar menú por rol
+  const getFilteredMenuItems = () => {
+    if (!user?.userType) return [];
+    
+    const permissions = {
+      'admin': [ 'dashboard', 'search', 'products', 'customdesigns', 'designelements', 'rawmaterials', 'employees', 'categories','subcategories', 'collections', 'customers', 'orders', 'reviews', 'refunds', 'transactions', 'suppliers', 'settings' ],
+      'vendedor': [ 'dashboard', 'search', 'products', 'customdesigns', 'designelements', 'rawmaterials', 'categories','subcategories', 'collections', 'orders', 'reviews', 'refunds', 'transactions', 'suppliers', 'settings' ],
+      'colaborador': [ 'dashboard', 'search', 'products', 'customdesigns', 'designelements', 'rawmaterials', 'categories','subcategories', 'collections', 'reviews', 'suppliers', 'settings' ],
+    }
+    const allowedViews = permissions[user.userType] || []
+    return menuItems.filter(item => allowedViews.includes(item.id))
+  }
+  const toggleSidebar = () => {
+    setIsCollapsed(!isCollapsed)
+  }
+  const handleMenuClick = (itemId) => {
+    setCurrentView(itemId)
+  }
+  return (
+    <div className={`bg-[#E3C6B8] h-screen transition-all duration-300 ease-in-out ${isCollapsed ? 'w-20' : 'w-80'} flex flex-col relative`}>
+      
+      {/* Header con logo - Estilo minimalista */}
+      <div className="bg-[#E8E1D8] h-24 flex items-center justify-center px-6 relative">
+        {!isCollapsed ? (
+          <div className="flex items-center justify-center w-full">
+            <img src={BlackLogo} alt="Pérgola Logo" className="h-16 w-auto object-contain" onError={(e) => {e.target.style.display = 'none'
+                e.target.nextSibling.style.display = 'flex'
+              }}
+            />
+            <div className="flex items-center justify-center" style={{display: 'none'}}>
+              <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center">
+                <span className="text-white font-bold text-xl">P</span>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <img src={Monogram} alt="Pérgola Monogram" className="w-12 h-12 object-contain" onError={(e) => { 
+              e.target.style.display = 'none'
+              e.target.nextSibling.style.display = 'flex'}}/>
+        )}
+        {/* Botón toggle */}
+        <button onClick={toggleSidebar} className="absolute right-4 top-1/2 transform -translate-y-1/2 text-[#3D1609] hover:text-[#271610] transition-colors duration-200 p-1">
+          {isCollapsed ? <Menu size={18} /> : <X size={18} />}
+        </button>
+      </div>
+      {/* Menu Items */}
+      <div className="flex-1 py-6 overflow-y-auto">
+        {getFilteredMenuItems().map((item) => { 
+          const IconComponent = item.icon;
+          const isActive = currentView === item.id;       
+          
+          return (
+            <div key={item.id} onClick={() => handleMenuClick(item.id)} className={`w-full cursor-pointer transition-all duration-200 group relative ${isCollapsed ? 'px-4 py-4' : 'px-6 py-4'} ${isActive ? 'bg-[#E3C6B8]' : 'hover:bg-[#E3C6B8]/50'}`}>
+              <div className="flex items-center">
+                <div className={`transition-colors duration-200 ${isActive ? 'text-[#8B4513]' : 'text-[#8B4513]/80'}`}>
+                  <IconComponent size={isCollapsed ? 24 : 20} className="flex-shrink-0"/>
+                </div>
+                {!isCollapsed && (
+                  <span className={`ml-4 text-[15px] transition-all duration-200 font-[Quicksand] ${isActive ? 'text-[#8B4513] font-bold' : 'text-[#8B4513]/90 font-medium'}`}>
+                    {item.label}
+                  </span>
+                )}
+              </div>
+              {/* Línea divisoria sutil */}
+              {!isActive && (
+                <div className="absolute bottom-0 left-6 right-6 h-px bg-[#3D1609]/10"></div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+      {/* Línea divisoria antes del footer */}
+      <div className="mx-6 h-px bg-[#3D1609]/20"></div>
+      {/* Footer Section - Configuración */}
+      <div className="py-2">
+        {menuItems.filter(item => item.id === 'settings').map((item) => {
+          const IconComponent = item.icon;
+          const isActive = currentView === item.id;
+          return (
+            <div key={item.id} className={`w-full cursor-pointer transition-all duration-200 group ${isCollapsed ? 'px-4 py-4' : 'px-6 py-4'} ${isActive ? 'bg-[#E3C6B8]' : 'hover:bg-[#E3C6B8]/50'}`} onClick={() => handleMenuClick(item.id)}>
+              <div className="flex items-center">
+                <div className={`transition-colors duration-200 ${isActive ? 'text-[#3D1609]' : 'text-[#3D1609]/80'}`}>
+                  <IconComponent size={isCollapsed ? 24 : 20} className="flex-shrink-0" />
+                </div>
+                {!isCollapsed && (
+                  <span className={`ml-4 text-[15px] transition-all duration-200 font-[Quicksand]
+                    ${isActive ? 'text-[#3D1609] font-bold' : 'text-[#3D1609]/90 font-medium'}
+                  `}>
+                    {item.label}
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      {/* Footer Section - Cerrar sesión */}
+      <div className="pb-4">
+        {menuItems.filter(item => item.id === 'power').map((item) => {
+          const IconComponent = item.icon;
+          return (
+            <div key={item.id} onClick={onLogout} className={`w-full cursor-pointer transition-all duration-200 group ${isCollapsed ? 'px-4 py-4' : 'px-6 py-4'} hover:bg-[#E3C6B8]/50`} >
+              <div className="flex items-center">
+                <div className="text-[#3D1609]/80 group-hover:text-[#3D1609] transition-colors duration-200">
+                  <IconComponent size={isCollapsed ? 24 : 20} className="flex-shrink-0"/>
+                </div>
+                {!isCollapsed && (
+                  <span className="ml-4 text-[#3D1609]/90 text-[15px] font-[Quicksand] font-medium group-hover:text-[#3D1609] transition-colors duration-200">
+                    {item.label}
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  )
+}
+export default Sidebar

@@ -1,33 +1,33 @@
-import express from "express";
-import multer from "multer";
-import path from "path";
-
-// Importación del controlador de productos (exportación por defecto)
-import productsController from "../controllers/productsController.js";
-
-// Configuración de Multer para manejar múltiples imágenes, guardando en "public/"
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "public/"); // La carpeta donde se guardarán las imágenes
-  },
-  filename: (req, file, cb) => {
-    // Renombrar el archivo con la fecha actual para evitar colisiones
-    cb(null, Date.now() + path.extname(file.originalname)); 
-  },
-});
-
-const upload = multer({ storage: storage });
+// Libreria para enrutamiento express y para guardar registros de archivos multimedia localmente
+import express from "express"
+import multer from "multer"
+// Importo controlador de productos
+import productsController from "../controllers/productsController.js"
 
 const router = express.Router();
-
-// Ruta para obtener todos los productos y crear nuevos productos (con múltiples imágenes)
+// Especificamos que los archivos multimedia se guarden en la carpeta public, incluyendo el límite de tamaño de los archivos
+const upload = multer({
+    dest: "products/",
+    limits: {
+        fileSize: 5 * 1024 * 1024, 
+    },
+    fileFilter: (file, cb) => {
+        // Validar tipo de archivo
+        if (file.mimetype.startsWith('image/')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Solo se permiten archivos de imagen'), false);
+        }
+    }
+});
+// Rutas que no requieren un parámetro en específico
 router.route("/")
-  .get(productsController.getProducts) // Aquí estás llamando a la función correctamente
-  .post(upload.array("images", 10), productsController.createProduct);
-
+    .get(productsController.getProducts)
+    .post(upload.array("images", 5), productsController.postProducts)
+// Rutas que requieren un parámetro en específico
 router.route("/:id")
-  .get(productsController.getProductById)
-  .put(upload.array("images", 10), productsController.updateProduct)  // Permite subir un array de imágenes para actualizar el producto
-  .delete(productsController.deleteProduct); // Eliminar un producto por ID
+    .get(productsController.getProduct)
+    .put(upload.array("images", 5), productsController.putProducts)
+    .delete(productsController.deleteProducts)
 
-export default router;
+export default router

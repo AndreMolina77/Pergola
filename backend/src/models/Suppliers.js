@@ -1,6 +1,5 @@
 // Importar Schema y model de mongoose
 import { Schema, model } from 'mongoose';
-
 // Definir el schema para Suppliers
 const supplierSchema = new Schema({
   name: {
@@ -50,5 +49,5 @@ const supplierSchema = new Schema({
   timestamps: true,
   strict: false
 });
-
+// El tercer argumento sirve para indicar el nombre de la colección en MongoDB
 export default model('Supplier', supplierSchema, 'Suppliers');

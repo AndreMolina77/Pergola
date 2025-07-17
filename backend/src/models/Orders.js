@@ -1,70 +1,78 @@
-/* 
-CRUD DE PEDIDOS (ALDO)
-Orders
-orderCode: string,
-receiver: string,
-timetable: string,
-mailingAddress: string,
-paymentMethod: string,
-status: string,
-paymentStatus: string,
-deliveryDate: date,
-items: Array[ObjectId]
-subtotal: number,
-total: number,
-*/
-import mongoose from 'mongoose';
-const { Schema } = mongoose;
-
+// Importar modelo y schema de mongoose
+import { Schema, model } from 'mongoose';
+// Definir el schema para Orders
 const ordersSchema = new Schema({
     orderCode: {
         type: String,
         required: [true, "El código de pedido es obligatorio"],
-        unique: true,
         trim: true,
-        minlength: [5, "El código de pedido debe tener al menos 5 caracteres"],
-        maxlength: [20, "El código de pedido no puede exceder los 20 caracteres"]
+        unique: true,
+        validate: {
+            validator: v => /^[A-Z0-9-]+$/.test(v),
+            message: "El código solo puede contener letras mayúsculas, números y guiones"
+        }
+    },
+    customer: {
+        type: Schema.Types.ObjectId,
+        ref: 'Customers',
+        required: [true, "El cliente es obligatorio"]
     },
     receiver: {
         type: String,
         required: [true, "El nombre del receptor es obligatorio"],
         trim: true,
-        minlength: [2, "El nombre del receptor debe tener al menos 2 caracteres"],
-        maxlength: [100, "El nombre del receptor no puede exceder los 100 caracteres"]
+        minlength: [5, "El nombre debe tener al menos 5 caracteres"],
+        maxlength: [100, "El nombre no puede exceder los 100 caracteres"]
     },
     timetable: {
         type: String,
-        required: [true, "El horario es obligatorio"],
-        trim: true
+        trim: true,
+        maxlength: [100, "El horario no puede exceder los 100 caracteres"]
     },
     mailingAddress: {
         type: String,
         required: [true, "La dirección de envío es obligatoria"],
-        trim: true
+        trim: true,
+        minlength: [10, "La dirección debe tener al menos 10 caracteres"],
+        maxlength: [200, "La dirección no puede exceder los 200 caracteres"]
     },
     paymentMethod: {
         type: String,
         required: [true, "El método de pago es obligatorio"],
-        enum: ["Tarjeta de crédito", "PayPal", "Transferencia bancaria", "Efectivo"]
+        enum: {
+            values: ["efectivo", "tarjeta de crédito", "transferencia", "paypal", "otro"],
+            message: "Método de pago no válido"
+        }
     },
     status: {
         type: String,
         required: [true, "El estado del pedido es obligatorio"],
-        enum: ["Pendiente", "Enviado", "Entregado", "Cancelado"]
+        enum: {
+            values: ["pendiente", "en proceso", "enviado", "entregado", "cancelado"],
+            message: "Estado de pedido no válido"
+        },
+        default: "pendiente"
     },
     paymentStatus: {
         type: String,
         required: [true, "El estado del pago es obligatorio"],
-        enum: ["Pendiente", "Pagado", "Reembolsado"]
+        enum: {
+            values: ["pendiente", "pagado", "reembolsado", "fallido"],
+            message: "Estado de pago no válido"
+        },
+        default: "pendiente"
     },
     deliveryDate: {
         type: Date,
-        required: [true, "La fecha de entrega es obligatoria"]
+        validate: {
+            validator: v => v >= new Date(),
+            message: "La fecha de entrega debe ser futura"
+        }
     },
     items: [{
         type: Schema.Types.ObjectId,
-        ref: 'Item',
-        required: true
+        ref: 'Products',
+        required: [true, "Al menos un producto es obligatorio"]
     }],
     subtotal: {
         type: Number,
@@ -76,6 +84,9 @@ const ordersSchema = new Schema({
         required: [true, "El total es obligatorio"],
         min: [0, "El total no puede ser negativo"]
     }
-    }, { timestamps: true });
-
-    export default model("Order", ordersSchema)
+}, {
+    timestamps: true,
+    strict: false
+});
+// El tercer argumento sirve para indicar el nombre de la colección en MongoDB
+export default model("Orders", ordersSchema, "Orders");
