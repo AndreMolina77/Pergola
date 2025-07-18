@@ -80,7 +80,7 @@ recoveryPasswordController.changePassword = async (req, res) => {
         //Actualizar la contraseña del usuario
         if (userType === "customer") {
             updatedUser = await customersModel.findOneAndUpdate({email}, {password: hashedPassword}, {new: true})
-        } else if (userType === "employee") {
+        } else if (userType === "colaborador") {
             updatedUser = await employeesModel.findOneAndUpdate({email}, {password: hashedPassword}, {new: true})
         } else {
             return res.status(400).json({message: "Tipo de usuario no válido"})

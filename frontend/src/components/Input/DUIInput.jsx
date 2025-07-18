@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-const DUIInput = ({ text, value, onChange, disabled = false, required = false }) => {
+const DUIInput = ({ text, name, value, onChange, disabled = false, required = false }) => {
   const [formattedValue, setFormattedValue] = useState(value)
 
   const formatDUI = (input) => {
@@ -29,6 +29,7 @@ const DUIInput = ({ text, value, onChange, disabled = false, required = false })
       <label className="mb-1 text-sm text-left text-[#3D1609] font-[Quicksand] font-semibold">{text}</label>
       <input 
         type="text" 
+        name={name}
         value={formattedValue} 
         onChange={handleChange} 
         placeholder="00000000-0" 

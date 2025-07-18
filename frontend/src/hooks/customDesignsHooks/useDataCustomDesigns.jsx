@@ -49,7 +49,7 @@ const useDataCustomDesigns = () => {
           throw new Error(errorData.message || "Error al registrar diseño único")
         }
         toast.success('Diseño único registrado exitosamente')
-        fetchCategories() // ⚠️ error: no existe fetchCategories
+        fetchCustomDesigns() 
       } catch (error) {
         console.error("Error:", error)
         toast.error(error.message || "Error al registrar diseño único")
@@ -69,14 +69,13 @@ const useDataCustomDesigns = () => {
           throw new Error(errorData.message || "Error al actualizar diseño único")
         }
         toast.success('Diseño único actualizado exitosamente')
-        fetchCategories() // ⚠️ error: no existe fetchCategories
+        fetchCustomDesigns() 
       } catch (error) {
         console.error("Error:", error)
         toast.error(error.message || "Error al actualizar diseño único")
         throw error
       }
-    },
-    onDelete: deleteCustomDesign // usa la función de borrar
+    }, onDelete: deleteCustomDesign // usa la función de borrar
   })
 
   // Borra diseño por ID
@@ -89,7 +88,7 @@ const useDataCustomDesigns = () => {
       })
       if (!response.ok) throw new Error("Hubo un error al eliminar el diseño único")
       toast.success('Diseño único eliminada exitosamente')
-      fetchCustomDesigns() // recarga lista
+      fetchCustomDesigns()
     } catch (error) {
       console.error("Error al eliminar diseño único:", error)
       toast.error("Error al eliminar diseño único")

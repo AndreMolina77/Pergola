@@ -43,24 +43,53 @@ const SignUp = () => {
   const userTypeOptions = [
     {
       value: 'colaborador',
-      label: 'Colaborador',
-    },
-    {
-      value: 'vendedor', 
-      label: 'Vendedor',
+      label: 'Colaborador'
     }
   ]
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }))
+    setFormData(prev => {
+      const newData = {
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value
+      }
+      console.log('Nuevo formData:', newData)
+      return newData
+    })
     console.log(e.target.value)
   }
   const validateForm = () => {
     const { name, lastName, username, email, password, confirmPassword, phoneNumber, birthDate, DUI, userType, hireDate } = formData
 
+    console.log('=== DEBUGGING FORM DATA ===')
+    console.log('formData completo:', formData)
+    console.log('name:', name, '- length:', name?.length)
+    console.log('lastName:', lastName, '- length:', lastName?.length)
+    console.log('username:', username, '- length:', username?.length)
+    console.log('email:', email, '- length:', email?.length)
+    console.log('password:', password, '- length:', password?.length)
+    console.log('confirmPassword:', confirmPassword, '- length:', confirmPassword?.length)
+    console.log('phoneNumber:', phoneNumber, '- length:', phoneNumber?.length)
+    console.log('birthDate:', birthDate, '- length:', birthDate?.length)
+    console.log('DUI:', DUI, '- length:', DUI?.length)
+    console.log('userType:', userType, '- length:', userType?.length)
+    console.log('hireDate:', hireDate, '- length:', hireDate?.length)
+    // Verificar cuáles campos están vacíos
+    const emptyFields = []
+    if (!name) emptyFields.push('name')
+    if (!lastName) emptyFields.push('lastName')
+    if (!username) emptyFields.push('username')
+    if (!email) emptyFields.push('email')
+    if (!password) emptyFields.push('password')
+    if (!confirmPassword) emptyFields.push('confirmPassword')
+    if (!phoneNumber) emptyFields.push('phoneNumber')
+    if (!birthDate) emptyFields.push('birthDate')
+    if (!DUI) emptyFields.push('DUI')
+    if (!userType) emptyFields.push('userType')
+    if (!hireDate) emptyFields.push('hireDate')
+    
+    console.log('Campos vacíos:', emptyFields)
+    console.log('===============================')
     if (!name || !lastName || !username || !email || !password || !phoneNumber || !birthDate || !DUI || !userType || !hireDate) {
       toast.error('Todos los campos marcados con * son obligatorios')
       return false
@@ -77,15 +106,16 @@ const SignUp = () => {
       toast.error('El email no es válido')
       return false
     }
-    if (phoneNumber.length < 8) {
-      toast.error('El teléfono debe tener al menos 8 dígitos')
+    // Por esta (considerando que phoneNumber solo contiene números):
+    if (phoneNumber.length < 9) { // 9 caracteres incluyendo el guión
+      toast.error('El teléfono debe tener el formato correcto (0000-0000)')
       return false
     }
     if (DUI.length !== 10) {
       toast.error('El número de DUI debe tener el formato correcto (00000000-0)')
       return false
     }
-    if (!['vendedor', 'colaborador'].includes(userType)) {
+    if (!'colaborador'.includes(userType)) {
       toast.error('Debe seleccionar un tipo de usuario válido')
       return false
     }

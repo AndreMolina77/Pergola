@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { useAuth } from '../hooks/useAuth'
@@ -19,9 +19,12 @@ const Login = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { Login: authLogin, user, isLoading: authLoading } = useAuth()
+  // Usar useRef para mantener referencia al timeout
+  const redirectTimeoutRef = useRef(null)
   // Redirigir si ya está autenticado
   useEffect(() => {
     if (!authLoading && user) {
+      console.log("👤 Usuario ya autenticado, redirigiendo...", user)
       const from = location.state?.from?.pathname || '/main'
       navigate(from, { replace: true })
     }
@@ -40,28 +43,41 @@ const Login = () => {
     }
     setIsLoading(true)
     try {
+      console.log("🔄 Iniciando proceso de login desde componente...")
       const result = await authLogin(email, password, rememberMe)
+      console.log("📋 Resultado del login:", result)
     
       if (result.success) {
         toast.success('¡Inicio de sesión exitoso!')
         // Redirigir a la página que intentaba acceder o al main
         const from = location.state?.from?.pathname || '/main'
-        // Pequeño delay para que se vea el toast
+        console.log("🔄 Redirigiendo a:", from)
+        // Pequeño delay para que se vea el toast y se actualice el estado
         setTimeout(() => {
           navigate(from, { replace: true })
-        }, 1000)
+        }, 1500)
       } else {
+        console.log("❌ Login falló:", result.message)
         toast.error(result.message || 'Error al iniciar sesión')
       }
     } catch (error) {
+      console.error('❌ Login error:', error)
       toast.error('Error de conexión. Verifica tu internet.')
-      console.error('Login error:', error)
     } finally {
       setIsLoading(false)
     }
   }
   const handleGoToRegister = () => {
     navigate('/register')
+  }
+  const handleForgotPassword = () => {
+    // Limpiar timeout antes de navegar
+    if (redirectTimeoutRef.current) {
+      console.log("🧹 Limpiando timeout antes de ir a forgot-password")
+      clearTimeout(redirectTimeoutRef.current)
+      redirectTimeoutRef.current = null
+    }
+    navigate('/forgot-password')
   }
   // Mostrar loading si está verificando autenticacion
   if (authLoading) {
@@ -154,7 +170,8 @@ const Login = () => {
                   </span>
                 </label>
                 <button 
-                  onClick={() => navigate('/forgot-password')}
+                  type="button"
+                  onClick={handleForgotPassword}
                   className="font-[Quicksand] text-sm font-medium underline hover:opacity-70" 
                   style={{ color: '#A73249' }}
                 >

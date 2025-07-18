@@ -15,7 +15,7 @@ const FormModal = ({isOpen, onClose, onSubmit, title, fields, initialData = {}, 
   })
   // Inicializar formulario cuando se abre el modal
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && fields) {
       const defaultValues = {}
       fields.forEach(field => {
         const initialValue = initialData[field.name]
@@ -25,7 +25,6 @@ const FormModal = ({isOpen, onClose, onSubmit, title, fields, initialData = {}, 
           defaultValues[field.name] = initialValue !== undefined ? Number(initialValue) : ''
         } 
         else if (field.type === 'select-multiple') {
-          // Si es un array de ObjectIds, extraer solo los IDs
           if (Array.isArray(initialValue)) {
             defaultValues[field.name] = initialValue.map(item => 
               typeof item === 'object' ? item._id : item
@@ -40,8 +39,11 @@ const FormModal = ({isOpen, onClose, onSubmit, title, fields, initialData = {}, 
       })
       reset(defaultValues)
       setShowPasswords({})
+      setImagePreviews({})
+      setImageArrays({})
+      setSelectedFiles({})
     }
-  }, [isOpen]) // Solo depende de isOpen
+  }, [isOpen, fields, initialData, reset]) // Solo depende de isOpen
   // Limpiar previews cuando se cierra el modal
   if (!isOpen) {
     setImagePreviews({})
@@ -99,7 +101,7 @@ const FormModal = ({isOpen, onClose, onSubmit, title, fields, initialData = {}, 
   }
   // Funcion para manejar preview de imágenes
   const handleImagePreview = (fieldName, files, isArray = false) => {
-    if (!files || files.length === 0) {
+      if (!files || files.length === 0) {
       setImagePreviews(prev => ({ ...prev, [fieldName]: null }))
       if (isArray) {
         setImageArrays(prev => ({ ...prev, [fieldName]: [] }))
@@ -175,7 +177,7 @@ const FormModal = ({isOpen, onClose, onSubmit, title, fields, initialData = {}, 
           <select {...register(field.name, validation)} className={baseInputClasses} disabled={isLoading}>
             <option value="">Seleccionar {field.label}</option>
             {selectOptions.map(option => (
-              <option key={option.value} value={option.value}>
+              <option key={`${field.name}-option-${option.value}-${index}`} value={option.value}>
                 {option.label}
               </option>
             ))}
@@ -191,7 +193,7 @@ const FormModal = ({isOpen, onClose, onSubmit, title, fields, initialData = {}, 
           <div className="space-y-2">
             <select {...register(field.name, validation)} multiple size={Math.min(multiSelectOptions.length + 1, 6)} className={`${baseInputClasses} h-auto min-h-[120px]`} disabled={isLoading}>
               {multiSelectOptions.map(option => (
-                <option key={option.value} value={option.value}>
+                <option key={`${field.name}-multi-option-${option.value}-${index}`} value={option.value}>
                   {option.label}
                 </option>
               ))}

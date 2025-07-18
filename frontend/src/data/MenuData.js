@@ -16,6 +16,7 @@ const menuItems = [
   { icon: SuppliersIcon, label: 'Proveedores', id: 'suppliers' },
   { icon: RefundsIcon, label: 'Devoluciones', id: 'refunds' },
   { icon: TransactionsIcon, label: 'Transacciones', id: 'transactions' },
+  { icon: SettingsIcon, label: 'Configuración', id: 'settings' },
   { icon: PowerIcon, label: 'Cerrar sesión', id: 'power' }
 ]
 export default menuItems

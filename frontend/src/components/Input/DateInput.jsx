@@ -1,10 +1,11 @@
-const DateInput = ({ text, value, onChange, disabled = false, required = false, max = null, min = null }) => {
+const DateInput = ({ text, name, value, onChange, disabled = false, required = false, max = null, min = null }) => {
   return (
     <div className="flex flex-col w-full">
       <label className="mb-1 text-sm text-left text-[#3D1609] font-[Quicksand] font-semibold">{text}</label>
       <input 
         type="date" 
-        value={value} 
+        name={name}
+        value={value || ""} // Forzar cadena vacía si es `null`/`undefined` 
         onChange={onChange} 
         disabled={disabled} 
         required={required}
