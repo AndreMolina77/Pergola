@@ -20,6 +20,10 @@ const transactionsSchema = new Schema({
         validate: {
             validator: v => /^[A-Z0-9-]+$/.test(v),
             message: "El código solo puede contener letras mayúsculas, números y guiones"
+        },
+        validate: {
+            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            message: "El código de transacción no puede estar vacío"
         }
     },
     order: {
@@ -43,6 +47,10 @@ const transactionsSchema = new Schema({
         enum: {
             values: ["pago", "reembolso", "ajuste"],
             message: "Tipo de transacción no válido"
+        },
+        validate: {
+            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            message: "El tipo de transacción no puede estar vacío"
         }
     },
     paymentMethod: {
@@ -51,6 +59,10 @@ const transactionsSchema = new Schema({
         enum: {
             values: ["efectivo", "tarjeta de crédito", "transferencia", "paypal", "otro"],
             message: "Método de pago no válido"
+        },
+        validate: {
+            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            message: "El método de pago no puede estar vacío"
         }
     },
     status: {
@@ -60,7 +72,11 @@ const transactionsSchema = new Schema({
             values: ["pendiente", "completado", "fallido", "revertido"],
             message: "Estado de transacción no válido"
         },
-        default: "pendiente"
+        default: "pendiente",
+        validate: {
+            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            message: "El estado no puede estar vacío"
+        }
     }
 }, {
     timestamps: true,

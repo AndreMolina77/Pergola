@@ -42,7 +42,7 @@ employeesController.postEmployees = async (req, res) => {
 employeesController.getEmployees = async (req, res) => {
     try {
         // Buscar empleados
-        const employees = await Employees.find().select('-password');
+        const employees = await Employees.find();
         // ESTADO DE OK
         res.status(200).json(employees);
     } catch (error) {
@@ -54,7 +54,7 @@ employeesController.getEmployees = async (req, res) => {
 employeesController.getEmployee = async (req, res) => {
     try {
         // Buscar un solo empleado
-        const employee = await Employees.findById(req.params.id).select('-password');
+        const employee = await Employees.findById(req.params.id);
         // Validar que el empleado si exista
         if (!employee) {
             // ESTADO DE NO ENCONTRADO

@@ -9,51 +9,73 @@ export const AuthProvider = ({ children }) => {
 
   const Login = async (email, password, rememberMe = false) => {
     try {
+      console.log("🔄 Iniciando login...", { email })
+      
       const response = await fetch(`${API}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, rememberMe }),
-        credentials: "include" // Para incluir cookies en la peticion
+        credentials: "include"
       })
 
       const data = await response.json()
+      console.log("📥 Respuesta del servidor:", data)
+      
       if (!response.ok) {
         throw new Error(data.message || "Error en la autenticación")
       }
-      // NECESITAMOS OBTENER EL USERTYPE DEL TOKEN O DEL SERVIDOR
-      // Hacer una peticion adicional para obtener la info del usuario
+
+      console.log("✅ Login exitoso, obteniendo info del usuario...")
+      
+      // Obtener información del usuario validando el token
       const userInfoResponse = await fetch(`${API}/validateAuthToken`, {
         method: "POST",
         credentials: "include",
         headers: { 'Content-Type': 'application/json' }
       })
-      if (userInfoResponse.ok) {
-        const userInfo = await userInfoResponse.json()
-        
-        let userData = { 
-          email, 
-          userType: userInfo.userType,
-          userId: userInfo.userId,
-          id: userInfo.userId,  
-          name: userInfo.name, 
-          lastName: userInfo.lastName,
-          profilePic: '' 
-        }
-       // AGREGAR: Para TODOS los usuarios (incluyendo admin), obtener datos completos
+      
+      if (!userInfoResponse.ok) {
+        throw new Error("No se pudo validar el token")
+      }
+      
+      const userInfo = await userInfoResponse.json()
+      console.log("📋 Info del usuario obtenida:", userInfo)
+      
+      // Estructura base del usuario
+      let userData = { 
+        email, 
+        userType: userInfo.userType,
+        userId: userInfo.userId,
+        id: userInfo.userId,  
+        name: userInfo.name || '', 
+        lastName: userInfo.lastName || '',
+        profilePic: '' 
+      }
+
+      // Obtener datos completos según el tipo de usuario
       try {
         let userDataEndpoint = ''
+        let useCredentials = true
+        
         if (userInfo.userType === 'admin') {
-          userDataEndpoint = `${API}/admin/profile/data-public`
+          userDataEndpoint = `${API}/admin/profile/data`
+          useCredentials = true
         } else if (userInfo.userType === 'customer') {
           userDataEndpoint = `${API}/customers/${userInfo.userId}`
         } else {
           userDataEndpoint = `${API}/employees/${userInfo.userId}`
         }        
+        
+        console.log("🔄 Obteniendo datos completos desde:", userDataEndpoint)
+        
         const userDataResponse = await fetch(userDataEndpoint, {
-          ...(userInfo.userType !== 'admin' && { credentials: 'include' })
+          ...(useCredentials && { credentials: 'include' })
         })
+        
         if (userDataResponse.ok) {
           const completeUserData = await userDataResponse.json()
+          console.log("📊 Datos completos obtenidos:", completeUserData)
+          
           // Actualizar userData con datos completos
           userData = {
             ...userData,
@@ -61,22 +83,29 @@ export const AuthProvider = ({ children }) => {
             lastName: completeUserData.lastName || userData.lastName,
             profilePic: completeUserData.profilePic || '',
             phoneNumber: completeUserData.phoneNumber || '',
+            // Para admin, mantener 'admin' como id, para otros usar userId real
             id: userInfo.userType === 'admin' ? 'admin' : userInfo.userId
           }
+          console.log("✅ Datos de usuario finales:", userData)
+        } else {
+          console.log("⚠️ No se pudieron obtener datos completos, usando datos básicos")
         }
       } catch (error) {
-        console.log("Error obteniendo datos completos en login:", error)
+        console.log("❌ Error obteniendo datos completos en login:", error)
       }
-        localStorage.setItem("user", JSON.stringify(userData))
-        setUser(userData)
-        setAuthCookie(true) // Indicador de que hay cookie valida
-        
-        return { success: true, message: data.message }
-      } else {
-        throw new Error("No se pudo obtener información del usuario")
-      }
+
+      // Guardar en localStorage
+      localStorage.setItem("user", JSON.stringify(userData))
+      
+      // Actualizar estado
+      setUser(userData)
+      setAuthCookie(true)
+      
+      console.log("🎉 Login completado exitosamente")
+      return { success: true, message: data.message, user: userData }
+      
     } catch (error) {
-      console.log("Login error:", error.message)
+      console.log("❌ Login error:", error.message)
       return { success: false, message: error.message }
     }
   }
@@ -95,15 +124,18 @@ export const AuthProvider = ({ children }) => {
       localStorage.removeItem("user")
       setAuthCookie(null)
       setUser(null)
+      console.log("🧹 Datos locales limpiados")
     }
   }
   // Verificar autenticacion al cargar la aplicación
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        console.log("🔍 Verificando autenticación inicial...")
         // Intentar restaurar usuario desde localStorage
         const savedUser = localStorage.getItem("user")
         if (savedUser) {
+          console.log("👤 Usuario guardado encontrado, validando sesión...")
           // Verificar si la sesión sigue siendo válida con el servidor
           const response = await fetch(`${API}/validateAuthToken`, {
             method: "POST",
@@ -115,6 +147,7 @@ export const AuthProvider = ({ children }) => {
           if (response.ok) {
             const validationData = await response.json()
             const savedUserData = JSON.parse(savedUser)
+            console.log("✅ Sesión válida, restaurando usuario")
             // Obtener datos completos incluyendo profilePic
             let completeUserData = savedUserData
             if (validationData.userType === 'admin') {
@@ -127,7 +160,7 @@ export const AuthProvider = ({ children }) => {
                   completeUserData = {
                     ...savedUserData,
                     name: adminInfo.name || "Admin",
-                    lastName: adminInfo.lastName || "MixArt",
+                    lastName: adminInfo.lastName || "Pérgola",
                     profilePic: adminInfo.profilePic || "",
                     id: "admin",
                     userType: "admin"

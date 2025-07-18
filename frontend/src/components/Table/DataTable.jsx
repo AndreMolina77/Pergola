@@ -53,7 +53,6 @@ const DataTable = ({data = [], columns = [], isLoading = false,
           'true': 'bg-green-100 text-green-800',
           'false': 'bg-red-100 text-red-800',
           // Otros
-          'vendedor': 'bg-purple-100 text-purple-800',
           'colaborador': 'bg-blue-100 text-blue-800',
           'customer': 'bg-blue-100 text-blue-800'
         }

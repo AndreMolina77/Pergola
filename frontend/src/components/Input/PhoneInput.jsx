@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-const PhoneInput = ({ text, value, onChange, disabled = false, required = false }) => {
+const PhoneInput = ({ text, name, value, onChange, disabled = false, required = false }) => {
   const [formattedValue, setFormattedValue] = useState(value)
 
   const formatPhoneNumber = (input) => {
@@ -19,15 +19,15 @@ const PhoneInput = ({ text, value, onChange, disabled = false, required = false 
     const input = e.target.value
     const formatted = formatPhoneNumber(input)
     setFormattedValue(formatted)
-    // Pasar solo los números al componente padre
-    const numbersOnly = formatted.replace(/\D/g, '')
-    onChange({ target: { name: e.target.name, value: numbersOnly } })
+    // Enviar el valor formateado (con guión) en lugar de solo números
+    onChange({ target: { name: e.target.name, value: formatted } })
   }
   return (
     <div className="flex flex-col w-full">
       <label className="mb-1 text-sm text-left text-[#3D1609] font-[Quicksand] font-semibold">{text}</label>
       <input 
-        type="text" 
+        type="text"
+        name={name}
         value={formattedValue} 
         onChange={handleChange} 
         placeholder="0000-0000" 

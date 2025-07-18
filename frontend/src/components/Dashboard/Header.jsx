@@ -24,7 +24,6 @@ const Header = () => {
     const roleMap = {
       'admin': 'Administrador',
       'colaborador': 'Colaborador',
-      'vendedor': 'Vendedor'
     }
     return roleMap[user.userType] || 'Empleado'
   }

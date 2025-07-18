@@ -21,8 +21,10 @@ const refundsSchema = new Schema({
         trim: true,
         unique: true,
         validate: {
-            validator: v => /^[A-Z0-9-]+$/.test(v),
-            message: "El código solo puede contener letras mayúsculas, números y guiones"
+            validator: function(v) {
+                return v.trim() !== '' && /^[A-Z0-9-]+$/.test(v);
+            },
+            message: "El código no puede estar vacío y solo puede contener letras mayúsculas, números y guiones"
         }
     },
     order: {
@@ -49,12 +51,20 @@ const refundsSchema = new Schema({
         required: [true, "La razón es obligatoria"],
         trim: true,
         minlength: [10, "La razón debe tener al menos 10 caracteres"],
-        maxlength: [200, "La razón no puede exceder los 200 caracteres"]
+        maxlength: [200, "La razón no puede exceder los 200 caracteres"],
+        validate: {
+            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            message: "El motivo/razón no puede estar vacío"
+        }
     },
     comments: {
         type: String,
         trim: true,
-        maxlength: [500, "Los comentarios no pueden exceder los 500 caracteres"]
+        maxlength: [500, "Los comentarios no pueden exceder los 500 caracteres"],
+        validate: {
+            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            message: "Los comentarios no puede estar vacíos"
+        }
     },
     items: [{
         type: Schema.Types.ObjectId,
@@ -68,7 +78,11 @@ const refundsSchema = new Schema({
             values: ["pendiente", "aprobado", "rechazado", "procesado"],
             message: "Estado de reembolso no válido"
         },
-        default: "pendiente"
+        default: "pendiente",
+        validate: {
+            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            message: "El estado no puede estar vacío"
+        }
     },
     amount: {
         type: Number,
@@ -81,6 +95,10 @@ const refundsSchema = new Schema({
         enum: {
             values: ["efectivo", "tarjeta de crédito", "transferencia", "vale", "mismo método de pago", "otro"],
             message: "Método de reembolso no válido"
+        },
+        validate: {
+            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            message: "El método de reembolso no puede estar vacío"
         }
     }
 }, {

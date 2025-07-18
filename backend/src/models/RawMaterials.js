@@ -8,8 +8,10 @@ const rawMaterialsSchema = new Schema({
         trim: true,
         unique: true,
         validate: {
-            validator: v => /^[A-Z0-9-]+$/.test(v),
-            message: "El correlativo solo puede contener letras mayúsculas, números y guiones"
+            validator: function(v) {
+                return v.trim() !== '' && /^[A-Z0-9-]+$/.test(v);
+            },
+            message: "El correlativo no puede estar vacío y solo puede contener letras mayúsculas, números y guiones"
         }
     },
     name: {
@@ -17,42 +19,78 @@ const rawMaterialsSchema = new Schema({
         required: [true, "El nombre es obligatorio"],
         trim: true,
         minlength: [3, "El nombre debe tener al menos 3 caracteres"],
-        maxlength: [100, "El nombre no puede exceder los 100 caracteres"]
+        maxlength: [100, "El nombre no puede exceder los 100 caracteres"],
+        validate: {
+            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            message: "El nombre no puede estar vacío"
+        }
     },
     description: {
         type: String,
         required: [true, "La descripción es obligatoria"],
         trim: true,
         minlength: [10, "La descripción debe tener al menos 10 caracteres"],
-        maxlength: [500, "La descripción no puede exceder los 500 caracteres"]
+        maxlength: [500, "La descripción no puede exceder los 500 caracteres"],
+        validate: {
+            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            message: "La descripción no puede estar vacía"
+        }
     },
     type: {
         type: String,
-        required: [true, "El tipo es obligatorio"]
+        required: [true, "El tipo es obligatorio"],
+        validate: {
+            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            message: "El tipo no puede estar vacío"
+        }
     },
     color: {
         type: String,
-        trim: true
+        trim: true,
+        validate: {
+            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            message: "El color no puede estar vacío"
+        }
     },
     tone: {
         type: String,
-        trim: true
+        trim: true,
+        validate: {
+            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            message: "El tono no puede estar vacío"
+        }
     },
     toneType: {
         type: String,
-        trim: true
+        trim: true,
+        validate: {
+            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            message: "El tipo de tono no puede estar vacío"
+        }
     },
     texture: {
         type: String,
-        trim: true
+        trim: true,
+        validate: {
+            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            message: "La textura no puede estar vacía"
+        }
     },
     shape: {
         type: String,
-        trim: true
+        trim: true,
+        validate: {
+            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            message: "La figura no puede estar vacía"
+        }
     },
     dimension: {
         type: String,
-        trim: true
+        trim: true,
+        validate: {
+            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            message: "La dimensión no puede estar vacía"
+        }
     },
     provider: {
         type: Schema.Types.ObjectId,
@@ -61,12 +99,20 @@ const rawMaterialsSchema = new Schema({
     },
     brand: {
         type: String,
-        trim: true
+        trim: true,
+        validate: {
+            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            message: "La marca no puede estar vacía"
+        }
     },
     presentation: {
         type: String,
         required: [true, "La presentación es obligatoria"],
-        trim: true
+        trim: true,
+        validate: {
+            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            message: "La presentación no puede estar vacía"
+        }
     },
     quantity: {
         type: Number,

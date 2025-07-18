@@ -22,14 +22,22 @@ const employeesSchema = new Schema({
     required: [true, "El nombre es obligatorio"],
     trim: true,
     minlength: [2, "El nombre debe tener al menos 2 caracteres"],
-    maxlength: [100, "El nombre no puede exceder los 100 caracteres"]
+    maxlength: [100, "El nombre no puede exceder los 100 caracteres"],
+    validate: {
+      validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+      message: "El nombre no puede estar vacío"
+    }
   },
   lastName: {
     type: String,
     required: [true, "El apellido es obligatorio"],
     trim: true,
     minlength: [2, "El apellido debe tener al menos 2 caracteres"],
-    maxlength: [100, "El apellido no puede exceder los 100 caracteres"]
+    maxlength: [100, "El apellido no puede exceder los 100 caracteres"],
+    validate: {
+      validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+      message: "El apellido no puede estar vacío"
+    }
   },
   username: {
     type: String,
@@ -37,7 +45,11 @@ const employeesSchema = new Schema({
     trim: true,
     minlength: [5, "El nombre de usuario debe tener al menos 5 caracteres"],
     maxlength: [50, "El nombre de usuario no puede exceder los 50 caracteres"],
-    unique: true
+    unique: true,
+    validate: {
+      validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+      message: "El nombre de usuario no puede estar vacío"
+    }
   },
   email: {
     type: String,
@@ -46,17 +58,21 @@ const employeesSchema = new Schema({
     lowercase: true,
     unique: true,
     validate: {
-      validator: v => /^[\w.-]+@([\w-]+\.)+[a-zA-Z]{2,}$/.test(v),
-      message: "El correo electrónico debe ser válido"
+      validator: function(v) {
+        return v.trim() !== '' && /^[\w.-]+@([\w-]+\.)+[a-zA-Z]{2,}$/.test(v);
+      },
+      message: "El correo no puede estar vacío y debe ser válido"
     }
   },
-  phone: {
+  phoneNumber: {
     type: String,
     required: [true, "El número de teléfono es obligatorio"],
     trim: true,
     validate: {
-      validator: v => /^(?:\+503\s?)?(6|7)\d{3}-?\d{4}$/.test(v),
-      message: "El teléfono debe ser válido en formato salvadoreño"
+      validator: function(v) {
+        return v.trim() !== '' && /^(?:\+503\s?)?(6|7)\d{3}-?\d{4}$/.test(v);
+      },
+      message: "El teléfono no puede estar vacío y debe ser válido en El Salvador"
     }
   },
   birthDate: {
@@ -72,8 +88,10 @@ const employeesSchema = new Schema({
     required: [true, "El DUI es obligatorio"],
     trim: true,
     validate: {
-      validator: v => /^\d{8}-\d$/.test(v),
-      message: "El DUI debe tener el formato salvadoreño: 12345678-9"
+      validator: function(v) {
+        return v.trim() !== '' && /^\d{8}-\d$/.test(v);
+      },
+      message: "El DUI no puede estar vacío y debe tener formato 12345678-9"
     }
   },
   password: {
@@ -83,22 +101,30 @@ const employeesSchema = new Schema({
     minlength: [8, "La contraseña debe tener al menos 8 caracteres"],
     maxlength: [100, "La contraseña no puede exceder los 100 caracteres"],
     validate: {
-      validator: v => /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(v),
-      message: "La contraseña debe incluir mayúsculas, minúsculas, números y caracteres especiales"
-    },
-    select: false
+      validator: function(v) {
+        return v.trim() !== '' && /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(v);
+      },
+      message: "La contraseña no puede estar vacía y debe incluir mayúsculas, minúsculas, números y caracteres especiales"
+    }
   },
   userType: {
     type: String,
     required: [true, "El tipo de usuario es obligatorio"],
     enum: ["admin", "colaborador"],
-    default: "colaborador"
+    default: "colaborador",
+    validate: {
+      validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+      message: "El tipo de usuario no puede estar vacío"
+    }
   },
   profilePic: {
     type: String,
     validate: {
-      validator: v => /^https?:\/\/.+\.(jpg|jpeg|png|webp|svg)$/.test(v),
-      message: "La URL de imagen debe ser válida"
+      validator: function(v) {
+        if (v == null) return true;
+        return v.trim() !== '' && /^https?:\/\/.+\.(jpg|jpeg|png|webp|svg)$/.test(v);
+      },
+      message: "La URL no puede estar vacía y debe ser válida (jpg/jpeg/png/webp/svg)"
     }
   },
   hireDate: {

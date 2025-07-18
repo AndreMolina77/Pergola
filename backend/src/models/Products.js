@@ -7,14 +7,22 @@ const productsSchema = new Schema({
         required: [true, "El nombre del producto es obligatorio"],
         trim: true,
         minlength: [3, "El nombre debe tener al menos 3 caracteres"],
-        maxlength: [100, "El nombre no puede exceder los 100 caracteres"]
+        maxlength: [100, "El nombre no puede exceder los 100 caracteres"],
+        validate: {
+            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            message: "El nombre del producto no puede estar vacío"
+        }
     },
     description: {
         type: String,
         required: [true, "La descripción es obligatoria"],
         trim: true,
         minlength: [10, "La descripción debe tener al menos 10 caracteres"],
-        maxlength: [1000, "La descripción no puede exceder los 1000 caracteres"]
+        maxlength: [1000, "La descripción no puede exceder los 1000 caracteres"],
+        validate: {
+            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            message: "El nombre del producto no puede estar vacío"
+        }
     },
     codeProduct: {
         type: String,
@@ -22,8 +30,10 @@ const productsSchema = new Schema({
         trim: true,
         unique: true,
         validate: {
-            validator: v => /^[A-Z0-9-]+$/.test(v),
-            message: "El código de producto solo puede contener letras mayúsculas, números y guiones"
+            validator: function(v) {
+                return v.trim() !== '' && /^[A-Z0-9-]+$/.test(v);
+            },
+            message: "El código no puede estar vacío y solo puede contener letras mayúsculas, números y guiones"
         }
     },
     stock: {
@@ -50,12 +60,17 @@ const productsSchema = new Schema({
     images: {
         type: [String],
         validate: {
-            validator: function(v) {
-                // Solo valida si el campo tiene un valor y no está vacío
-                if (!v || v.length === 0) return true;
-                return v.every(img => img && img.trim() !== '' && /^https?:\/\/.+\.(jpg|jpeg|png|webp|svg)$/.test(img));
+            validator: function (v) {
+            // Debe ser un array no vacío
+            if (!Array.isArray(v) || v.length === 0) return false;
+            // Todos los valores deben ser strings no vacíos que coincidan con la URL
+            return v.every(img =>
+                typeof img === 'string' &&
+                img.trim() !== '' &&
+                /^https?:\/\/.+\.(jpg|jpeg|png|webp|svg)$/.test(img)
+            );
             },
-            message: "Todas las URLs de imágenes deben ser válidas"
+            message: 'Todas las URLs de imágenes deben ser válidas y el arreglo no puede estar vacío.'
         }
     },
     collection: {
@@ -85,7 +100,13 @@ const productsSchema = new Schema({
     correlative: {
         type: String,
         required: [true, "El correlativo es obligatorio"],
-        trim: true
+        trim: true,
+        validate: {
+            validator: function(v) {
+                return v.trim() !== '' && /^[A-Z0-9-]+$/.test(v);
+            },
+            message: "El correlativo no puede estar vacío y solo puede contener letras mayúsculas, números y guiones"
+        }
     },
     movementType: {
         type: String,
@@ -93,6 +114,10 @@ const productsSchema = new Schema({
         enum: {
             values: ["venta", "exhibición", "producción", "otro"],
             message: "Tipo de movimiento no válido"
+        },
+        validate: {
+            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            message: "El tipo de movimiento no puede estar vacío"
         }
     },
     status: {
@@ -101,11 +126,19 @@ const productsSchema = new Schema({
         enum: {
             values: ["disponible", "agotado", "en producción", "descontinuado"],
             message: "Estado no válido"
+        },
+        validate: {
+            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            message: "El estado no puede estar vacío"
         }
     },
     applicableCosts: {
         type: String,
-        trim: true
+        trim: true,
+        validate: {
+            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            message: "Los costos aplicables no puede estar vacíos"
+        }
     },
     hasDiscount: {
         type: Boolean,

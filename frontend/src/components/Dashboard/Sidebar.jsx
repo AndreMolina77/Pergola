@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Menu, X } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'  
 import { useAuth } from '../../hooks/useAuth.js'
 import menuItems from '../../data/MenuData.js'
 import BlackLogo from '../../assets/logoforsidebar.png' 
@@ -7,6 +8,7 @@ import Monogram from '../../assets/logoforsidebar2.png'
 
 const Sidebar = ({ currentView, setCurrentView, onLogout }) => {
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const navigate = useNavigate()
   const { user } = useAuth() 
   // Función para filtrar menú por rol
   const getFilteredMenuItems = () => {
@@ -14,7 +16,6 @@ const Sidebar = ({ currentView, setCurrentView, onLogout }) => {
     
     const permissions = {
       'admin': [ 'dashboard', 'search', 'products', 'customdesigns', 'designelements', 'rawmaterials', 'employees', 'categories','subcategories', 'collections', 'customers', 'orders', 'reviews', 'refunds', 'transactions', 'suppliers', 'settings' ],
-      'vendedor': [ 'dashboard', 'search', 'products', 'customdesigns', 'designelements', 'rawmaterials', 'categories','subcategories', 'collections', 'orders', 'reviews', 'refunds', 'transactions', 'suppliers', 'settings' ],
       'colaborador': [ 'dashboard', 'search', 'products', 'customdesigns', 'designelements', 'rawmaterials', 'categories','subcategories', 'collections', 'reviews', 'suppliers', 'settings' ],
     }
     const allowedViews = permissions[user.userType] || []
@@ -24,8 +25,23 @@ const Sidebar = ({ currentView, setCurrentView, onLogout }) => {
     setIsCollapsed(!isCollapsed)
   }
   const handleMenuClick = (itemId) => {
-    setCurrentView(itemId)
+    if (itemId === 'power') {
+      handleLogout()
+    } else {
+      setCurrentView(itemId)
+    }
   }
+  // Función para el cierre de sesión
+  const handleLogout = async () => {
+    try {
+      await onLogout()
+      navigate('/login')
+    } catch (error) {
+      console.error('Error durante logout:', error)
+      navigate('/login')
+    }
+  }
+  // Render del sidebar
   return (
     <div className={`bg-[#E3C6B8] h-screen transition-all duration-300 ease-in-out ${isCollapsed ? 'w-20' : 'w-80'} flex flex-col relative`}>
       
@@ -55,18 +71,18 @@ const Sidebar = ({ currentView, setCurrentView, onLogout }) => {
       </div>
       {/* Menu Items */}
       <div className="flex-1 py-6 overflow-y-auto">
-        {getFilteredMenuItems().map((item) => { 
+        {getFilteredMenuItems().filter(item => item.id !== 'settings' && item.id !== 'power').map((item) => { 
           const IconComponent = item.icon;
           const isActive = currentView === item.id;       
           
           return (
             <div key={item.id} onClick={() => handleMenuClick(item.id)} className={`w-full cursor-pointer transition-all duration-200 group relative ${isCollapsed ? 'px-4 py-4' : 'px-6 py-4'} ${isActive ? 'bg-[#E3C6B8]' : 'hover:bg-[#E3C6B8]/50'}`}>
               <div className="flex items-center">
-                <div className={`transition-colors duration-200 ${isActive ? 'text-[#8B4513]' : 'text-[#8B4513]/80'}`}>
+                <div className={`transition-colors duration-200 ${isActive ? 'text-[#3D1609]' : 'text-[#3D1609]/80'}`}>
                   <IconComponent size={isCollapsed ? 24 : 20} className="flex-shrink-0"/>
                 </div>
                 {!isCollapsed && (
-                  <span className={`ml-4 text-[15px] transition-all duration-200 font-[Quicksand] ${isActive ? 'text-[#8B4513] font-bold' : 'text-[#8B4513]/90 font-medium'}`}>
+                  <span className={`ml-4 text-[15px] transition-all duration-200 font-[Quicksand] ${isActive ? 'text-[#3D1609] font-bold' : 'text-[#3D1609]/90 font-medium'}`}>
                     {item.label}
                   </span>
                 )}
@@ -93,9 +109,7 @@ const Sidebar = ({ currentView, setCurrentView, onLogout }) => {
                   <IconComponent size={isCollapsed ? 24 : 20} className="flex-shrink-0" />
                 </div>
                 {!isCollapsed && (
-                  <span className={`ml-4 text-[15px] transition-all duration-200 font-[Quicksand]
-                    ${isActive ? 'text-[#3D1609] font-bold' : 'text-[#3D1609]/90 font-medium'}
-                  `}>
+                  <span className={`ml-4 text-[15px] transition-all duration-200 font-[Quicksand] ${isActive ? 'text-[#3D1609] font-bold' : 'text-[#3D1609]/90 font-medium'}`}>
                     {item.label}
                   </span>
                 )}
@@ -109,7 +123,7 @@ const Sidebar = ({ currentView, setCurrentView, onLogout }) => {
         {menuItems.filter(item => item.id === 'power').map((item) => {
           const IconComponent = item.icon;
           return (
-            <div key={item.id} onClick={onLogout} className={`w-full cursor-pointer transition-all duration-200 group ${isCollapsed ? 'px-4 py-4' : 'px-6 py-4'} hover:bg-[#E3C6B8]/50`} >
+            <div key={item.id} onClick={handleLogout} className={`w-full cursor-pointer transition-all duration-200 group ${isCollapsed ? 'px-4 py-4' : 'px-6 py-4'} hover:bg-[#E3C6B8]/50`} >
               <div className="flex items-center">
                 <div className="text-[#3D1609]/80 group-hover:text-[#3D1609] transition-colors duration-200">
                   <IconComponent size={isCollapsed ? 24 : 20} className="flex-shrink-0"/>

@@ -23,6 +23,7 @@ import signupCustomerRoutes from "./src/routes/signupCustomer.js"
 import recoveryPasswordRoutes from "./src/routes/recoveryPassword.js"
 import validateAuthTokenRoutes from "./src/routes/validateAuthToken.js"
 import validatePasswordRoutes from "./src/routes/validatePassword.js"
+import adminProfileRoutes from "./src/routes/adminProfile.js"
 // Importo middlewares para validar el token de autenticación
 import { validateAuthToken } from "./src/middlewares/validateAuthToken.js"
  
@@ -41,13 +42,15 @@ app.use("/api/signup", signupRoutes)
 app.use("/api/signupCustomer", signupCustomerRoutes)
 app.use("/api/recoveryPassword", recoveryPasswordRoutes)
 app.use("/api/validatePassword", validatePasswordRoutes)
+app.use("/api/admin/profile", adminProfileRoutes) // Esta será pública para /data-public
 // Ruta especial para validar token (acepta cualquier tipo de usuario válido)
 app.use("/api/validateAuthToken", validateAuthTokenRoutes)
 // Rutas que SÍ requieren login (protegidas) 
 app.use("/api/products", validateAuthToken(["admin", "colaborador"]), productsRoutes)
 app.use("/api/rawmaterials", validateAuthToken(["admin", "colaborador"]), rawMaterialsRoutes)
-app.use("/api/customdesigns", validateAuthToken(["admin", "colaborador", "customers"]), customDesignsRoutes)
+app.use("/api/customdesigns", validateAuthToken(["admin", "colaborador", "customer"]), customDesignsRoutes)
 app.use("/api/employees", validateAuthToken(["admin", "colaborador"]), employeesRoutes)
+app.use("/api/admin/profile", validateAuthToken(["admin"]), adminProfileRoutes) // Solo admin
 app.use("/api/collections", validateAuthToken(["admin", "colaborador"]), collectionsRoutes) 
 app.use("/api/categories", validateAuthToken(["admin", "colaborador"]), categoriesRoutes)
 app.use("/api/subcategories", validateAuthToken(["admin", "colaborador"]), subcategoriesRoutes) 
