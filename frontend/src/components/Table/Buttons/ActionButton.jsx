@@ -1,7 +1,19 @@
+// Importa los iconos que se pueden usar en el botón
 import { Plus, Edit, Trash2, Eye, Mail, Download, Filter } from 'lucide-react'
 
-const ActionButton = ({variant = "primary", size = "md", icon, children, onClick, disabled = false, loading = false, className = "", ...props }) => {
-  // Configuracion de iconos por defecto segun la variante
+// Componente de botón de acción reutilizable
+const ActionButton = ({
+  variant = "primary", // Variante de estilo
+  size = "md",        // Tamaño del botón
+  icon,               // Icono personalizado
+  children,           // Texto o contenido del botón
+  onClick,            // Función al hacer clic
+  disabled = false,   // Estado deshabilitado
+  loading = false,    // Estado de carga
+  className = "",     // Clases adicionales
+  ...props            // Otros props
+}) => {
+  // Configuración de iconos por defecto según la variante
   const getDefaultIcon = () => {
     switch (variant) {
       case 'add': return Plus
@@ -14,7 +26,7 @@ const ActionButton = ({variant = "primary", size = "md", icon, children, onClick
       default: return null
     }
   }
-  // Configuracion de estilos por variant
+  // Configuración de estilos según la variante
   const getVariantStyles = () => {
     switch (variant) {
       case 'primary':
@@ -36,7 +48,7 @@ const ActionButton = ({variant = "primary", size = "md", icon, children, onClick
         return 'bg-[#A73249] border-[#A73249] text-white hover:bg-transparent hover:text-[#A73249] focus:ring-[#A73249]/20'
     }
   }
-  // Configuracion de tamaños
+  // Configuración de tamaños
   const getSizeStyles = () => {
     switch (size) {
       case 'xs':
@@ -53,12 +65,21 @@ const ActionButton = ({variant = "primary", size = "md", icon, children, onClick
         return 'px-4 py-2 text-sm'
     }
   }
+  // Determina el icono a mostrar
   const IconComponent = icon || getDefaultIcon()
+  // Obtiene los estilos según la variante y tamaño
   const variantStyles = getVariantStyles()
   const sizeStyles = getSizeStyles()
 
   return (
-    <button onClick={onClick} disabled={disabled || loading} className={` inline-flex items-center justify-center gap-2 font-[Quicksand] font-semibold border-2 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95 shadow-sm hover:shadow-md ${variantStyles} ${sizeStyles} ${className}`} {...props}>
+    // Botón principal con estilos y funcionalidad
+    <button
+      onClick={onClick}
+      disabled={disabled || loading}
+      className={` inline-flex items-center justify-center gap-2 font-[Quicksand] font-semibold border-2 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95 shadow-sm hover:shadow-md ${variantStyles} ${sizeStyles} ${className}`}
+      {...props}
+    >
+      {/* Muestra spinner si está cargando */}
       {loading ? (
         <>
           <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
@@ -66,11 +87,14 @@ const ActionButton = ({variant = "primary", size = "md", icon, children, onClick
         </>
       ) : (
         <>
+          {/* Muestra el icono si existe */}
           {IconComponent && <IconComponent className="w-4 h-4 flex-shrink-0" />}
+          {/* Muestra el texto o contenido */}
           {children && <span>{children}</span>}
         </>
       )}
     </button>
   )
 }
+// Exporta el componente para su uso en otras partes
 export default ActionButton

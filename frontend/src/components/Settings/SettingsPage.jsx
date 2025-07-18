@@ -5,7 +5,7 @@ import { User, Camera, Mail, Phone, Shield, Palette, Moon, Sun, Bell, Save, Eye,
 const SettingsPage = () => {
   const { user } = useAuth()
   const fileInputRef = useRef(null)
-  // Estados para la informacion del perfil (solo para mostrar, no editable)
+  // Estado para mostrar información del perfil (solo lectura)
   const [profileData] = useState({
     name: user?.name || '',
     lastName: user?.lastName || '',
@@ -13,18 +13,19 @@ const SettingsPage = () => {
     phoneNumber: user?.phoneNumber || '',
     profilePic: user?.profilePic || ''
   })
-  // Estados para cambio de contraseña (no funcional por ahora)
+  // Estado para el cambio de contraseña (no funcional aún)
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
   })
+  // Estado para mostrar/ocultar contraseñas
   const [showPasswords, setShowPasswords] = useState({
     current: false,
     new: false,
     confirm: false
   })
-  // Estados para preferencias (simulados localmente)
+  // Estados para preferencias de usuario (simulados localmente)
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [language, setLanguage] = useState('es')
   const [emailNotifications, setEmailNotifications] = useState(true)
@@ -82,7 +83,7 @@ const SettingsPage = () => {
   return (
     <div className={`p-6 min-h-screen font-[Quicksand] transition-colors duration-300 ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
+        {/* Encabezado */}
         <div className="mb-8">
           <h1 className={`text-3xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-[#3D1609]'}`}>
             ⚙️ Configuración
@@ -91,7 +92,7 @@ const SettingsPage = () => {
             Personaliza tu perfil y preferencias
           </p>
         </div>
-        {/* Tabs */}
+        {/* Tabs de navegación */}
         <div className={`flex space-x-1 mb-8 p-1 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
           {tabs.map(tab => { const IconComponent = tab.icon
             return (
@@ -111,7 +112,7 @@ const SettingsPage = () => {
               <h2 className={`text-xl font-semibold mb-6 ${isDarkMode ? 'text-white' : 'text-[#3D1609]'}`}>
                 Información del Perfil
               </h2>  
-              {/* Foto de perfil */}
+              {/* Foto de perfil y botón de cambio */}
               <div className="flex items-center space-x-6 mb-8">
                 <div className="relative">
                   <div className="w-24 h-24 rounded-full overflow-hidden shadow-lg border-4 border-white">
@@ -119,10 +120,12 @@ const SettingsPage = () => {
                       <img src={profileData.profilePic} alt="Perfil" className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'
                           e.target.nextSibling.style.display = 'flex' }}/>
                     ) : null}
+                    {/* Iniciales si no hay foto */}
                     <div className={`w-full h-full bg-gradient-to-br from-[#A73249] to-[#D4667A] flex items-center justify-center text-white text-2xl font-bold ${profileData.profilePic ? 'hidden' : 'flex'}`} style={{ display: profileData.profilePic ? 'none' : 'flex' }}>
                       {`${profileData.name?.charAt(0) || user?.name?.charAt(0) || 'U'}${profileData.lastName?.charAt(0) || user?.lastName?.charAt(0) || ''}`}
                     </div>
                   </div>
+                  {/* Botón para subir nueva foto */}
                   <button onClick={() => fileInputRef.current?.click()} disabled={isLoading} className="absolute -bottom-2 -right-2 bg-[#A73249] text-white p-2 rounded-full hover:bg-[#8A2A3E] transition-colors shadow-lg disabled:opacity-50 group">
                     {isLoading ? (
                       <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"/>
@@ -144,13 +147,13 @@ const SettingsPage = () => {
                   </p>
                 </div>
               </div>
-              {/* Aviso de modo solo lectura */}
+              {/* Aviso de solo lectura */}
               <div className={`mb-6 p-4 rounded-lg border ${isDarkMode ? 'bg-blue-900/30 border-blue-700' : 'bg-blue-50 border-blue-200'}`}>
                 <p className={`text-sm ${isDarkMode ? 'text-blue-300' : 'text-blue-700'}`}>
                   ℹ️ <strong>Modo de solo lectura:</strong> Los campos están deshabilitados temporalmente. Esta información se obtiene de tu sesión actual.
                 </p>
               </div>
-              {/* Formulario de perfil - SOLO LECTURA */}
+              {/* Formulario de perfil (solo lectura) */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
                   <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-200' : 'text-[#3D1609]'}`}>
@@ -179,6 +182,7 @@ const SettingsPage = () => {
                     <input type="email" value={profileData.email} className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#A73249] focus:border-transparent ${isDarkMode ? 'bg-gray-700 border-gray-600 text-gray-300' : 'bg-gray-100 border-gray-300 text-gray-600'} cursor-not-allowed`} placeholder="tu@email.com" disabled readOnly/>
                   </div>
                 </div>
+                {/* Campo teléfono solo para usuarios no admin */}
                 {user?.userType !== 'admin' && (
                   <div>
                     <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-200' : 'text-[#3D1609]'}`}>
@@ -191,6 +195,7 @@ const SettingsPage = () => {
                   </div>
                 )}
               </div>
+              {/* Botón deshabilitado para actualizar perfil */}
               <button onClick={handleProfileUpdate} disabled={true} className="flex items-center space-x-2 bg-gray-400 text-white px-6 py-3 rounded-lg cursor-not-allowed opacity-50">
                 <Save className="w-4 h-4" />
                 <span>Funcionalidad deshabilitada</span>
@@ -203,6 +208,7 @@ const SettingsPage = () => {
               <h2 className={`text-xl font-semibold mb-6 ${isDarkMode ? 'text-white' : 'text-[#3D1609]'}`}>
                 Seguridad
               </h2>
+              {/* Aviso sobre cambio de contraseña */}
               <div className={`border rounded-lg p-4 mb-6 ${isDarkMode ? 'bg-blue-900/30 border-blue-700' : 'bg-blue-50 border-blue-200'}`}>
                 <h3 className={`font-medium mb-2 ${isDarkMode ? 'text-blue-300' : 'text-blue-800'}`}>
                   Cambiar Contraseña
@@ -211,7 +217,9 @@ const SettingsPage = () => {
                   Asegúrate de usar una contraseña segura con al menos 8 caracteres.
                 </p>
               </div>
+              {/* Formulario de cambio de contraseña */}
               <div className="space-y-4 mb-6">
+                {/* Campo contraseña actual */}
                 <div>
                   <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-200' : 'text-[#3D1609]'}`}>
                     Contraseña Actual
@@ -219,11 +227,13 @@ const SettingsPage = () => {
                   <div className="relative">
                     <Shield className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 ${isDarkMode ? 'text-gray-400' : 'text-gray-400'}`} />
                     <input type={showPasswords.current ? 'text' : 'password'} value={passwordData.currentPassword} onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))} className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-[#A73249] focus:border-transparent ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`} placeholder="Tu contraseña actual"/>
+                    {/* Botón para mostrar/ocultar contraseña */}
                     <button type="button" onClick={() => setShowPasswords(prev => ({ ...prev, current: !prev.current }))} className={`absolute right-3 top-1/2 transform -translate-y-1/2 hover:text-gray-600 ${isDarkMode ? 'text-gray-400' : 'text-gray-400'}`}>
                       {showPasswords.current ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
                   </div>
                 </div>
+                {/* Campo nueva contraseña */}
                 <div>
                   <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-200' : 'text-[#3D1609]'}`}>
                     Nueva Contraseña
@@ -231,11 +241,13 @@ const SettingsPage = () => {
                   <div className="relative">
                     <Shield className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 ${isDarkMode ? 'text-gray-400' : 'text-gray-400'}`} />
                     <input type={showPasswords.new ? 'text' : 'password'} value={passwordData.newPassword} onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))} className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-[#A73249] focus:border-transparent ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`} placeholder="Nueva contraseña (mín. 8 caracteres)"/>
+                    {/* Botón para mostrar/ocultar contraseña */}
                     <button type="button" onClick={() => setShowPasswords(prev => ({ ...prev, new: !prev.new }))} className={`absolute right-3 top-1/2 transform -translate-y-1/2 hover:text-gray-600 ${isDarkMode ? 'text-gray-400' : 'text-gray-400'}`}>
                       {showPasswords.new ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
                   </div>
                 </div>
+                {/* Campo confirmar nueva contraseña */}
                 <div>
                   <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-200' : 'text-[#3D1609]'}`}>
                     Confirmar Nueva Contraseña
@@ -243,12 +255,14 @@ const SettingsPage = () => {
                   <div className="relative">
                     <Shield className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 ${isDarkMode ? 'text-gray-400' : 'text-gray-400'}`} />
                     <input type={showPasswords.confirm ? 'text' : 'password'} value={passwordData.confirmPassword} onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))} className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-[#A73249] focus:border-transparent ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`} placeholder="Confirma tu nueva contraseña"/>
+                    {/* Botón para mostrar/ocultar contraseña */}
                     <button type="button" onClick={() => setShowPasswords(prev => ({ ...prev, confirm: !prev.confirm }))} className={`absolute right-3 top-1/2 transform -translate-y-1/2 hover:text-gray-600 ${isDarkMode ? 'text-gray-400' : 'text-gray-400'}`}>
                       {showPasswords.confirm ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
                   </div>
                 </div>
               </div>
+              {/* Botón para cambiar contraseña */}
               <button onClick={handlePasswordChange} disabled={isLoading} className="flex items-center space-x-2 bg-[#A73249] text-white px-6 py-3 rounded-lg hover:bg-[#8A2A3E] transition-colors disabled:opacity-50">
                 <Shield className="w-4 h-4" />
                 <span>{isLoading ? 'Cambiando...' : 'Cambiar Contraseña'}</span>
@@ -268,7 +282,7 @@ const SettingsPage = () => {
                 </p>
               </div>
               <div className="space-y-6">
-                {/* Tema */}
+                {/* Preferencia de tema */}
                 <div className={`flex items-center justify-between p-4 border rounded-lg ${isDarkMode ? 'border-gray-600 bg-gray-700' : 'border-gray-200'}`}>
                   <div className="flex items-center space-x-3">
                     {isDarkMode ?
@@ -280,11 +294,12 @@ const SettingsPage = () => {
                       <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-500'}`}>Claro u oscuro (temporal)</p>
                     </div>
                   </div>
+                  {/* Switch de tema */}
                   <button onClick={toggleDarkMode} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${ isDarkMode ? 'bg-[#A73249]' : 'bg-gray-300' }`}>
                     <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${ isDarkMode ? 'translate-x-6' : 'translate-x-1' }`}/>
                   </button>
                 </div>
-                {/* Idioma */}
+                {/* Preferencia de idioma */}
                 <div className={`flex items-center justify-between p-4 border rounded-lg ${isDarkMode ? 'border-gray-600 bg-gray-700' : 'border-gray-200'}`}>
                   <div className="flex items-center space-x-3">
                     <Palette className="w-5 h-5 text-purple-500" />
@@ -298,7 +313,7 @@ const SettingsPage = () => {
                     <option value="en">🇺🇸 English</option>
                   </select>
                 </div>
-                {/* Notificaciones Email */}
+                {/* Preferencia de notificaciones por email */}
                 <div className={`flex items-center justify-between p-4 border rounded-lg ${isDarkMode ? 'border-gray-600 bg-gray-700' : 'border-gray-200'}`}>
                   <div className="flex items-center space-x-3">
                     <Mail className="w-5 h-5 text-green-500" />
@@ -309,11 +324,12 @@ const SettingsPage = () => {
                       </p>
                     </div>
                   </div>
+                  {/* Switch de notificaciones email */}
                   <button onClick={toggleEmailNotifications} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${ emailNotifications ? 'bg-[#A73249]' : 'bg-gray-300' }`}>
                     <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${ emailNotifications ? 'translate-x-6' : 'translate-x-1' }`}/>
                   </button>
                 </div>
-                {/* Notificaciones del Navegador */}
+                {/* Preferencia de notificaciones del navegador */}
                 <div className={`flex items-center justify-between p-4 border rounded-lg ${isDarkMode ? 'border-gray-600 bg-gray-700' : 'border-gray-200'}`}>
                   <div className="flex items-center space-x-3">
                     <Bell className="w-5 h-5 text-blue-500" />
@@ -323,11 +339,12 @@ const SettingsPage = () => {
                       </p>
                     </div>
                   </div>
+                  {/* Botón para activar notificaciones navegador */}
                   <button onClick={handleBrowserNotifications} className={`px-4 py-2 text-white text-sm rounded-lg transition-colors ${ browserNotifications === 'granted' ? 'bg-[#A73249] hover:bg-[#8A2A3E]' : 'bg-[#A73249] hover:bg-[#8A2A3E]' }`}>
                       {browserNotifications === 'granted' ? 'Probar' : 'Activar'}
                   </button>
                 </div>
-                {/* Información del usuario actual */}
+                {/* Información de sesión del usuario */}
                 <div className={`p-4 rounded-lg border-l-4 border-l-[#A73249] ${isDarkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
                   <h4 className={`font-medium mb-2 ${isDarkMode ? 'text-white' : 'text-[#3D1609]'}`}>👤 Información de Sesión</h4>
                   <div className={`text-sm space-y-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
@@ -338,6 +355,7 @@ const SettingsPage = () => {
                     <p>🌍 Idioma: <span className="font-medium">{language === 'es' ? 'Español' : 'English'}</span></p>
                   </div>
                 </div>
+                {/* Repetido por error, puedes eliminar el siguiente bloque si lo deseas */}
                 <div className={`p-4 rounded-lg border-l-4 border-l-[#A73249] ${isDarkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
                   <h4 className={`font-medium mb-2 ${isDarkMode ? 'text-white' : 'text-[#3D1609]'}`}>👤 Información de Sesión</h4>
                   <div className={`text-sm space-y-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
@@ -349,7 +367,7 @@ const SettingsPage = () => {
                   </div>
                 </div>
               </div>
-              {/* Tips */}
+              {/* Tips y estado actual */}
               <div className={`mt-8 p-4 border rounded-lg ${ isDarkMode ? 'bg-green-900/30 border-green-700' : 'bg-green-50 border-green-200' }`}>
                 <p className={`text-sm ${ isDarkMode ? 'text-green-300' : 'text-green-700'}`}>
                   💡 <strong>Estado Actual:</strong>
@@ -368,4 +386,5 @@ const SettingsPage = () => {
     </div>
   )
 }
+// Exporta el componente para su uso en otras partes de la aplicación
 export default SettingsPage

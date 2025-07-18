@@ -1,5 +1,7 @@
 import { useEffect, useRef } from 'react'
+// Importa iconos de lucide-react para las tarjetas y métricas
 import { BarChart3, TrendingUp, ShoppingCart, Eye, Star, DollarSign, Package, Users } from 'lucide-react'
+// Importa y registra los módulos necesarios de Chart.js para los gráficos
 import { 
   Chart as ChartJS, 
   CategoryScale, 
@@ -30,12 +32,14 @@ ChartJS.register(
   DoughnutController,
   LineController
 )
+
 const Dashboard = () => {
+  // Referencias para los gráficos
   const barChartRef = useRef(null)
   const pieChartRef = useRef(null)
   const lineChartRef = useRef(null)
   
-  // Datos de ejemplo
+  // Datos de ejemplo para las tarjetas de estadísticas
   const dashboardStats = [
     {
       title: "Ventas Totales",
@@ -70,13 +74,14 @@ const Dashboard = () => {
       color: "bg-gradient-to-br from-orange-500 to-orange-600"
     }
   ]
+  // Datos de ventas recientes para la tabla
   const recentSales = [
     { product: "Pendientes de cerezas", type: "Cristal Bohemio", price: "$12.50", status: "Completado" },
     { product: "Aretes Margaritas", type: "Esencias Ligeras", price: "$89", status: "Pendiente" },
     { product: "Collar de corazón delicado", type: "Esencias Ligeras", price: "$21", status: "Completado" },
     { product: "Pulsera roccocó aqua", type: "Perlas Roccocó", price: "$75", status: "Procesando" }
   ]
-  // Datos para gráficos
+  // Datos para el gráfico de barras (ventas mensuales)
   const monthlyData = {
     labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
     datasets: [
@@ -91,6 +96,7 @@ const Dashboard = () => {
       }
     ]
   }
+  // Datos para el gráfico de pie (ventas por tipo)
   const typeData = {
     labels: ['Cristal Bohemio', 'Perlas Roccocó', 'Esencias Ligeras'],
     datasets: [
@@ -115,6 +121,7 @@ const Dashboard = () => {
       }
     ]
   }
+  // Datos para el gráfico de línea (tendencia semanal)
   const trendData = {
     labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4', 'Sem 5', 'Sem 6'],
     datasets: [
@@ -133,6 +140,7 @@ const Dashboard = () => {
       }
     ]
   }
+  // Opciones para el gráfico de barras
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -169,6 +177,7 @@ const Dashboard = () => {
       }
     }
   }
+  // Opciones para el gráfico de pie
   const pieOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -192,6 +201,7 @@ const Dashboard = () => {
       }
     }
   }
+  // Opciones para el gráfico de línea
   const lineOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -228,6 +238,7 @@ const Dashboard = () => {
       }
     }
   }
+  // useEffect para inicializar y limpiar los gráficos al montar/desmontar el componente
   useEffect(() => {
     // Limpiar graficos existentes
     if (barChartRef.current) {
@@ -267,7 +278,7 @@ const Dashboard = () => {
         options: lineOptions
       })
     }
-    // Cleanup function
+    // Cleanup function para destruir los gráficos al desmontar
     return () => {
       if (barChartRef.current) {
         barChartRef.current.destroy()

@@ -7,12 +7,14 @@ import Logo from '../assets/logo.png'
 import { ChevronLeft } from 'lucide-react'
 
 const VerifyCode = () => {
+  // Estado para el código, loading y tiempo restante
   const [code, setCode] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [timeLeft, setTimeLeft] = useState(20 * 60) // 20 minutos en segundos
   const navigate = useNavigate()
   const location = useLocation()
   const email = location.state?.email
+
   // Redirigir si no hay email
   useEffect(() => {
     if (!email) {
@@ -20,22 +22,26 @@ const VerifyCode = () => {
     }
   }, [email, navigate])
 
-  // Contador de tiempo
+  // Contador de tiempo para expirar el código
   useEffect(() => {
     if (timeLeft > 0) {
       const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000)
       return () => clearTimeout(timer)
     }
   }, [timeLeft])
-  // Formatear tiempo restante
+
+  // Formatea el tiempo restante en minutos:segundos
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60)
     const remainingSeconds = seconds % 60
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
   }
+
+  // Maneja el envío del formulario para verificar el código
   const handleSubmit = async (e) => {
     e.preventDefault() 
     
+    // Validaciones del código
     if (!code) {
       toast.error('Por favor ingresa el código')
       return
@@ -46,6 +52,7 @@ const VerifyCode = () => {
     }
     setIsLoading(true)
     try {
+      // Petición para verificar el código
       const response = await fetch('http://localhost:4000/api/recoveryPassword/verifyCode', {
         method: 'POST',
         headers: {
@@ -56,6 +63,7 @@ const VerifyCode = () => {
       })
       const data = await response.json()
       
+      // Si fue exitoso, muestra mensaje y navega a reset password
       if (response.ok) {
         toast.success('Código verificado correctamente')
         navigate('/reset-password', { state: { email } })
@@ -69,6 +77,8 @@ const VerifyCode = () => {
       setIsLoading(false)
     }
   }
+
+  // Maneja el reenvío del código
   const handleResendCode = async () => {
     setIsLoading(true)
     try {
@@ -82,6 +92,7 @@ const VerifyCode = () => {
       })
       const data = await response.json()
 
+      // Si fue exitoso, reinicia contador y limpia código
       if (response.ok) {
         toast.success('Nuevo código enviado')
         setTimeLeft(20 * 60) // Reiniciar contador
@@ -96,6 +107,8 @@ const VerifyCode = () => {
       setIsLoading(false)
     }
   }
+
+  // Render principal
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
       {/* Sección Izquierda - Branding */}
@@ -123,13 +136,13 @@ const VerifyCode = () => {
               Atrás
             </button>
           </div>
-          {/* Content */}
+          {/* Content principal */}
           <div className="mb-10 lg:mb-12">
-            {/* Title */}
+            {/* Título */}
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-[Quicksand] font-bold mb-3 lg:mb-4" style={{ color: '#3D1609' }}>
               Verificar código
             </h2>
-            {/* Subtitle */}
+            {/* Subtítulo */}
             <h3 className="text-lg sm:text-xl lg:text-2xl font-[Quicksand] font-medium mb-6" style={{ color: '#A73249' }}>
               Código de verificación
             </h3>
@@ -153,7 +166,7 @@ const VerifyCode = () => {
                 </p>
               </div>
             </div>
-            {/* Form */}
+            {/* Formulario para ingresar el código */}
             <form onSubmit={handleSubmit} className="space-y-6">
               <TextInput
                 text="Código de verificación:"
@@ -166,7 +179,7 @@ const VerifyCode = () => {
               />
             </form>
           </div>
-          {/* Submit Button */}
+          {/* Botón para verificar el código */}
           <button
             onClick={handleSubmit}
             disabled={isLoading || timeLeft === 0}
@@ -178,7 +191,7 @@ const VerifyCode = () => {
           >
             {isLoading ? 'Verificando...' : 'Verificar código'}
           </button>
-          {/* Resend Code */}
+          {/* Opción para reenviar el código */}
           <div className="text-center">
             <p className="text-sm font-[Quicksand] mb-2" style={{ color: '#3D1609' }}>
               ¿No recibiste el código?
@@ -203,4 +216,6 @@ const VerifyCode = () => {
     </div>
   );
 };
+
+// Exporta el componente para su uso en rutas
 export default VerifyCode

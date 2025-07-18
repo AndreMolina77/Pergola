@@ -1,12 +1,16 @@
 import { AlertTriangle, Trash2, X } from 'lucide-react'
 import BaseModal from './BaseModal'
 
-const ConfirmModal = ({isOpen, onClose, onConfirm, 
-  title = "Confirmar acción",
-  message = "¿Estás seguro de que quieres realizar esta acción?",
-  confirmText = "Confirmar", cancelText = "Cancelar", type = "danger", // Puede ser danger, warning, info
-  isLoading = false, icon: CustomIcon
+const ConfirmModal = ({ isOpen, onClose, onConfirm,
+  title = "Confirmar acción",                // Título del modal
+  message = "¿Estás seguro de que quieres realizar esta acción?", // Mensaje principal
+  confirmText = "Confirmar",                 // Texto del botón de confirmar
+  cancelText = "Cancelar",                   // Texto del botón de cancelar
+  type = "danger",                           // Tipo de acción (danger, warning, info)
+  isLoading = false,                         // Estado de carga
+  icon: CustomIcon                           // Icono personalizado
 }) => {
+  // Devuelve estilos según el tipo de acción
   const getTypeStyles = () => {
     switch (type) {
       case 'danger':
@@ -39,15 +43,18 @@ const ConfirmModal = ({isOpen, onClose, onConfirm,
         }
     }
   }
+  // Obtiene los estilos y el icono correspondiente
   const styles = getTypeStyles()
   const IconComponent = CustomIcon || styles.defaultIcon
 
+  // Maneja la confirmación de la acción
   const handleConfirm = async () => {
     if (onConfirm) {
       await onConfirm()
     }
   }
   return (
+    // Usa el modal base para mostrar el contenido
     <BaseModal isOpen={isOpen} onClose={onClose} maxWidth="md">
       <div className="p-6 font-[Quicksand]">
         {/* Header con icono */}
@@ -83,4 +90,5 @@ const ConfirmModal = ({isOpen, onClose, onConfirm,
     </BaseModal>
   )
 }
+
 export default ConfirmModal

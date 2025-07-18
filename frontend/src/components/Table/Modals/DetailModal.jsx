@@ -1,8 +1,12 @@
+// Importa iconos y el modal base
 import { Package, Tag, DollarSign, Star, Hash, FileText, Eye, Image, Layers, Building, Boxes, MessageSquare, CheckCircle, XCircle, Gem, Archive, Palette, Calendar, User, Mail, Phone, MapPin, Ruler, Paintbrush, Link } from 'lucide-react'
 import BaseModal from './BaseModal'
 
+// Componente modal para mostrar detalles de un elemento
 const DetailModal = ({ isOpen, onClose, data, title = "Detalles", type = "generic" }) => {
+  // Si no hay datos, no renderiza nada
   if (!data) return null
+
   // Función para formatear fechas
   const formatDate = (dateString) => {
     if (!dateString) return '-'
@@ -101,7 +105,7 @@ const DetailModal = ({ isOpen, onClose, data, title = "Detalles", type = "generi
     }
     return iconMap[fieldKey] || iconMap.default
   }
-  // Función para obtener configuración específica por tipo
+  // Configuración de campos según el tipo de elemento
   const getTypeConfig = () => {
     switch (type) {
       case 'products':
@@ -227,6 +231,7 @@ const DetailModal = ({ isOpen, onClose, data, title = "Detalles", type = "generi
           ]
         }
       default:
+        // Si no hay tipo específico, muestra todos los campos como texto
         return {
           fields: Object.keys(data).map(key => ({
             key,
@@ -236,7 +241,7 @@ const DetailModal = ({ isOpen, onClose, data, title = "Detalles", type = "generi
         }
     }
   }
-  // Función para renderizar el valor según su tipo
+  // Renderiza el valor según el tipo de campo
   const renderFieldValue = (field, value) => {
     if (value === null || value === undefined || value === '') {
       return <span className="text-gray-500 italic">No especificado</span>
@@ -258,6 +263,7 @@ const DetailModal = ({ isOpen, onClose, data, title = "Detalles", type = "generi
           </a>
         )
       case 'badge':
+        // Muestra un badge de color según el valor
         const badgeValue = value?.toString()?.toLowerCase() || 'unknown'
         const badgeColors = {
           true: 'bg-green-100 text-green-800 border-green-200',
@@ -281,6 +287,7 @@ const DetailModal = ({ isOpen, onClose, data, title = "Detalles", type = "generi
           </span>
         )
       case 'reference':
+        // Muestra información de referencia si es objeto
         if (typeof value === 'object' && value) {
           const displayName = value.name || value.contactPerson || value._id?.slice(-6) || 'Sin nombre'
           return (
@@ -294,6 +301,7 @@ const DetailModal = ({ isOpen, onClose, data, title = "Detalles", type = "generi
         }
         return <span className="text-gray-500 italic">Referencia no encontrada</span>
       case 'array':
+        // Muestra lista de elementos si es array
         if (Array.isArray(value) && value.length > 0) {
           return (
             <div className="space-y-2">
@@ -312,6 +320,7 @@ const DetailModal = ({ isOpen, onClose, data, title = "Detalles", type = "generi
         }
         return <span className="text-gray-500 italic">Sin elementos</span>
       case 'rating':
+        // Muestra estrellas según la calificación
         const rating = Number(value) || 0
         return (
           <div className="flex items-center gap-2">
@@ -329,6 +338,7 @@ const DetailModal = ({ isOpen, onClose, data, title = "Detalles", type = "generi
           </div>
         )
       case 'image':
+        // Muestra imagen si existe
         if (value && typeof value === 'string') {
           return (
             <div className="mt-2">
@@ -338,6 +348,7 @@ const DetailModal = ({ isOpen, onClose, data, title = "Detalles", type = "generi
         }
         return <span className="text-gray-500 italic">Sin imagen</span>
       case 'imageArray':
+        // Muestra galería de imágenes si es array
         if (Array.isArray(value) && value.length > 0) {
           return (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2">
@@ -349,15 +360,18 @@ const DetailModal = ({ isOpen, onClose, data, title = "Detalles", type = "generi
         }
         return <span className="text-gray-500 italic">Sin imágenes</span>
       default:
+        // Por defecto muestra el valor como texto
         return <span className="text-gray-700">{value?.toString() || '-'}</span>
     }
   }
+  // Obtiene la configuración de campos
   const config = getTypeConfig()
 
   return (
+    // Usa el modal base para mostrar los detalles
     <BaseModal isOpen={isOpen} onClose={onClose} title={title} size="lg">
       <div className="p-6">
-        {/* ID del elemento */}
+        {/* Muestra el ID si existe */}
         {data._id && (
           <div className="mb-6 p-4 bg-[#E8E1D8] rounded-lg border-2 border-[#A73249]/20">
             <div className="flex items-center gap-2 text-sm text-[#3D1609]">
@@ -369,12 +383,12 @@ const DetailModal = ({ isOpen, onClose, data, title = "Detalles", type = "generi
             </div>
           </div>
         )}
-        {/* Campos de información */}
+        {/* Muestra los campos configurados */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {config.fields.map((field) => {
             const value = data[field.key]
             const IconComponent = getFieldIcon(field.key)
-            // No mostrar campos vacíos o de sistema en algunos casos
+            // No mostrar campos de sistema
             if (field.key === '_id' || field.key === '__v') return null
             return (
               <div key={field.key} className={field.type === 'imageArray' || field.type === 'array' || (field.type === 'text' && field.key === 'description') ? 'md:col-span-2' : ''}>
@@ -397,4 +411,5 @@ const DetailModal = ({ isOpen, onClose, data, title = "Detalles", type = "generi
     </BaseModal>
   )
 }
+// Exporta el componente para su uso en otras partes
 export default DetailModal

@@ -11,31 +11,37 @@ const useDataCollections = () => {
   const fetchCollections = async () => {
     try {
       const response = await fetch(API, { credentials: "include" })
+      // Si el usuario no tiene permisos, muestra mensaje y vacía datos
       if (response.status === 403) { // sin permisos
         console.log("⚠️ Sin permisos para colecciones")
         setCollections([])
         setLoading(false)
         return
       }
+      // Si hay error en la respuesta, lanza excepción
       if (!response.ok) throw new Error("Hubo un error al obtener las colecciones")
+      // Si todo bien, guarda los datos
       const data = await response.json()
       setCollections(data)
       setLoading(false)
     } catch (error) {
       console.error("Error al obtener colecciones:", error)
+      // Solo muestra toast si no es error de permisos
       if (!error.message.includes("403")) toast.error("Error al cargar colecciones")
       setLoading(false)
     }
   }
 
+  // Ejecuta la carga inicial al montar el componente
   useEffect(() => {
     fetchCollections() // carga inicial al montar
   }, [])
 
-  // Handlers para CRUD
+  // Handlers para CRUD (agregar, editar, eliminar)
   const createHandlers = (API) => ({
     data: collections,
     loading,
+    // Handler para agregar colección
     onAdd: async (data) => {
       try {
         let body
@@ -49,6 +55,7 @@ const useDataCollections = () => {
           headers["Content-Type"] = "application/json"
           body = JSON.stringify(data)
         }
+        // Realiza la petición POST
         const response = await fetch(`${API}/collections`, {
           method: "POST",
           headers,
@@ -67,6 +74,7 @@ const useDataCollections = () => {
         throw error
       }
     },
+    // Handler para editar colección
     onEdit: async (id, data) => {
       try {
         let body
@@ -80,6 +88,7 @@ const useDataCollections = () => {
           headers["Content-Type"] = "application/json"
           body = JSON.stringify(data)
         }
+        // Realiza la petición PUT
         const response = await fetch(`${API}/collections/${id}`, {
           method: "PUT",
           headers,
@@ -98,6 +107,7 @@ const useDataCollections = () => {
         throw error
       }
     },
+    // Handler para eliminar colección
     onDelete: deleteCollection // usa la función de borrar
   })
 
@@ -118,7 +128,7 @@ const useDataCollections = () => {
     }
   }
 
-  // Retorna estados y funciones
+  // Retorna estados y funciones para usar en componentes
   return {
     collections,
     loading,
@@ -128,4 +138,5 @@ const useDataCollections = () => {
   }
 }
 
+// Exporta el hook para su uso en otros componentes
 export default useDataCollections

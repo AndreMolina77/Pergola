@@ -15,20 +15,24 @@ const useDataReviews = () => {
       const response = await fetch(API, {
         credentials: "include" // Incluye cookies de sesión
       })
+      // Si el usuario no tiene permisos, vacía datos y termina
       if (response.status === 403) {
         console.log("⚠️ Sin permisos para reseñas - usuario no autorizado")
         setReviews([])
         setLoading(false)
         return
       }
+      // Si hay error en la respuesta, lanza excepción
       if (!response.ok) {
         throw new Error("Hubo un error al obtener las reseñas")
       }
+      // Si todo bien, guarda los datos
       const data = await response.json()
       setReviews(data)
       setLoading(false)
     } catch (error) {
       console.error("Error al obtener reseñas:", error)
+      // Solo muestra toast si no es error de permisos
       if (!error.message.includes("403") && !error.message.includes("sin permisos")) {
         toast.error("Error al cargar reseñas") // Muestra error si no es por permisos
       }

@@ -2,34 +2,38 @@ import { Search, Filter, RefreshCw, Plus } from 'lucide-react' // Importa Plus a
 import ActionButton from './Buttons/ActionButton'
 import ExportButton from './Buttons/ExportButton'
 
+// Componente para mostrar las acciones de la tabla (buscar, filtrar, añadir, exportar, refrescar)
 const TableActions = ({
-  // Configuración de acciones
+  // Configuración de acciones disponibles
   actions = { canAdd: true, canExport: true, canFilter: true, canRefresh: true },
-  // Callbacks
+  // Callbacks para cada acción
   onAdd, onExport, onFilter, onRefresh, onSearch,
-  // Estados
+  // Estados de carga y búsqueda
   isLoading = false, searchValue = "",
-  // Personalizacion
+  // Personalización de textos y título
   addButtonText = "Añadir", title = "",
-  // Props adicionales
+  // Acciones personalizadas y clases adicionales
   customActions = [], className = ""
 }) => {
+  // Maneja el cambio en el campo de búsqueda
   const handleSearchChange = (e) => {
     if (onSearch) {
       onSearch(e.target.value)
     }
   }
   return (
+    // Contenedor principal de acciones
     <div className={`bg-white rounded-lg border border-gray-200 p-4 mb-6 font-[Quicksand] ${className}`}>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         {/* Lado izquierdo - Titulo y búsqueda */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-4 flex-1">
+          {/* Muestra el título si existe */}
           {title && (
             <h2 className="text-xl font-bold text-[#3D1609]">
               {title}
             </h2>
           )}
-          {/* Campo de busqueda */}
+          {/* Campo de búsqueda si hay callback */}
           {onSearch && (
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#3D1609] w-4 h-4" />
@@ -37,7 +41,7 @@ const TableActions = ({
             </div>
           )}
         </div>
-        {/* Lado derecho - Botones de accion */}
+        {/* Lado derecho - Botones de acción */}
         <div className="flex flex-wrap items-center gap-3">
           {/* Acciones personalizadas */}
           {customActions.map((action, index) => (
@@ -45,21 +49,21 @@ const TableActions = ({
               {action.label}
             </ActionButton>
           ))}
-          {/* Boton de filtro */}
+          {/* Botón de filtro */}
           {actions.canFilter && onFilter && (
             <ActionButton variant="ghost" icon={Filter} onClick={onFilter} disabled={isLoading}>
               Filtrar
             </ActionButton>
           )}
-          {/* Boton de refrescar */}
+          {/* Botón de refrescar */}
           {actions.canRefresh && onRefresh && (
             <ActionButton variant="ghost" icon={RefreshCw} onClick={onRefresh} disabled={isLoading} size="icon"/>
           )}
-          {/* Boton de exportar */}
+          {/* Botón de exportar */}
           {actions.canExport && onExport && (
             <ExportButton onExport={onExport} disabled={isLoading}/>
           )}
-          {/* Boton de añadir */}
+          {/* Botón de añadir */}
           {actions.canAdd && onAdd && (
             <ActionButton variant="primary" icon={Plus} onClick={onAdd} disabled={isLoading}>
               {addButtonText}
@@ -67,9 +71,10 @@ const TableActions = ({
           )}
         </div>
       </div>
-      {/* Linea separadora sutil */}
+      {/* Línea separadora sutil */}
       <div className="mt-4 h-px bg-gradient-to-r from-transparent via-gray-500 to-transparent"></div>
     </div>
   )
 }
+// Exporta el componente para su uso en otras partes
 export default TableActions

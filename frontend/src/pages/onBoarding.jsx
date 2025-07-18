@@ -4,10 +4,13 @@ import Logo from '../assets/logo.png'
 import Pergola from '../assets/pergola.png'
 import { useNavigate } from 'react-router-dom';
 
+// Componente principal de Onboarding
 const PergolaOnboarding = () => {
+  // Estado para el paso actual del onboarding
   const [currentStep, setCurrentStep] = useState(0);
   const navigate = useNavigate();
 
+  // Pasos del onboarding, cada uno con icono, título, subtítulo y descripción
   const onboardingSteps = [
     {
       icon: <Crown size={80} className="mx-auto mb-6" style={{ color: '#A73249' }} />,
@@ -31,22 +34,29 @@ const PergolaOnboarding = () => {
       highlight: "🌟 Únete a nuestra familia"
     }
   ];
+
+  // Avanza al siguiente paso
   const nextStep = () => {
     if (currentStep < onboardingSteps.length - 1) {
       setCurrentStep(currentStep + 1);
     }
   };
+  // Retrocede al paso anterior
   const prevStep = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
     }
   };
+  // Salta al último paso
   const skipOnboarding = () => {
     setCurrentStep(onboardingSteps.length - 1);
   };
+  // Finaliza el onboarding y navega al registro
   const finishOnboarding = () => {
     navigate('/register')
   };
+
+  // Render principal
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
       {/* Sección Izquierda - Branding */}
@@ -56,9 +66,9 @@ const PergolaOnboarding = () => {
           <img src={Pergola} alt="P decorativa" className="w-8 h-auto sm:w-10 lg:w-12 opacity-60 object-contain"/>
         </div>
         <div className="text-center">
-          {/* Logo */}
+          {/* Logo principal */}
           <img src={Logo} alt="Pérgola Joyería Logo" className="mb-6 lg:mb-8 mx-auto max-w-full object-contain" style={{ width: 'min(320px, 90vw)', height: 'auto', maxHeight: '400px' }}/>
-          {/* Texto debajo de la imagen */}
+          {/* Frase de bienvenida */}
           <div className="max-w-sm mx-auto">
             <h3 className="text-lg sm:text-xl lg:text-2xl font-[Quicksand] font-semibold mb-1 sm:mb-2" style={{ color: '#A73249' }}>
               TU BELLEZA
@@ -71,7 +81,7 @@ const PergolaOnboarding = () => {
             </p>
           </div>
         </div>
-        {/* Indicadores de progreso */}
+        {/* Indicadores de progreso del onboarding */}
         <div className="absolute bottom-6 lg:bottom-12 flex space-x-3">
           {onboardingSteps.map((_, index) => (
             <div
@@ -86,10 +96,10 @@ const PergolaOnboarding = () => {
           ))}
         </div>
       </div>
-      {/* Sección Derecha - Onboarding Content */}
+      {/* Sección Derecha - Contenido del Onboarding */}
       <div className="w-full lg:w-3/5 flex flex-col justify-center items-center px-8 sm:px-12 lg:px-16 py-8 lg:py-0 relative" style={{ backgroundColor: '#E3C6B8' }}>
         <div className="w-full max-w-2xl text-center">
-          {/* Header */}
+          {/* Header con botón para saltar y contador de pasos */}
           <div className="flex justify-between items-center mb-10 lg:mb-12">
             <button
               onClick={skipOnboarding}
@@ -101,9 +111,10 @@ const PergolaOnboarding = () => {
               {currentStep + 1} de {onboardingSteps.length}
             </span>
           </div>
-          {/* Content */}
+          {/* Contenido principal del paso actual */}
           <div className="mb-10 lg:mb-12">
             <div className="mb-6 lg:mb-8 flex justify-center">
+              {/* Icono dinámico según el paso */}
               {React.cloneElement(onboardingSteps[currentStep].icon, {
                 size: window.innerWidth < 640 ? 65 : window.innerWidth < 1024 ? 75 : 85
               })}
@@ -127,7 +138,7 @@ const PergolaOnboarding = () => {
               {onboardingSteps[currentStep].highlight}
             </div>
           </div>
-          {/* Navigation */}
+          {/* Navegación entre pasos */}
           <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6">
             <button
               onClick={prevStep}
@@ -146,6 +157,7 @@ const PergolaOnboarding = () => {
               <ChevronLeft size={18} />
               <span>Anterior</span>
             </button>
+            {/* Botón para finalizar o avanzar */}
             {currentStep === onboardingSteps.length - 1 ? (
               <button
                 onClick={finishOnboarding}
@@ -177,4 +189,6 @@ const PergolaOnboarding = () => {
     </div>
   );
 };
-export default PergolaOnboarding
+
+// Exporta el componente para su uso en rutas
+export default PergolaOnboarding;

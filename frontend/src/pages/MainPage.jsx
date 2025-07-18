@@ -6,8 +6,8 @@ import Header from '../components/Dashboard/Header'
 import Dashboard from '../components/Dashboard/Dashboard'
 import TableContainer from '../components/Table/TableContainer'
 import SettingsPage from '../components/Settings/SettingsPage'
-import ProgressScreen from '../components/Misc/ProgressScreen'
-import { useConditionalData } from '../hooks/MainHook/useConditionalData.js'
+import ProgressScreen from '../components/Misc/ProgressScreen.jsx'
+import { useConditionalData } from '../hooks/mainHook/useConditionalData.js'
 // Importar configuraciones de tablas
 import { suppliersConfig, categoriesConfig, subcategoriesConfig, collectionsConfig, productsConfig, rawMaterialsConfig, reviewsConfig, customDesignsConfig} from '../data/TableConfigs.js'
 

@@ -7,13 +7,16 @@ import Logo from '../assets/logo.png'
 import { ChevronLeft } from 'lucide-react'
 
 const ForgotPassword = () => {
+  // Estado para el email y el estado de carga
   const [email, setEmail] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
 
+  // Maneja el envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault()
     
+    // Validaciones básicas de email
     if (!email) {
       toast.error('Por favor ingresa tu correo electrónico')
       return
@@ -25,6 +28,7 @@ const ForgotPassword = () => {
 
     setIsLoading(true)
     try {
+      // Realiza la petición para solicitar el código de recuperación
       const response = await fetch('http://localhost:4000/api/recoveryPassword/requestCode', {
         method: 'POST',
         headers: {
@@ -36,13 +40,16 @@ const ForgotPassword = () => {
       
       const data = await response.json()
       
+      // Si la petición fue exitosa, muestra mensaje y navega a la verificación
       if (response.ok) {
         toast.success('Código enviado a tu correo electrónico')
         navigate('/verify-code', { state: { email } })
       } else {
+        // Si hubo error, muestra mensaje de error
         toast.error(data.message || 'Error al enviar el código')
       }
     } catch (error) {
+      // Error de conexión
       console.error('Error:', error)
       toast.error('Error de conexión. Verifica tu internet.')
     } finally {
@@ -67,7 +74,7 @@ const ForgotPassword = () => {
       {/* Sección Derecha - Forgot Password Content */}
       <div className="w-full lg:w-3/5 flex flex-col justify-center items-center px-8 sm:px-12 lg:px-16 py-8 lg:py-0 relative" style={{ backgroundColor: '#E3C6B8' }}>
         <div className="w-full max-w-lg text-center">
-          {/* Header */}
+          {/* Header con botón para volver al login */}
           <div className="flex justify-between items-center mb-10 lg:mb-12">
             <button
               onClick={() => navigate('/login')}
@@ -79,23 +86,23 @@ const ForgotPassword = () => {
             </button>
           </div>
 
-          {/* Content */}
+          {/* Content principal */}
           <div className="mb-10 lg:mb-12">
-            {/* Title */}
+            {/* Título */}
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-[Quicksand] font-bold mb-3 lg:mb-4" style={{ color: '#3D1609' }}>
               ¿Olvidaste tu contraseña?
             </h2>
-            {/* Subtitle */}
+            {/* Subtítulo */}
             <h3 className="text-lg sm:text-xl lg:text-2xl font-[Quicksand] font-medium mb-8 lg:mb-10" style={{ color: '#A73249' }}>
               Recupera tu acceso
             </h3>
             
-            {/* Description */}
+            {/* Descripción */}
             <p className="text-base font-[Quicksand] mb-8 lg:mb-10" style={{ color: '#3D1609' }}>
               Ingresa tu correo electrónico y te enviaremos un código para restablecer tu contraseña
             </p>
 
-            {/* Form */}
+            {/* Formulario de email */}
             <form onSubmit={handleSubmit} className="space-y-6">
               <TextInput
                 text="Correo electrónico:"
@@ -109,7 +116,7 @@ const ForgotPassword = () => {
             </form>
           </div>
 
-          {/* Submit Button */}
+          {/* Botón para enviar el código */}
           <button
             onClick={handleSubmit}
             disabled={isLoading}
@@ -122,7 +129,7 @@ const ForgotPassword = () => {
             {isLoading ? 'Enviando código...' : 'Enviar código'}
           </button>
 
-          {/* Back to Login Link */}
+          {/* Enlace para volver al login si recuerda la contraseña */}
           <p className="text-center font-[Quicksand] text-sm" style={{ color: '#3D1609' }}>
             ¿Recordaste tu contraseña?{' '}
             <button 
