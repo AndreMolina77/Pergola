@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react"
 import { toast } from "react-hot-toast"
-
 // Hook personalizado para manejar reseñas, clientes y productos
 const useDataReviews = () => {
   const API = "http://localhost:4000/api/reviews"
@@ -142,7 +141,6 @@ const useDataReviews = () => {
       toast.error("Error al eliminar reseña")
     }
   }
-
   // Devuelve funciones y datos para usar en el componente
   return {
     reviews,

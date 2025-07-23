@@ -24,6 +24,7 @@ const reviewsSchema = new Schema({
     },
     comment: {
         type: String,
+        required: [true, "El comentario es obligatorio"],
         trim: true,
         minlength: [10, "El comentario debe tener al menos 10 caracteres"],
         maxlength: [500, "El comentario no puede exceder los 500 caracteres"],
@@ -37,7 +38,13 @@ const reviewsSchema = new Schema({
         trim: true,
         maxlength: [500, "La respuesta no puede exceder los 500 caracteres"],
         validate: {
-            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
+            validator: function(v) {
+                // Solo validar si se proporciona un valor
+                if (v === undefined || v === null || v === '') {
+                    return true; // Permitir valores vacíos/nulos
+                }
+                return v.trim() !== ''; // Si se proporciona, no debe ser una cadena vacía
+            },
             message: "La respuesta no puede estar vacía"
         }
     }
