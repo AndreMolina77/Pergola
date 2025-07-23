@@ -234,9 +234,9 @@ export const reviewsConfig = {
   formFields: [
     { name: 'rating', type: 'number', label: 'Calificación (1-5)', required: true, min: 1, max: 5, step: 1, validate: { validator: Number.isInteger, message: "La calificación debe ser un número entero" } },
     { name: 'comment', type: 'textarea', label: 'Comentario', required: true, placeholder: 'Escribe un comentario (mínimo 10 caracteres)...', rows: 4, minlength: 10, maxlength: 500 },
-    { key: 'product', type: 'select', label: 'Producto', required: true, options: 'products' },
-    { key: 'customer', type: 'select', label: 'Cliente', required: true, options: 'customers' },
-    { key: 'response', type: 'textarea', label: 'Respuesta', required: false, placeholder: 'Escribe una respuesta...', rows: 4, maxlength: 50 }
+    { name: 'product', type: 'select', label: 'Producto', required: true, options: 'products' },
+    { name: 'customer', type: 'select', label: 'Cliente', required: true, options: 'customers' },
+    { name: 'response', type: 'textarea', label: 'Respuesta', required: false, placeholder: 'Escribe una respuesta...', rows: 4, maxlength: 500 }
   ]
 }
 // Configuración para diseños únicos

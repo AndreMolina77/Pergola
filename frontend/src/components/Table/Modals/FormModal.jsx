@@ -1,21 +1,36 @@
 import { useForm } from 'react-hook-form'
 import BaseModal from './BaseModal'
 import { Save, X, Upload, Eye, EyeOff, Image, Trash2 } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 
 const FormModal = ({isOpen, onClose, onSubmit, title, fields, initialData = {}, isLoading = false, submitButtonText = 'Guardar'}) => {
   const [showPasswords, setShowPasswords] = useState({})
   const [imagePreviews, setImagePreviews] = useState({})
   const [imageArrays, setImageArrays] = useState({})
   const [selectedFiles, setSelectedFiles] = useState({})
+  const isInitialized = useRef(false)
   // Configurar react-hook-form
   const { register, handleSubmit, formState: { errors }, reset, watch, setValue } = useForm({
     mode: 'onChange', // Validar en tiempo real
     defaultValues: {}
   })
+  // Función para limpiar states}}
+  const clearStates = useCallback(() => {
+    setShowPasswords({})
+    setImagePreviews({})
+    setImageArrays({})
+    setSelectedFiles({})
+  }, [])
+  // Efecto para reset cuando se cierra el modal
+  useEffect(() => {
+    if (!isOpen) {
+      clearStates()
+      isInitialized.current = false
+    }
+  }, [isOpen, clearStates])
   // Inicializar formulario cuando se abre el modal
   useEffect(() => {
-    if (isOpen && fields) {
+    if (isOpen && fields && !isInitialized.current) {
       const defaultValues = {}
       fields.forEach(field => {
         const initialValue = initialData[field.name]
@@ -38,17 +53,10 @@ const FormModal = ({isOpen, onClose, onSubmit, title, fields, initialData = {}, 
         }
       })
       reset(defaultValues)
-      setShowPasswords({})
-      setImagePreviews({})
-      setImageArrays({})
-      setSelectedFiles({})
+      clearStates()
+      isInitialized.current = true
     }
-  }, [isOpen, fields, initialData, reset]) // Solo depende de isOpen
-  // Limpiar previews cuando se cierra el modal
-  if (!isOpen) {
-    setImagePreviews({})
-    setImageArrays({})
-  }
+  }, [isOpen, fields, initialData, reset, clearStates])
   // Manejar envio del formulario
   const onFormSubmit = (data) => {
     onSubmit(data)
@@ -156,7 +164,7 @@ const FormModal = ({isOpen, onClose, onSubmit, title, fields, initialData = {}, 
     const hasError = errors[field.name]
     const validation = getValidationRules(field)
 
-    const baseInputClasses = `w-full px-3 py-2 border rounded-lg font-[Quicksand] transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#A73249] ${
+    const baseInputClasses = `w-full px-3 py-2 border rounded-lg font-[Quicksand] transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#A73249] text-[#3D1609] ${
       hasError 
         ? 'border-red-300 bg-red-50 focus:border-red-500' 
         : 'border-gray-300 bg-white focus:border-[#A73249]'
@@ -176,7 +184,7 @@ const FormModal = ({isOpen, onClose, onSubmit, title, fields, initialData = {}, 
         return (
           <select {...register(field.name, validation)} className={baseInputClasses} disabled={isLoading}>
             <option value="">Seleccionar {field.label}</option>
-            {selectOptions.map(option => (
+            {selectOptions.map((option, index) => (
               <option key={`${field.name}-option-${option.value}-${index}`} value={option.value}>
                 {option.label}
               </option>
@@ -192,7 +200,7 @@ const FormModal = ({isOpen, onClose, onSubmit, title, fields, initialData = {}, 
         return (
           <div className="space-y-2">
             <select {...register(field.name, validation)} multiple size={Math.min(multiSelectOptions.length + 1, 6)} className={`${baseInputClasses} h-auto min-h-[120px]`} disabled={isLoading}>
-              {multiSelectOptions.map(option => (
+              {multiSelectOptions.map((option, index) => (
                 <option key={`${field.name}-multi-option-${option.value}-${index}`} value={option.value}>
                   {option.label}
                 </option>
@@ -287,10 +295,10 @@ const FormModal = ({isOpen, onClose, onSubmit, title, fields, initialData = {}, 
         )
     }
   }
-  // Procesar datos antes de enviar (para archivos)
+  // Procesar datos antes de enviar (para imágenes)
   const processFormData = (data) => {
     const processedData = { ...data }
-    // Procesar archivos e imágenes
+    // Procesar imágenes
     fields.forEach(field => {
       if (field.type === 'image') {
         // Usar el archivo del estado separado
@@ -309,6 +317,10 @@ const FormModal = ({isOpen, onClose, onSubmit, title, fields, initialData = {}, 
       }
     })
     return processedData  
+  }
+  // Validar si hay campos
+  if (!fields) {
+    return null
   }
   return (
     <BaseModal isOpen={isOpen} onClose={onClose} title={title} size="lg">

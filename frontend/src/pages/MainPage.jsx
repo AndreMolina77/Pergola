@@ -69,11 +69,31 @@ const MainPage = () => {
         return <Dashboard/>
       case 'search':
         return <ProgressScreen/>
+      case 'employees':
+        return <ProgressScreen/>
+      case 'customers':
+        return <ProgressScreen/>
       case 'products':
         return (
           <div className="p-6 bg-white min-h-screen">
             <div className="max-w-7xl mx-auto">
               <TableContainer config={productsConfig} {...productsData.createHandlers(API)} onExport={handleDataExport} categoriesData={categoriesData} subcategoriesData={subcategoriesData} collectionsData={collectionsData} rawMaterialsData={rawmaterialsData}/>
+            </div>
+          </div>
+        )
+      case 'rawmaterials':
+        return (
+          <div className="p-6 bg-white min-h-screen">
+            <div className="max-w-7xl mx-auto">
+              <TableContainer config={rawMaterialsConfig} {...rawmaterialsData.createHandlers(API)} onExport={handleDataExport} suppliersData={suppliersData}/>
+            </div>
+          </div>
+        )
+      case 'collections':
+        return (
+          <div className="p-6 bg-white min-h-screen">
+            <div className="max-w-7xl mx-auto">
+              <TableContainer config={collectionsConfig} {...collectionsData.createHandlers(API)} onExport={handleDataExport}/>
             </div>
           </div>
         )
@@ -93,11 +113,21 @@ const MainPage = () => {
             </div>
           </div>
         )
-      case 'collections':
+      case 'orders':
+        return <ProgressScreen/>
+      case 'customdesigns':
         return (
           <div className="p-6 bg-white min-h-screen">
             <div className="max-w-7xl mx-auto">
-              <TableContainer config={collectionsConfig} {...collectionsData.createHandlers(API)} onExport={handleDataExport}/>
+              <TableContainer config={customDesignsConfig} {...customDesignsData.createHandlers(API)} onExport={handleDataExport}/>
+            </div>
+          </div>
+        )
+      case 'reviews':
+        return (
+          <div className="p-6 bg-white min-h-screen">
+            <div className="max-w-7xl mx-auto">
+              <TableContainer config={reviewsConfig} {...reviewsData.createHandlers(API)} onExport={handleDataExport} customersData={{customers: reviewsData.customers || []}} productsData={{products: reviewsData.products || []}}/>
             </div>
           </div>
         )
@@ -109,30 +139,10 @@ const MainPage = () => {
             </div>
           </div>
         )
-      case 'rawmaterials':
-        return (
-          <div className="p-6 bg-white min-h-screen">
-            <div className="max-w-7xl mx-auto">
-              <TableContainer config={rawMaterialsConfig} {...rawmaterialsData.createHandlers(API)} onExport={handleDataExport} suppliersData={suppliersData}/>
-            </div>
-          </div>
-        )
-      case 'reviews':
-        return (
-          <div className="p-6 bg-white min-h-screen">
-            <div className="max-w-7xl mx-auto">
-              <TableContainer config={reviewsConfig} {...reviewsData.createHandlers(API)} onExport={handleDataExport} customersData={customersData} productsData={productsData}/>
-            </div>
-          </div>
-        )
-      case 'customdesigns':
-        return (
-          <div className="p-6 bg-white min-h-screen">
-            <div className="max-w-7xl mx-auto">
-              <TableContainer config={customDesignsConfig} {...customDesignsData.createHandlers(API)} onExport={handleDataExport}/>
-            </div>
-          </div>
-        )
+      case 'refunds':
+        return <ProgressScreen/>
+      case 'transactions':
+        return <ProgressScreen/>
       case 'settings':
         return <SettingsPage/>
       default: 

@@ -35,7 +35,6 @@ const useDataReviews = () => {
       setLoading(false)
     }
   }
-
   // Obtener clientes desde el servidor
   const fetchCustomers = async () => {
     try {
@@ -51,7 +50,6 @@ const useDataReviews = () => {
       console.error("Error al obtener clientes:", error)
     }
   }
-
   // Obtener productos desde el servidor
   const fetchProducts = async () => {
     try {
@@ -67,14 +65,12 @@ const useDataReviews = () => {
       console.error("Error al obtener productos:", error)
     }
   }
-
   // Llama a las funciones cuando el componente se monta
   useEffect(() => {
     fetchReviews()
     fetchCustomers()
     fetchProducts()
   }, [])
-
   // Funciones para agregar, editar y borrar reseñas
   const createHandlers = (API) => ({
     data: reviews, // Devuelve las reseñas
@@ -101,7 +97,6 @@ const useDataReviews = () => {
         throw error
       }
     },
-
     // Edita una reseña existente
     onEdit: async (id, data) => {
       try {
