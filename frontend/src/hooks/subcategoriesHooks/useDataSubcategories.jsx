@@ -11,23 +11,28 @@ const useDataSubcategories = () => {
   const fetchSubcategories = async () => {
     try {
       const response = await fetch(API, { credentials: "include" })
+      // Si el usuario no tiene permisos, vacía datos y termina
       if (response.status === 403) { // sin permisos
         console.log("⚠️ Sin permisos para subcategorías")
         setSubcategories([])
         setLoading(false)
         return
       }
+      // Si hay error en la respuesta, lanza excepción
       if (!response.ok) throw new Error("Hubo un error al obtener las subcategorías")
+      // Si todo bien, guarda los datos
       const data = await response.json()
       setSubcategories(data)
       setLoading(false)
     } catch (error) {
       console.error("Error al obtener subcategorías:", error)
+      // Solo muestra toast si no es error de permisos
       if (!error.message.includes("403")) toast.error("Error al cargar subcategorías")
       setLoading(false)
     }
   }
 
+  // Ejecuta la carga inicial al montar el componente
   useEffect(() => {
     fetchSubcategories() // carga inicial al montar
   }, [])
@@ -36,6 +41,7 @@ const useDataSubcategories = () => {
   const createHandlers = (API) => ({
     data: subcategories,
     loading,
+    // Handler para agregar subcategoría
     onAdd: async (data) => {
       try {
         let body
@@ -67,6 +73,7 @@ const useDataSubcategories = () => {
         throw error
       }
     },
+    // Handler para editar subcategoría
     onEdit: async (id, data) => {
       try {
         let body
@@ -98,6 +105,7 @@ const useDataSubcategories = () => {
         throw error
       }
     },
+    // Handler para eliminar subcategoría
     onDelete: deleteSubcategory // usa la función de borrar
   })
 
@@ -128,4 +136,5 @@ const useDataSubcategories = () => {
   }
 }
 
+// Exporta el hook para su uso en otros componentes
 export default useDataSubcategories

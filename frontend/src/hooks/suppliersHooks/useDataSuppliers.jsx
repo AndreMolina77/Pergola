@@ -121,6 +121,7 @@ const useDataSuppliers = () => {
         credentials: "include"
       })
 
+      // Si la respuesta no fue exitosa, lanzar error
       if (!response.ok) {
         throw new Error("Hubo un error al eliminar el proveedor")
       }

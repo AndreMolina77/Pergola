@@ -248,4 +248,5 @@ const useDataProducts = () => {
   }
 }
 
+// Exporta el hook para su uso en otros componentes
 export default useDataProducts

@@ -2,15 +2,19 @@ import { createContext, useState, useEffect } from "react"
 const API = "http://localhost:4000/api"
 const AuthContext = createContext()
 
+// Proveedor de contexto de autenticación
 export const AuthProvider = ({ children }) => {
+  // Estados para usuario, cookie de autenticación y carga
   const [user, setUser] = useState(null)
   const [authCookie, setAuthCookie] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
 
+  // Función para iniciar sesión
   const Login = async (email, password, rememberMe = false) => {
     try {
       console.log("🔄 Iniciando login...", { email })
       
+      // Llama al endpoint de login
       const response = await fetch(`${API}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -27,7 +31,7 @@ export const AuthProvider = ({ children }) => {
 
       console.log("✅ Login exitoso, obteniendo info del usuario...")
       
-      // Obtener información del usuario validando el token
+      // Valida el token y obtiene info básica del usuario
       const userInfoResponse = await fetch(`${API}/validateAuthToken`, {
         method: "POST",
         credentials: "include",
@@ -94,7 +98,7 @@ export const AuthProvider = ({ children }) => {
         console.log("❌ Error obteniendo datos completos en login:", error)
       }
 
-      // Guardar en localStorage
+      // Guardar usuario en localStorage
       localStorage.setItem("user", JSON.stringify(userData))
       
       // Actualizar estado
@@ -109,9 +113,11 @@ export const AuthProvider = ({ children }) => {
       return { success: false, message: error.message }
     }
   }
+
+  // Función para cerrar sesión
   const logout = async () => {
     try {
-      // Llamar al endpoint de logout en el backend para limpiar la cookie
+      // Llama al endpoint de logout para limpiar la cookie
       await fetch(`${API}/logout`, {
         method: "POST",
         credentials: "include", // Para incluir cookies en la petición
@@ -120,14 +126,15 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error("❌ Error durante el logout:", error)
     } finally {
-      // Limpiar datos locales independientemente de si la petición al servidor tuvo éxito
+      // Limpiar datos locales
       localStorage.removeItem("user")
       setAuthCookie(null)
       setUser(null)
       console.log("🧹 Datos locales limpiados")
     }
   }
-  // Verificar autenticacion al cargar la aplicación
+
+  // Verifica autenticación al cargar la aplicación
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -223,12 +230,14 @@ export const AuthProvider = ({ children }) => {
       }
     }
     checkAuth()
-  }, []) // Array vacio - solo ejecutar una vez al montar
+  }, []) // Solo ejecutar una vez al montar
+
+  // Provee el contexto a los componentes hijos
   return (
     <AuthContext.Provider value={{ user, Login,  logout, authCookie, setAuthCookie, setUser, API, isLoading }}>
       {children}
     </AuthContext.Provider>
   )
 }
-// Export el contexto para poder usarlo en el hook
+// Exporta el contexto para poder usarlo en el hook
 export { AuthContext }

@@ -1,34 +1,22 @@
+// Importa react-hook-form y componentes necesarios
 import { useForm } from 'react-hook-form'
 import BaseModal from './BaseModal'
 import { Save, X, Upload, Eye, EyeOff, Image, Trash2 } from 'lucide-react'
 import { useState, useEffect, useRef, useCallback } from 'react'
 
+// Componente modal para formularios dinámicos
 const FormModal = ({isOpen, onClose, onSubmit, title, fields, initialData = {}, isLoading = false, submitButtonText = 'Guardar'}) => {
+  // Estados para mostrar/ocultar contraseñas, previews de imágenes y archivos seleccionados
   const [showPasswords, setShowPasswords] = useState({})
   const [imagePreviews, setImagePreviews] = useState({})
   const [imageArrays, setImageArrays] = useState({})
   const [selectedFiles, setSelectedFiles] = useState({})
-  const isInitialized = useRef(false)
-  // Configurar react-hook-form
+  // Configura react-hook-form
   const { register, handleSubmit, formState: { errors }, reset, watch, setValue } = useForm({
     mode: 'onChange', // Validar en tiempo real
     defaultValues: {}
   })
-  // Función para limpiar states}}
-  const clearStates = useCallback(() => {
-    setShowPasswords({})
-    setImagePreviews({})
-    setImageArrays({})
-    setSelectedFiles({})
-  }, [])
-  // Efecto para reset cuando se cierra el modal
-  useEffect(() => {
-    if (!isOpen) {
-      clearStates()
-      isInitialized.current = false
-    }
-  }, [isOpen, clearStates])
-  // Inicializar formulario cuando se abre el modal
+  // Inicializa el formulario cuando se abre el modal
   useEffect(() => {
     if (isOpen && fields && !isInitialized.current) {
       const defaultValues = {}
@@ -56,12 +44,17 @@ const FormModal = ({isOpen, onClose, onSubmit, title, fields, initialData = {}, 
       clearStates()
       isInitialized.current = true
     }
-  }, [isOpen, fields, initialData, reset, clearStates])
-  // Manejar envio del formulario
+  }, [isOpen, fields, initialData, reset]) // Solo depende de isOpen
+  // Limpiar previews cuando se cierra el modal
+  if (!isOpen) {
+    setImagePreviews({})
+    setImageArrays({})
+  }
+  // Maneja el envío del formulario
   const onFormSubmit = (data) => {
     onSubmit(data)
   }
-  // Obtener reglas de validacion para cada campo
+  // Obtiene reglas de validación para cada campo
   const getValidationRules = (field) => {
     const rules = {}
     if (field.required && field.type !== 'checkbox') {
@@ -78,7 +71,7 @@ const FormModal = ({isOpen, onClose, onSubmit, title, fields, initialData = {}, 
         value: /^\d{8,}$/,
         message: 'Teléfono debe tener al menos 8 dígitos'
       }
-      rules.setValueAs = (value) => value.replace(/\D/g, '') // Limpiar caracteres no numericos
+      rules.setValueAs = (value) => value.replace(/\D/g, '') // Limpiar caracteres no numéricos
     }
     if (field.type === 'number') {
       rules.min = {
@@ -107,7 +100,7 @@ const FormModal = ({isOpen, onClose, onSubmit, title, fields, initialData = {}, 
     }
     return rules
   }
-  // Funcion para manejar preview de imágenes
+  // Maneja el preview de imágenes
   const handleImagePreview = (fieldName, files, isArray = false) => {
       if (!files || files.length === 0) {
       setImagePreviews(prev => ({ ...prev, [fieldName]: null }))
@@ -119,7 +112,6 @@ const FormModal = ({isOpen, onClose, onSubmit, title, fields, initialData = {}, 
     if (isArray) {
       const newPreviews = []
       const fileArray = Array.from(files)
-      
       fileArray.forEach((file, index) => {
         if (file.type.startsWith('image/')) {
           const reader = new FileReader()
@@ -144,27 +136,24 @@ const FormModal = ({isOpen, onClose, onSubmit, title, fields, initialData = {}, 
       }
     }
   }
-  // Funcion para remover imagen del array
+  // Remueve imagen de un array de imágenes
   const removeImageFromArray = (fieldName, index) => {
     const currentPreviews = imagePreviews[fieldName] || []
     const currentFiles = imageArrays[fieldName] || []
-    
     const newPreviews = currentPreviews.filter((_, i) => i !== index)
     const newFiles = currentFiles.filter((_, i) => i !== index)
-    
     setImagePreviews(prev => ({ ...prev, [fieldName]: newPreviews }))
     setImageArrays(prev => ({ ...prev, [fieldName]: newFiles }))
-    // Actualizar el valor en el formulario
+    // Actualiza el valor en el formulario
     const dataTransfer = new DataTransfer()
     newFiles.forEach(file => dataTransfer.items.add(file))
     setValue(fieldName, dataTransfer.files)
   }
-  // Renderizar campo segun tipo
+  // Renderiza el campo según su tipo
   const renderField = (field) => {
     const hasError = errors[field.name]
     const validation = getValidationRules(field)
-
-    const baseInputClasses = `w-full px-3 py-2 border rounded-lg font-[Quicksand] transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#A73249] text-[#3D1609] ${
+    const baseInputClasses = `w-full px-3 py-2 border rounded-lg font-[Quicksand] transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#A73249] ${
       hasError 
         ? 'border-red-300 bg-red-50 focus:border-red-500' 
         : 'border-gray-300 bg-white focus:border-[#A73249]'
@@ -175,9 +164,8 @@ const FormModal = ({isOpen, onClose, onSubmit, title, fields, initialData = {}, 
           <textarea {...register(field.name, validation)} placeholder={field.placeholder} rows={field.rows || 3} className={`${baseInputClasses} resize-none`} disabled={isLoading}/>
         )
       case 'select':
-        // Usar las opciones del campo
+        // Usa las opciones del campo
         let selectOptions = field.options || []
-        // Asegurarse de que selectOptions sea un array
         if (!Array.isArray(selectOptions)) {
           selectOptions = []
         }
@@ -193,7 +181,6 @@ const FormModal = ({isOpen, onClose, onSubmit, title, fields, initialData = {}, 
         )
       case 'select-multiple':
         let multiSelectOptions = field.options || []
-        // Asegurarse de que selectOptions sea un array
         if (!Array.isArray(multiSelectOptions)) {
           multiSelectOptions = []
         }
@@ -295,13 +282,13 @@ const FormModal = ({isOpen, onClose, onSubmit, title, fields, initialData = {}, 
         )
     }
   }
-  // Procesar datos antes de enviar (para imágenes)
+  // Procesa los datos antes de enviar (para archivos)
   const processFormData = (data) => {
     const processedData = { ...data }
-    // Procesar imágenes
+    // Procesa archivos e imágenes
     fields.forEach(field => {
       if (field.type === 'image') {
-        // Usar el archivo del estado separado
+        // Usa el archivo del estado separado
         const file = selectedFiles[field.name]
         if (file && file instanceof File) {
           processedData[field.name] = file
@@ -312,7 +299,7 @@ const FormModal = ({isOpen, onClose, onSubmit, title, fields, initialData = {}, 
         processedData[field.name] = imageArrays[field.name]
       }
       else if (field.type === 'select-multiple' && data[field.name]) {
-        // Convertir HTMLCollection a array de strings
+        // Convierte HTMLCollection a array de strings
         processedData[field.name] = Array.from(data[field.name])
       }
     })
@@ -323,9 +310,11 @@ const FormModal = ({isOpen, onClose, onSubmit, title, fields, initialData = {}, 
     return null
   }
   return (
+    // Usa el modal base para mostrar el formulario
     <BaseModal isOpen={isOpen} onClose={onClose} title={title} size="lg">
       <form onSubmit={handleSubmit((data) => onFormSubmit(processFormData(data)))} className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          {/* Renderiza cada campo del formulario */}
           {fields.map((field) => (
             <div key={field.name} className={field.fullWidth ? 'md:col-span-2' : ''}>
               <label className="block text-sm font-medium text-[#3D1609] mb-2 font-[Quicksand]">
@@ -333,18 +322,20 @@ const FormModal = ({isOpen, onClose, onSubmit, title, fields, initialData = {}, 
                 {field.required && <span className="text-red-500 ml-1">*</span>}
               </label>
               {renderField(field)}
+              {/* Muestra errores de validación */}
               {errors[field.name] && (
                 <p className="mt-1 text-sm text-red-600 font-[Quicksand]">
                   {errors[field.name]?.message}
                 </p>
               )}
+              {/* Texto de ayuda si existe */}
               {field.helperText && !errors[field.name] && (
                 <p className="mt-1 text-sm text-gray-500 font-[Quicksand]">{field.helperText}</p>
               )}
             </div>
           ))}
         </div>
-        {/* Botones */}
+        {/* Botones de acción */}
         <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
           <button type="button" onClick={onClose} disabled={isLoading} className="px-4 py-2 text-[#3D1609] border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200 font-[Quicksand] font-regular disabled:opacity-50">
             <X className="w-4 h-4 inline mr-2" />
@@ -368,4 +359,5 @@ const FormModal = ({isOpen, onClose, onSubmit, title, fields, initialData = {}, 
     </BaseModal>
   )
 }
+// Exporta el componente para su uso en otras partes de la aplicación
 export default FormModal
