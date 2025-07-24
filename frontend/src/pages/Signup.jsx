@@ -13,6 +13,7 @@ import Pergola from '../assets/pergola.png'
 import Logo from '../assets/logo.png'
 
 const SignUp = () => {
+  // Estado para los datos del formulario
   const [formData, setFormData] = useState({
     name: '',
     lastName: '',
@@ -27,9 +28,11 @@ const SignUp = () => {
     hireDate: '',
     isVerified: false
   })
+  // Estado para mostrar loading
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
+  // Obtiene usuario, loading y API del contexto de autenticación
   const { user, isLoading: authLoading, API } = useAuth()
 
   // Redirigir si ya está autenticado
@@ -40,12 +43,15 @@ const SignUp = () => {
     }
   }, [user, authLoading, navigate, location])
 
+  // Opciones para el tipo de usuario
   const userTypeOptions = [
     {
       value: 'colaborador',
       label: 'Colaborador'
     }
   ]
+
+  // Maneja cambios en los inputs del formulario
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target
     setFormData(prev => {
@@ -58,23 +64,15 @@ const SignUp = () => {
     })
     console.log(e.target.value)
   }
+
+  // Valida los datos del formulario antes de enviar
   const validateForm = () => {
     const { name, lastName, username, email, password, confirmPassword, phoneNumber, birthDate, DUI, userType, hireDate } = formData
 
+    // Debug para desarrollo
     console.log('=== DEBUGGING FORM DATA ===')
     console.log('formData completo:', formData)
-    console.log('name:', name, '- length:', name?.length)
-    console.log('lastName:', lastName, '- length:', lastName?.length)
-    console.log('username:', username, '- length:', username?.length)
-    console.log('email:', email, '- length:', email?.length)
-    console.log('password:', password, '- length:', password?.length)
-    console.log('confirmPassword:', confirmPassword, '- length:', confirmPassword?.length)
-    console.log('phoneNumber:', phoneNumber, '- length:', phoneNumber?.length)
-    console.log('birthDate:', birthDate, '- length:', birthDate?.length)
-    console.log('DUI:', DUI, '- length:', DUI?.length)
-    console.log('userType:', userType, '- length:', userType?.length)
-    console.log('hireDate:', hireDate, '- length:', hireDate?.length)
-    // Verificar cuáles campos están vacíos
+    // Verifica campos vacíos
     const emptyFields = []
     if (!name) emptyFields.push('name')
     if (!lastName) emptyFields.push('lastName')
@@ -87,9 +85,9 @@ const SignUp = () => {
     if (!DUI) emptyFields.push('DUI')
     if (!userType) emptyFields.push('userType')
     if (!hireDate) emptyFields.push('hireDate')
-    
     console.log('Campos vacíos:', emptyFields)
     console.log('===============================')
+    // Validaciones de campos obligatorios
     if (!name || !lastName || !username || !email || !password || !phoneNumber || !birthDate || !DUI || !userType || !hireDate) {
       toast.error('Todos los campos marcados con * son obligatorios')
       return false
@@ -106,7 +104,6 @@ const SignUp = () => {
       toast.error('El email no es válido')
       return false
     }
-    // Por esta (considerando que phoneNumber solo contiene números):
     if (phoneNumber.length < 9) { // 9 caracteres incluyendo el guión
       toast.error('El teléfono debe tener el formato correcto (0000-0000)')
       return false
@@ -123,7 +120,6 @@ const SignUp = () => {
     const birthDateObj = new Date(birthDate)
     const hireDateObj = new Date(hireDate)
     const today = new Date()
-    
     if (birthDateObj >= today) {
       toast.error('La fecha de nacimiento debe ser anterior a hoy')
       return false
@@ -134,11 +130,14 @@ const SignUp = () => {
     }
     return true
   }
+
+  // Maneja el envío del formulario de registro
   const handleSubmit = async () => {
     if (!validateForm()) return
 
     setIsLoading(true)
     try {
+      // Petición para registrar usuario
       const response = await fetch(`${API}/signup`, {
         method: 'POST',
         headers: {
@@ -161,6 +160,7 @@ const SignUp = () => {
       })
       const data = await response.json()
 
+      // Si hubo error, muestra mensaje
       if (!response.ok) {
         throw new Error(data.message || 'Error al registrar empleado')
       }
@@ -176,9 +176,12 @@ const SignUp = () => {
       setIsLoading(false)
     }
   }
+
+  // Navega a la página de login
   const handleGoToLogin = () => {
     navigate('/login')
   }
+
   // Mostrar loading si está verificando autenticación
   if (authLoading) {
     return (
@@ -190,6 +193,8 @@ const SignUp = () => {
       </div>
     )
   }
+
+  // Render principal del formulario de registro
   return (
     <div className="flex flex-col lg:flex-row h-screen">
       {/* Sección Izquierda - Branding */}
@@ -427,4 +432,6 @@ const SignUp = () => {
     </div>
   );
 };
+
+// Exporta el componente para su uso en rutas
 export default SignUp

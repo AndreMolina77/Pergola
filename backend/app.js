@@ -26,7 +26,7 @@ import validatePasswordRoutes from "./src/routes/validatePassword.js"
 import adminProfileRoutes from "./src/routes/adminProfile.js"
 // Importo middlewares para validar el token de autenticación
 import { validateAuthToken } from "./src/middlewares/validateAuthToken.js"
-
+ 
 dotenv.config()
 const app = express()
 app.use(express.json())

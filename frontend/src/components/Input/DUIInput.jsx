@@ -1,8 +1,11 @@
 import { useState } from 'react'
 
+// Componente de input para ingresar y formatear DUI (Documento Único de Identidad)
 const DUIInput = ({ text, name, value, onChange, disabled = false, required = false }) => {
+  // Estado para almacenar el valor formateado
   const [formattedValue, setFormattedValue] = useState(value)
 
+  // Función para formatear el DUI como 00000000-0
   const formatDUI = (input) => {
     // Remover todos los caracteres no numéricos
     const cleaned = input.replace(/\D/g, '')
@@ -17,6 +20,8 @@ const DUIInput = ({ text, name, value, onChange, disabled = false, required = fa
       return limited
     }
   }
+
+  // Maneja el cambio en el input y actualiza el valor formateado
   const handleChange = (e) => {
     const input = e.target.value
     const formatted = formatDUI(input)
@@ -24,9 +29,12 @@ const DUIInput = ({ text, name, value, onChange, disabled = false, required = fa
     // Pasar el valor formateado al componente padre
     onChange({ target: { name: e.target.name, value: formatted } })
   }
+
   return (
     <div className="flex flex-col w-full">
+      {/* Etiqueta del input */}
       <label className="mb-1 text-sm text-left text-[#3D1609] font-[Quicksand] font-semibold">{text}</label>
+      {/* Input de texto para DUI */}
       <input 
         type="text" 
         name={name}

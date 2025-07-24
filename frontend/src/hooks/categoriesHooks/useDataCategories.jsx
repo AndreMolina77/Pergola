@@ -1,17 +1,20 @@
 import { useEffect, useState } from "react"
 import { toast } from "react-hot-toast"
 
+// Hook personalizado para manejar datos de categorías
 const useDataCategories = () => {
   const API = "http://localhost:4000/api/categories"
+  // Estado para almacenar categorías y estado de carga
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
 
+  // Función para obtener las categorías desde la API
   const fetchCategories = async () => {
     try {
       const response = await fetch(API, {
         credentials: "include"
       })
-      // Si es 403 (sin permisos), no mostrar error
+      // Si la respuesta es 403, usuario no autorizado
       if (response.status === 403) {
         console.log("⚠️ Sin permisos para categorías - usuario no autorizado")
         setCategories([])
@@ -26,22 +29,27 @@ const useDataCategories = () => {
       setLoading(false)
     } catch (error) {
       console.error("Error al obtener categorías:", error)
-      // Solo mostrar toast si NO es error de permisos
+      // Solo muestra toast si no es error de permisos
       if (!error.message.includes("403") && !error.message.includes("sin permisos")) {
         toast.error("Error al cargar categorías")
       }
       setLoading(false)
     }
   }
+
+  // Obtiene las categorías al montar el componente
   useEffect(() => {
     fetchCategories()
   }, [])
+
+  // Crea los handlers para agregar, editar y eliminar categorías
   const createHandlers = (API) => ({
     data: categories,
     loading,
+    // Handler para agregar categoría
     onAdd: async (data) => {
       try {
-        // Usar FormData si hay imagen
+        // Usa FormData si hay imagen
         let body
         let headers = { credentials: "include" }
 
@@ -51,7 +59,7 @@ const useDataCategories = () => {
             formData.append(key, data[key])
           })
           body = formData
-          // No se establece el Content-Type para FormData, dejar que el navegador lo establezca
+          // No se establece el Content-Type para FormData
         } else {
           headers["Content-Type"] = "application/json"
           body = JSON.stringify(data)
@@ -73,9 +81,10 @@ const useDataCategories = () => {
         toast.error(error.message || "Error al registrar categoría")
         throw error
       }
-    }, onEdit: async (id, data) => {
+    },
+    // Handler para editar categoría
+    onEdit: async (id, data) => {
       try {
-        // Usar FormData si hay imagen
         let body
         let headers = { credentials: "include" }
 
@@ -85,7 +94,6 @@ const useDataCategories = () => {
             formData.append(key, data[key])
           })
           body = formData
-          // No se establece el Content-Type para FormData, dejar que el navegador lo establezca
         } else {
           headers["Content-Type"] = "application/json"
           body = JSON.stringify(data)
@@ -107,8 +115,12 @@ const useDataCategories = () => {
         toast.error(error.message || "Error al actualizar categoría")
         throw error
       }
-    }, onDelete: deleteCategory
+    },
+    // Handler para eliminar categoría
+    onDelete: deleteCategory
   })
+
+  // Función para eliminar una categoría
   const deleteCategory = async (id) => {
     try {
       const response = await fetch(`${API}/${id}`, {
@@ -128,6 +140,8 @@ const useDataCategories = () => {
       toast.error("Error al eliminar categoría")
     }
   }
+
+  // Retorna los datos y handlers para usar en componentes
   return {
     categories,
     loading,
@@ -136,4 +150,5 @@ const useDataCategories = () => {
     createHandlers
   }
 }
+// Exporta el hook para su uso en otros componentes
 export default useDataCategories

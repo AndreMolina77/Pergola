@@ -12,15 +12,18 @@ import Pergola from '../assets/pergola.png'
 import Logo from '../assets/logo.png'
 
 const Login = () => {
+  // Estados para los campos del formulario
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
+  // Obtiene funciones y estados del contexto de autenticación
   const { Login: authLogin, user, isLoading: authLoading } = useAuth()
-  // Usar useRef para mantener referencia al timeout
+  // Referencia para manejar el timeout de redirección
   const redirectTimeoutRef = useRef(null)
+
   // Redirigir si ya está autenticado
   useEffect(() => {
     if (!authLoading && user) {
@@ -30,6 +33,7 @@ const Login = () => {
     }
   }, [user, authLoading, navigate, location])
 
+  // Maneja el login al enviar el formulario
   const handleLogin = async (e) => {
     e.preventDefault()
     // Validaciones
@@ -67,9 +71,13 @@ const Login = () => {
       setIsLoading(false)
     }
   }
+
+  // Navega a la página de registro
   const handleGoToRegister = () => {
     navigate('/register')
   }
+
+  // Navega a la página de recuperación de contraseña
   const handleForgotPassword = () => {
     // Limpiar timeout antes de navegar
     if (redirectTimeoutRef.current) {
@@ -79,6 +87,7 @@ const Login = () => {
     }
     navigate('/forgot-password')
   }
+
   // Mostrar loading si está verificando autenticacion
   if (authLoading) {
     return (
@@ -90,6 +99,8 @@ const Login = () => {
       </div>
     )
   }
+
+  // Renderiza el formulario de login y la interfaz
   return (
     <div className="min-h-screen w-full flex flex-col lg:flex-row overflow-hidden">
       {/* Sección Izquierda - Branding */}
@@ -211,4 +222,6 @@ const Login = () => {
     </div>
   );
 };
+
+// Exporta el componente para su uso en rutas
 export default Login

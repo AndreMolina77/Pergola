@@ -7,19 +7,22 @@ import Logo from '../assets/logo.png'
 import { ChevronLeft } from 'lucide-react'
 
 const ResetPassword = () => {
+  // Estados para las contraseñas y el estado de carga
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
   const email = location.state?.email
-  // Redirigir si no hay email
+
+  // Redirigir si no hay email en el estado
   useEffect(() => {
     if (!email) {
       navigate('/forgot-password')
     }
   }, [email, navigate])
 
+  // Valida la contraseña según reglas de seguridad
   const validatePassword = (password) => {
     const errors = []
     if (password.length < 8) {
@@ -36,9 +39,12 @@ const ResetPassword = () => {
     }
     return errors
   }
+
+  // Maneja el envío del formulario para cambiar la contraseña
   const handleSubmit = async (e) => {
     e.preventDefault()
     
+    // Validaciones de campos
     if (!newPassword || !confirmPassword) {
       toast.error('Por favor completa todos los campos')
       return
@@ -54,6 +60,7 @@ const ResetPassword = () => {
     }
     setIsLoading(true)
     try {
+      // Petición para cambiar la contraseña
       const response = await fetch('http://localhost:4000/api/recoveryPassword/changePassword', {
         method: 'POST',
         headers: {
@@ -65,6 +72,7 @@ const ResetPassword = () => {
       
       const data = await response.json()
 
+      // Si fue exitosa, muestra mensaje y redirige al login
       if (response.ok) {
         toast.success('Contraseña cambiada exitosamente')
         setTimeout(() => {
@@ -80,6 +88,8 @@ const ResetPassword = () => {
       setIsLoading(false)
     }
   }
+
+  // Render principal
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
       {/* Sección Izquierda - Branding */}
@@ -107,17 +117,17 @@ const ResetPassword = () => {
               Atrás
             </button>
           </div>
-          {/* Content */}
+          {/* Content principal */}
           <div className="mb-10 lg:mb-12">
-            {/* Title */}
+            {/* Título */}
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-[Quicksand] font-bold mb-3 lg:mb-4" style={{ color: '#3D1609' }}>
               Nueva contraseña
             </h2>
-            {/* Subtitle */}
+            {/* Subtítulo */}
             <h3 className="text-lg sm:text-xl lg:text-2xl font-[Quicksand] font-medium mb-8 lg:mb-10" style={{ color: '#A73249' }}>
               Restablece tu acceso
             </h3>
-            {/* Description */}
+            {/* Descripción */}
             <p className="text-base font-[Quicksand] mb-8" style={{ color: '#3D1609' }}>
               Crea una nueva contraseña segura para tu cuenta
             </p>
@@ -133,7 +143,7 @@ const ResetPassword = () => {
                 <li>• Al menos un número</li>
               </ul>
             </div>
-            {/* Form */}
+            {/* Formulario para cambiar contraseña */}
             <form onSubmit={handleSubmit} className="space-y-6">
               <PasswordInput
                 text="Nueva contraseña:"
@@ -161,7 +171,7 @@ const ResetPassword = () => {
               )}
             </form>
           </div>
-          {/* Submit Button */}
+          {/* Botón para enviar el cambio de contraseña */}
           <button
             onClick={handleSubmit}
             disabled={isLoading}
@@ -178,4 +188,6 @@ const ResetPassword = () => {
     </div>
   );
 };
+
+// Exporta el componente para su uso en rutas
 export default ResetPassword

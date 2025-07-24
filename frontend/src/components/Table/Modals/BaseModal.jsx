@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { X } from 'lucide-react'
 
 const BaseModal = ({ isOpen, onClose, title, children, size = 'md', showCloseButton = true }) => {
-  // Cerrar modal con Escape
+  // Cierra el modal al presionar Escape y bloquea el scroll del fondo
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === 'Escape' && isOpen) {
@@ -19,8 +19,9 @@ const BaseModal = ({ isOpen, onClose, title, children, size = 'md', showCloseBut
     }
   }, [isOpen, onClose])
 
+  // Si el modal no está abierto, no renderiza nada
   if (!isOpen) return null
-  // Tamaños del modal
+  // Clases de tamaño para el modal
   const sizeClasses = {
     sm: 'max-w-md',
     md: 'max-w-2xl',
@@ -29,12 +30,13 @@ const BaseModal = ({ isOpen, onClose, title, children, size = 'md', showCloseBut
     full: 'max-w-full mx-4'
   }
   return (
+    // Contenedor principal del modal
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Overlay */}
+      {/* Overlay oscuro y desenfoque */}
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300" onClick={onClose}/>
-      {/* Modal Content */}
+      {/* Contenido del modal */}
       <div className={`relative bg-white rounded-xl shadow-2xl w-full ${sizeClasses[size]} max-h-[90vh] flex flex-col transform transition-all duration-300 scale-100 opacity-100 animate-fade-in`} onClick={(e) => e.stopPropagation()}>
-        {/* Header */}
+        {/* Header con título y botón de cerrar */}
         {(title || showCloseButton) && (
           <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-[#E8E1D8] rounded-t-xl">
             <h3 className="text-xl font-bold text-[#3D1609] font-[Quicksand]">
@@ -47,7 +49,7 @@ const BaseModal = ({ isOpen, onClose, title, children, size = 'md', showCloseBut
             )}
           </div>
         )}
-        {/* Body */}
+        {/* Cuerpo del modal para contenido personalizado */}
         <div className="flex-1 overflow-auto">
           {children}
         </div>

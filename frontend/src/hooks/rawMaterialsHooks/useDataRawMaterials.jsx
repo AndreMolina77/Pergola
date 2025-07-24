@@ -23,10 +23,12 @@ const useDataRawMaterials = () => {
         return
       }
 
+      // Si la respuesta no es exitosa, lanza error
       if (!response.ok) {
         throw new Error("Hubo un error al obtener las materias primas")
       }
 
+      // Guarda los datos obtenidos
       const data = await response.json()
       setRawMaterials(data)
       setLoading(false)
@@ -46,9 +48,11 @@ const useDataRawMaterials = () => {
       const response = await fetch(`${API}/suppliers`, {
         credentials: "include"
       })
+      // Si la respuesta no es exitosa, lanza error
       if (!response.ok) {
         throw new Error("Error al obtener proveedores")
       }
+      // Guarda los datos obtenidos
       const data = await response.json()
       setSuppliers(data)
     } catch (error) {
@@ -72,6 +76,7 @@ const useDataRawMaterials = () => {
         },
         credentials: "include"
       })
+      // Si la respuesta no es exitosa, lanza error
       if (!response.ok) {
         throw new Error("Hubo un error al eliminar la materia prima")
       }
@@ -113,6 +118,7 @@ const useDataRawMaterials = () => {
           body
         })
 
+        // Si la respuesta no es exitosa, lanza error
         if (!response.ok) {
           const errorData = await response.json()
           throw new Error(errorData.message || "Error al registrar materia prima")
@@ -152,6 +158,7 @@ const useDataRawMaterials = () => {
           body
         })
 
+        // Si la respuesta no es exitosa, lanza error
         if (!response.ok) {
           const errorData = await response.json()
           throw new Error(errorData.message || "Error al actualizar materia prima")

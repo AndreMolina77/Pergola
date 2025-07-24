@@ -3,23 +3,30 @@ import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { toast } from 'react-hot-toast'
 
+// Componente para proteger rutas privadas
 const ProtectedRoute = ({ children }) => {
+  // Obtiene datos de autenticación y función de logout
   const { user, authCookie, logout } = useAuth()
+  // Estado para saber si está validando la sesión
   const [isValidating, setIsValidating] = useState(true)
+  // Estado para saber si el usuario está autenticado
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  // Estado para evitar mostrar el error varias veces
   const [hasShownError, setHasShownError] = useState(false)
+  // Ubicación actual para redirección
   const location = useLocation()
 
   useEffect(() => {
+    // Función para validar autenticación
     const validateAuth = async () => {
-      // Si no hay usuario ni token, redirigir inmediatamente
+      // Si no hay usuario ni token, no está autenticado
       if (!user && !authCookie) {
         setIsAuthenticated(false)
         setIsValidating(false)
         return
       }
       try {
-        // Verificar token con el servidor
+        // Verifica el token con el servidor
         const response = await fetch('http://localhost:4000/api/validateAuthToken', {
           method: 'POST',
           credentials: 'include',
@@ -28,14 +35,15 @@ const ProtectedRoute = ({ children }) => {
           }
         })
         if (response.ok) {
+          // Token válido
           console.log("✅ Token válido - user authenticated")
           setIsAuthenticated(true)
-          setHasShownError(false) // Reset error flag
+          setHasShownError(false) // Reinicia el flag de error
         } else {
-          // Token inválido, limpiar datos locales
-          await logout() // Esto limpiará localStorage y cookies
+          // Token inválido, limpia datos locales
+          await logout() // Limpia localStorage y cookies
           setIsAuthenticated(false)
-          // Solo mostrar error una vez
+          // Solo muestra el error una vez
           if (!hasShownError) {
             setHasShownError(true)
             if (response.status === 401) {
@@ -48,22 +56,24 @@ const ProtectedRoute = ({ children }) => {
           }
         }
       } catch (error) {
+        // Error de conexión, limpia datos
         console.error('Error validando auth:', error)
-        // Error de conexion, limpiar datos
         await logout()
         setIsAuthenticated(false)
-        
+        // Solo muestra el error una vez
         if (!hasShownError) {
           setHasShownError(true)
           toast.error('Error de conexión. Redirigiendo al login.')
         }
       } finally {
+        // Finaliza la validación
         setIsValidating(false)
       }
     }
     validateAuth()
   }, [user, authCookie, logout, hasShownError])
-  // Mostrar loading mientras valida
+
+  // Muestra loading mientras valida
   if (isValidating) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#E8E1D8]">
@@ -74,11 +84,11 @@ const ProtectedRoute = ({ children }) => {
       </div>
     )
   }
-  // Si no está autenticado, redirigir al login
+  // Si no está autenticado, redirige al login
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />
   }
-  // Si está autenticado, mostrar el contenido
+  // Si está autenticado, muestra el contenido protegido
   return children
 }
 export default ProtectedRoute

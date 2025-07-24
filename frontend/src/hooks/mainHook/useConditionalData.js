@@ -8,6 +8,7 @@ import useDataRawMaterials from '../rawMaterialsHooks/useDataRawMaterials'
 import useDataReviews from '../ReviewsHooks/useDataReviews'
 import useDataCustomDesigns from '../CustomDesignsHooks/useDataCustomDesigns'
 
+// Hook principal para obtener datos condicionales según permisos del usuario
 export const useConditionalData = () => {
   const { user } = useAuth()
   // TODOS los hooks se ejecutan SIEMPRE (cumple reglas de React)
@@ -20,21 +21,23 @@ export const useConditionalData = () => {
   const allReviewsData = useDataReviews()
   const allCustomDesignsData = useDataCustomDesigns()
   
+  // Función para verificar si el usuario tiene acceso a una sección
   const canAccess = (section) => {
     if (!user?.userType) return false
     
+    // Permisos por tipo de usuario
     const permissions = {
       'admin': [ 'dashboard', 'search', 'products', 'customdesigns', 'designelements', 'rawmaterials', 'employees', 'categories','subcategories', 'collections', 'customers', 'orders', 'reviews', 'refunds', 'transactions', 'suppliers', 'settings' ],
       'colaborador': [ 'dashboard', 'search', 'products', 'customdesigns', 'designelements', 'rawmaterials', 'categories','subcategories', 'collections', 'reviews', 'suppliers', 'settings' ],
     }
     return permissions[user.userType]?.includes(section) || false
   }
-  // Objeto vacio para cuando no hay acceso
+  // Objeto vacío para cuando no hay acceso
   const emptyData = { 
     data: [], 
     loading: false, 
     fetch: () => {},
-    // Propiedades especificas segun el tipo de data
+    // Propiedades específicas según el tipo de data
     suppliers: [],
     categories: [],
     subcategories: [],
@@ -44,6 +47,7 @@ export const useConditionalData = () => {
     reviews: [],
     customdesigns: []
   }
+  // Retorna los datos según permisos
   return {
     suppliersData: canAccess('suppliers') ? allSuppliersData : emptyData,
     categoriesData: canAccess('categories') ? allCategoriesData : emptyData,
@@ -53,6 +57,6 @@ export const useConditionalData = () => {
     rawmaterialsData: canAccess('rawmaterials') ? allRawMaterialsData : emptyData,
     reviewsData: canAccess('reviews') ? allReviewsData : emptyData,
     customDesignsData: canAccess('customdesigns') ? allCustomDesignsData : emptyData,
-    canAccess
+    canAccess // expone la función para uso
   }
 }
