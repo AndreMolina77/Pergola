@@ -14,6 +14,53 @@ cloudinary.config({
 collectionsController.postCollections = async (req, res) => {
     try {
         const { name, description, isActive } = req.body;
+        // Validaciones manuales antes de llegar a Mongoose
+        if (!name || name.trim().length < 3) {
+            return res.status(400).json({ message: "El nombre de la colección es requerido y debe tener al menos 3 caracteres" });
+        }
+        if (name.trim().length > 100) {
+            return res.status(400).json({ message: "El nombre no puede exceder los 100 caracteres" });
+        }
+        if (!description || description.trim().length < 10) {
+            return res.status(400).json({ message: "La descripción es obligatoria y debe tener al menos 10 caracteres" });
+        }
+        if (description.trim().length > 500) {
+            return res.status(400).json({ message: "La descripción no puede exceder los 500 caracteres" });
+        }
+        if (isActive !== undefined && typeof isActive !== 'boolean') {
+            return res.status(400).json({ message: "El estado de actividad debe ser un booleano" });
+        }
+        // Validar que no exista una colección con el mismo nombre
+        const existingCollection = await Collections.findOne({ name: name.trim() });
+        if (existingCollection) {
+            return res.status(400).json({ message: "Ya existe una colección con ese nombre" });
+        }
+        // Validar que la imagen sea una URL válida si se proporciona
+        if (req.file && !/^https?:\/\/.+\.(jpg|jpeg|png|webp|svg)$/.test(req.file.path)) {
+            return res.status(400).json({ message: "La imagen debe ser una URL válida (jpg/jpeg/png/webp/svg)" });
+        }
+        // Si no se proporciona imagen, se deja como cadena vacía
+        if (req.file && req.file.path.trim() === '') {
+            return res.status(400).json({ message: "La imagen no puede estar vacía" });
+        }
+        // Si no se proporciona imagen, se deja como cadena vacía
+        if (!req.file) {
+            req.file = { path: '' }; // Asignar un objeto vacío si no hay archivo
+        }
+        // Si se proporciona imagen, subirla a Cloudinary
+        if (req.file.path) {
+            const result = await cloudinary.uploader.upload(req.file.path, {
+                folder: "collections",
+                allowed_formats: ["jpg", "jpeg", "png", "gif", "webp"],
+            });
+            req.file.path = result.secure_url; // Actualizar la ruta del archivo con la URL de Cloudinary
+        }
+        // Si no hay imagen, se deja como cadena vacía
+        if (!req.file.path) {
+            req.file.path = '';
+        };
+
+
         // Link de imagen
         let imageURL = ""
         // Subir imagen a cloudinary si se proporciona una imagen en el cuerpo de la solicitud
