@@ -56,8 +56,32 @@ customDesignsController.postDesigns = async (req, res) => {
             });
           }
 
-        
-
+        if (
+            !clasp ||
+            typeof clasp !== "string" ||
+            clasp.trim() === "" ||
+            !["Cierre de mosquetón", "Cierre de imán", "Cierre de botón"].includes(clasp)
+        ) {
+            return res.status(400).json({
+                message: "El cierre es obligatorio, no puede estar vacío y debe ser uno de los siguientes: 'Cierre de mosquetón', 'Cierre de imán' o 'Cierre de botón'."
+            });
+        }
+        if (
+            !customerComments ||
+            typeof customerComments !== "string" ||
+            customerComments.trim() === ""
+        ) {
+            return res.status(400).json({
+                message: "Los comentarios del cliente son obligatorios y no pueden estar vacíos."
+            });
+        }
+        // Verificar si el código de diseño ya existe
+        const existingDesign = await CustomDesigns.findOne({ codeRequest });
+        if (existingDesign) {
+            // ESTADO DE ERROR DE INPUT DEL CLIENTE
+            return res.status(400).json({ message: "El código de diseño ya está en uso" });
+        }
+        // Crear nuevo diseño
         const newDesign = new CustomDesigns({ codeRequest, piece, base, baseLength, decoration, clasp, customerComments });
         // Guardar diseño
         await newDesign.save();
