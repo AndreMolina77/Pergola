@@ -1,3 +1,102 @@
+// Configuración para Clientes
+export const customersConfig = {
+  title: "Clientes",
+  columns: [
+    { key: 'name', label: 'Nombre', sortable: true, searchable: true },
+    { key: 'lastName', label: 'Apellido', sortable: true, searchable: true },
+    { key: 'username', label: 'Usuario', sortable: true, searchable: true },
+    { key: 'email', label: 'Email', sortable: true, searchable: true },
+    { key: 'phoneNumber', label: 'Teléfono', searchable: true },
+    { key: 'birthDate', label: 'Fecha de Nacimiento', sortable: true, type: 'date' },
+    { key: 'DUI', label: 'DUI', sortable: true, searchable: true },
+    { key: 'address', label: 'Dirección', searchable: true },
+    { key: 'isVerified', label: 'Verificado', sortable: true, type: 'boolean' },
+    { key: 'profilePic', label: 'Foto', type: 'image' },
+    { key: 'createdAt', label: 'Fecha de Registro', sortable: true, type: 'date' },
+    { key: 'preferredColors', label: 'Colores Preferidos', searchable: true },
+    { key: 'preferredMaterials', label: 'Materiales Preferidos', searchable: true },
+    { key: 'preferredJewelStyle', label: 'Estilo de Joya Preferido', searchable: true },
+    { key: 'purchaseOpportunity', label: 'Oportunidad de Compra', searchable: true },
+    { key: 'allergies', label: 'Alergias', searchable: true },
+    { key: 'jewelSize', label: 'Tamaño de Joya', sortable: true },
+    { key: 'budget', label: 'Presupuesto', sortable: true }
+  ],
+  actions: {
+    canAdd: true,
+    canEdit: true,
+    canDelete: true,
+    canExport: true,
+    canView: true
+  },
+  formFields: [
+    { name: 'name', type: 'text', label: 'Nombre', required: true, placeholder: 'Ej: Juan' },
+    { name: 'lastName', type: 'text', label: 'Apellido', required: true, placeholder: 'Ej: Pérez' },
+    { name: 'username', type: 'text', label: 'Usuario', required: true, placeholder: 'Ej: juanperez' },
+    { name: 'email', type: 'email', label: 'Email', required: true, placeholder: 'correo@ejemplo.com' },
+    { name: 'phoneNumber', type: 'tel', label: 'Teléfono', required: true, placeholder: 'Ej: 7123-4567' },
+    { name: 'birthDate', type: 'date', label: 'Fecha de Nacimiento', required: true },
+    { name: 'DUI', type: 'text', label: 'DUI', required: true, placeholder: '12345678-9' },
+    { name: 'password', type: 'password', label: 'Contraseña', required: true, placeholder: '********' },
+    { name: 'profilePic', type: 'image', label: 'Foto de Perfil', accept: 'image/*', placeholder: 'Seleccionar imagen' },
+    { name: 'address', type: 'textarea', label: 'Dirección', required: true, placeholder: 'Dirección completa...', rows: 2 },
+    { name: 'isVerified', type: 'checkbox', label: 'Verificado' },
+    { name: 'preferredColors', type: 'text', label: 'Colores Preferidos', required: false, placeholder: 'Ej: dorado, plateado' },
+    { name: 'preferredMaterials', type: 'text', label: 'Materiales Preferidos', required: false, placeholder: 'Ej: oro, plata' },
+    { name: 'preferredJewelStyle', type: 'text', label: 'Estilo de Joya Preferido', required: false, placeholder: 'Ej: clásico, moderno' },
+    { name: 'purchaseOpportunity', type: 'text', label: 'Oportunidad de Compra', required: false, placeholder: 'Ej: cumpleaños' },
+    { name: 'allergies', type: 'text', label: 'Alergias', required: false, placeholder: 'Ej: níquel' },
+    { name: 'jewelSize', type: 'select', label: 'Tamaño de Joya', required: false, options: [
+      { value: 'pequeño', label: 'Pequeño' },
+      { value: 'mediano', label: 'Mediano' },
+      { value: 'grande', label: 'Grande' },
+      { value: 'muy grande', label: 'Muy grande' }
+    ] },
+    { name: 'budget', type: 'text', label: 'Presupuesto', required: false, placeholder: 'Ej: $100' }
+  ]
+}
+// Configuración para Empleados
+export const employeesConfig = {
+  title: "Empleados",
+  columns: [
+    { key: 'name', label: 'Nombre', sortable: true, searchable: true },
+    { key: 'lastName', label: 'Apellido', sortable: true, searchable: true },
+    { key: 'username', label: 'Usuario', sortable: true, searchable: true },
+    { key: 'email', label: 'Email', sortable: true, searchable: true },
+    { key: 'phoneNumber', label: 'Teléfono', searchable: true },
+    { key: 'birthDate', label: 'Fecha de Nacimiento', sortable: true, type: 'date' },
+    { key: 'DUI', label: 'DUI', sortable: true, searchable: true },
+    { key: 'userType', label: 'Tipo de Usuario', sortable: true },
+    { key: 'hireDate', label: 'Fecha de Contratación', sortable: true, type: 'date' },
+    { key: 'isVerified', label: 'Verificado', sortable: true, type: 'boolean' },
+    { key: 'profilePic', label: 'Foto', type: 'image' },
+    { key: 'createdAt', label: 'Fecha de Registro', sortable: true, type: 'date' }
+  ],
+  actions: {
+    canAdd: true,
+    canEdit: true,
+    canDelete: true,
+    canExport: true,
+    canView: true
+  },
+  formFields: [
+    { name: 'name', type: 'text', label: 'Nombre', required: true, placeholder: 'Ej: Juan' },
+    { name: 'lastName', type: 'text', label: 'Apellido', required: true, placeholder: 'Ej: Pérez' },
+    { name: 'username', type: 'text', label: 'Usuario', required: true, placeholder: 'Ej: juanperez' },
+    { name: 'email', type: 'email', label: 'Email', required: true, placeholder: 'correo@ejemplo.com' },
+    { name: 'phoneNumber', type: 'tel', label: 'Teléfono', required: true, placeholder: 'Ej: 7123-4567' },
+    { name: 'birthDate', type: 'date', label: 'Fecha de Nacimiento', required: true },
+    { name: 'DUI', type: 'text', label: 'DUI', required: true, placeholder: '12345678-9' },
+    { name: 'password', type: 'password', label: 'Contraseña', required: true, placeholder: '********' },
+    { name: 'userType', type: 'select', label: 'Tipo de Usuario', required: true, options: [
+      { value: 'admin', label: 'Administrador' },
+      { value: 'colaborador', label: 'Colaborador' }
+    ] },
+    { name: 'hireDate', type: 'date', label: 'Fecha de Contratación', required: true },
+    { name: 'profilePic', type: 'image', label: 'Foto de Perfil', accept: 'image/*', placeholder: 'Seleccionar imagen' },
+    { name: 'isVerified', type: 'checkbox', label: 'Verificado' }
+  ]
+}
+ 
 // Configuracion para Categorias
 export const categoriesConfig = {
   title: "Categorías",
