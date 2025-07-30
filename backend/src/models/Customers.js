@@ -137,9 +137,9 @@ const customersSchema = new Schema({
         default: false
     },
     // Campos de preferencias opcionales
-    preferredColors: {
-        type: [String],
-        default: []
+   preferredColors: {
+    type: [String],
+    default: []
     },
     preferredMaterials: {
         type: [String],
@@ -154,8 +154,8 @@ const customersSchema = new Schema({
         trim: true
     },
     allergies: {
-        type: String,
-        trim: true
+        type: [String],
+        default: []
     },
     jewelSize: {
         type: String,
@@ -163,9 +163,9 @@ const customersSchema = new Schema({
         trim: true
     },
     budget: {
-        type: String,
-        trim: true
-    }
+        type: Number,
+        min: 0
+    },
 }, {
     timestamps: true,
     strict: false

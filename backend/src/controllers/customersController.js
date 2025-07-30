@@ -15,6 +15,100 @@ customersController.postCustomers = async (req, res) => {
     try {
         const { name, lastName, username, email, phoneNumber, birthDate, DUI, password, address, isVerified, preferredColors, preferredMaterials, preferredJewelStyle, purchaseOpportunity, allergies, jewelSize, budget } = req.body;
         // Link de imagen
+
+        // Verifica que 'name' exista, sea una cadena y no sea solo espacios en blanco
+        if (!name || typeof name !== "string" || name.trim().length === 0) {
+            return res.status(400).json({ message: "El nombre es obligatorio y no puede estar vacío." });
+        }
+
+        // Verifica que 'lastName' exista, sea una cadena y no sea solo espacios en blanco
+        if (!lastName || typeof lastName !== "string" || lastName.trim().length === 0) {
+            return res.status(400).json({ message: "El apellido es obligatorio y no puede estar vacío." });
+        }
+
+        // Verifica que 'username' exista, sea una cadena y no sea solo espacios en blanco
+        if (!username || typeof username !== "string" || username.trim().length === 0) {
+            return res.status(400).json({ message: "El nombre de usuario es obligatorio y no puede estar vacío." });
+        }
+
+        // Verifica que 'email' exista, sea una cadena y cumpla con un patrón básico de email válido
+        if (!email || typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            return res.status(400).json({ message: "El correo electrónico es obligatorio y debe ser válido." });
+        }
+
+        // Verifica que 'phoneNumber' exista, sea una cadena y no sea solo espacios en blanco
+        if (!phoneNumber || typeof phoneNumber !== "string" || phoneNumber.trim().length === 0) {
+            return res.status(400).json({ message: "El número de teléfono es obligatorio y no puede estar vacío." });
+        }
+
+        // Verifica que 'birthDate' exista y sea una fecha válida (que no sea NaN)
+        if (!birthDate || isNaN(new Date(birthDate).getTime())) {
+            return res.status(400).json({ message: "La fecha de nacimiento es obligatoria y debe ser una fecha válida." });
+        }
+
+        // Verifica que 'DUI' exista, sea una cadena y tenga el formato específico de 8 dígitos, guion y 1 dígito
+        if (!DUI || typeof DUI !== "string" || !/^\d{8}-\d{1}$/.test(DUI)) {
+            return res.status(400).json({ message: "El DUI es obligatorio y debe tener el formato correcto (8 dígitos seguidos de un guion y un dígito)." });
+        }
+
+        // Verifica que 'password' exista, sea una cadena y tenga al menos 6 caracteres no vacíos
+        if (!password || typeof password !== "string" || password.trim().length < 6) {
+            return res.status(400).json({ message: "La contraseña es obligatoria, no puede estar vacía y debe tener al menos 6 caracteres." });
+        }
+
+        // Verifica que 'address' exista, sea una cadena y no sea solo espacios en blanco
+        if (!address || typeof address !== "string" || address.trim().length === 0) {
+            return res.status(400).json({ message: "La dirección es obligatoria y no puede estar vacía." });
+        }
+
+        // Si 'preferredColors' fue enviado, verifica que sea un array y que no esté vacío
+        if (preferredColors !== undefined && (!Array.isArray(preferredColors) || preferredColors.length === 0)) {
+            return res.status(400).json({ message: "Los colores preferidos deben ser un array no vacío si se proporcionan." });
+        }
+
+        // Si 'preferredMaterials' fue enviado, verifica que sea un array y que no esté vacío
+        if (preferredMaterials !== undefined && (!Array.isArray(preferredMaterials) || preferredMaterials.length === 0)) {
+            return res.status(400).json({ message: "Los materiales preferidos deben ser un array no vacío si se proporcionan." });
+        }
+
+        // Si 'preferredJewelStyle' fue enviado, verifica que sea un array y que no esté vacío
+        if (preferredJewelStyle !== undefined && (!Array.isArray(preferredJewelStyle) || preferredJewelStyle.length === 0)) {
+            return res.status(400).json({ message: "El estilo de joya preferido debe ser un array no vacío si se proporciona." });
+        }
+
+        // Si 'allergies' fue enviado, verifica que sea un array y que no esté vacío
+        if (allergies !== undefined && (!Array.isArray(allergies) || allergies.length === 0)) {
+            return res.status(400).json({ message: "Las alergias deben ser un array no vacío si se proporcionan." });
+        }
+
+        // Si 'purchaseOpportunity' fue enviado, verifica que sea una cadena no vacía (string con contenido)
+        if (purchaseOpportunity !== undefined && (typeof purchaseOpportunity !== "string" || purchaseOpportunity.trim().length === 0)) {
+            return res.status(400).json({ message: "La oportunidad de compra debe ser una cadena no vacía si se proporciona." });
+        }
+
+        // Si 'jewelSize' fue enviado, verifica que sea una cadena no vacía
+        if (jewelSize !== undefined && (typeof jewelSize !== "string" || jewelSize.trim().length === 0)) {
+            return res.status(400).json({ message: "El tamaño de la joya debe ser una cadena no vacía si se proporciona." });
+        }
+
+        // Si 'budget' fue enviado, verifica que sea un número y que sea positivo (mayor o igual a 0)
+        if (budget !== undefined && (typeof budget !== "number" || budget < 0)) {
+            return res.status(400).json({ message: "El presupuesto debe ser un número positivo si se proporciona." });
+        }
+
+        // Verifica que no exista un cliente ya registrado con el mismo email
+        const existingCustomer = await Customers.findOne({ email });
+        if (existingCustomer) {
+            return res.status(400).json({ message: "Ya existe un cliente con este correo electrónico." });
+        }
+
+        // Si se subió una imagen de perfil, verifica que su formato sea jpg, png o webp
+        if (req.file && !["image/jpeg", "image/png", "image/webp"].includes(req.file.mimetype)) {
+            return res.status(400).json({ message: "El formato de la imagen debe ser jpg, png o webp." });
+        }
+
+        // Inicializar URL de imagen de perfil
+
         let profilePicURL = "";
         // Subir imagen a cloudinary si se proporciona una imagen en el cuerpo de la solicitud
         if (req.file) {
