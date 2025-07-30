@@ -14,6 +14,124 @@ cloudinary.config({
 employeesController.postEmployees = async (req, res) => {
     try {
         const { name, lastName, username, email, phoneNumber, birthDate, DUI, password, userType, hireDate, isVerified } = req.body;
+        if (
+            !name ||
+            typeof name !== "string" ||
+            name.trim().length === 0 ||
+            name.trim().length < 2 ||
+            name.trim().length > 100
+        ) {
+            return res.status(400).json({
+                message: "El nombre es obligatorio, no puede estar vacío y debe tener entre 2 y 100 caracteres."
+            });
+        }
+        if (
+            !lastName ||
+            typeof lastName !== "string" ||
+            lastName.trim().length === 0 ||
+            lastName.trim().length < 2 ||
+            lastName.trim().length > 100
+        ) {
+            return res.status(400).json({
+                message: "El apellido es obligatorio, no puede estar vacío y debe tener entre 2 y 100 caracteres."
+            });
+        }
+        if (
+            !username ||
+            typeof username !== "string" ||
+            username.trim().length === 0 ||
+            username.trim().length < 5 ||
+            username.trim().length > 50
+        ) {
+            return res.status(400).json({
+                message: "El nombre de usuario es obligatorio, no puede estar vacío y debe tener entre 5 y 50 caracteres."
+            });
+        }
+        if (
+            !email ||
+            typeof email !== "string" ||
+            email.trim().length === 0 ||
+            !/^[\w.-]+@([\w-]+\.)+[a-zA-Z]{2,}$/.test(email.trim())
+        ) {
+            return res.status(400).json({
+                message: "El correo electrónico es obligatorio, no puede estar vacío y debe ser válido."
+            });
+        }
+        if (
+            !phoneNumber ||
+            typeof phoneNumber !== "string" ||
+            phoneNumber.trim().length === 0 ||
+            !/^(?:\+503\s?)?(6|7)\d{3}-?\d{4}$/.test(phoneNumber.trim())
+        ) {
+            return res.status(400).json({
+                message: "El número de teléfono es obligatorio, no puede estar vacío y debe ser válido en El Salvador."
+            }); 
+        }
+        if (
+            !birthDate ||
+            isNaN(new Date(birthDate).getTime())
+        ) {
+            return res.status(400).json({
+                message: "La fecha de nacimiento es obligatoria y debe ser una fecha válida."
+            });
+        }
+        if (
+            !DUI ||
+            typeof DUI !== "string" ||
+            DUI.trim().length === 0 ||
+            !/^\d{8}-\d{1}$/.test(DUI.trim())
+        ) {
+            return res.status(400).json({
+                message: "El DUI es obligatorio, no puede estar vacío y debe tener el formato 12345678-9."
+            });
+        }
+        if (
+            !password ||
+            typeof password !== "string" ||
+            password.trim().length === 0 ||
+            password.trim().length < 8 ||
+            password.trim().length > 50
+        ) {
+            return res.status(400).json({
+                message: "La contraseña es obligatoria, no puede estar vacía y debe tener entre 8 y 50 caracteres."
+            });
+        }
+        if (
+            !userType ||
+            typeof userType !== "string" ||
+            !["Administrador", "Empleado"].includes(userType)
+        ) {
+            return res.status(400).json({
+                message: "El tipo de usuario es obligatorio y debe ser 'Administrador' o 'Empleado'."
+            });
+        } 
+        if (
+            !hireDate ||
+            isNaN(new Date(hireDate).getTime())
+        ) {
+            return res.status(400).json({
+                message: "La fecha de contratación es obligatoria y debe ser una fecha válida."
+            });
+        }
+        // Validar que la imagen sea un archivo válido
+        if (!req.file) {
+            return res.status(400).json({
+                message: "La imagen de perfil es obligatoria y debe ser un archivo válido."
+            });
+        }
+        // Validar tipo de archivo de imagen
+        const validImageTypes = ["image/jpeg", "image/png", "image/gif"];
+        if (!validImageTypes.includes(req.file.mimetype)) {
+            return res.status(400).json({
+                message: "El archivo debe ser una imagen válida (jpg, png, gif)."
+            });
+        }
+        if (req.file.size > 2 * 1024 * 1024) { // 2MB
+            return res.status(400).json({
+                message: "El tamaño de la imagen no puede exceder los 2MB."
+            });
+        }
+        
         // Link de imagen
         let profilePicURL = "";
         // Subir imagen a cloudinary si se proporciona una imagen en el cuerpo de la solicitud

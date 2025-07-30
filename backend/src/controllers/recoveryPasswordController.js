@@ -11,6 +11,81 @@ import { config } from "../utils/config.js"
 recoveryPasswordController.requestCode = async (req, res) => {
     //Obtener el email del cuerpo de la solicitud
     const email = req.body.email
+
+    //Validar el email
+    if (!email || typeof email !== "string" || email.trim().length === 0 || !/^[\w.-]+@([\w-]+\.)+[a-zA-Z]{2,}$/.test(email.trim())) {
+        return res.status(400).json({
+            message: "El correo electrónico es obligatorio, no puede estar vacío y debe ser válido."
+        });
+    }
+    //Buscar el usuario por email en clientes y empleados
+    if (!email) {
+        return res.status(400).json({
+            message: "El correo electrónico es obligatorio."
+        });
+    }
+    if (typeof email !== "string" || email.trim().length === 0) {
+        return res.status(400).json({
+            message: "El correo electrónico no puede estar vacío."
+        });
+    }
+    if (!/^[\w.-]+@([\w-]+\.)+[a-zA-Z]{2,}$/.test(email.trim())) {
+        return res.status(400).json({
+            message: "El correo electrónico debe ser válido."
+        });
+    }
+    if (email.trim() === '') {
+        return res.status(400).json({
+            message: "El correo electrónico no puede estar vacío."
+        });
+    }
+    if (email.trim().length < 5 || email.trim().length > 100) {
+        return res.status(400).json({
+            message: "El correo electrónico debe tener entre 5 y 100 caracteres."
+        });
+    }
+    if (!email.includes('@')) {
+        return res.status(400).json({
+            message: "El correo electrónico debe contener un '@'."
+        });
+    }
+    if (!email.includes('.')) {
+        return res.status(400).json({
+            message: "El correo electrónico debe contener un '.' después del '@'."
+        });
+    }
+    if (email.indexOf('@') === 0 || email.indexOf('.') === 0) {
+        return res.status(400).json({
+            message: "El correo electrónico no puede comenzar con '@' o '.'"
+        });
+    }
+    if (email.lastIndexOf('@') > email.lastIndexOf('.')) {
+        return res.status(400).json({
+            message: "El correo electrónico debe tener un dominio válido después del '@'."
+        });
+    }
+    if (email.lastIndexOf('.') === email.length - 1) {
+        return res.status(400).json({
+            message: "El correo electrónico no puede terminar con un '.'"
+        });
+    }
+    if (email.indexOf('..') !== -1) {
+        return res.status(400).json({
+            message: "El correo electrónico no puede contener '..' consecutivos."
+        });
+    }
+    if (email.indexOf('@') !== email.lastIndexOf('@')) {
+        return res.status(400).json({
+            message: "El correo electrónico no puede contener múltiples '@'."
+        });
+    }
+    if (email.indexOf('.') !== email.lastIndexOf('.')) {
+        return res.status(400).json({
+            message: "El correo electrónico no puede contener múltiples '.'"
+        });
+    }
+    
+    
     try {
         let userFound
         let userType

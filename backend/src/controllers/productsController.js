@@ -31,6 +31,180 @@ productsController.postProducts = async (req, res) => {
           status, 
           applicableCosts, 
           hasDiscount } = req.body;
+          if (
+            !name ||
+            typeof name !== "string" ||
+            name.trim().length === 0 ||
+            name.trim().length < 2 ||
+            name.trim().length > 100
+            ) {
+            return res.status(400).json({
+                message: "El nombre es obligatorio, no puede estar vacío y debe tener entre 2 y 100 caracteres."
+            });
+        }
+        if (
+            !description ||
+            typeof description !== "string" ||
+            description.trim().length === 0 ||
+            description.trim().length < 10 ||
+            description.trim().length > 500
+        ) {
+            return res.status(400).json({
+                message: "La descripción es obligatoria, no puede estar vacía y debe tener entre 10 y 500 caracteres."
+            });
+        }
+        if (
+            !codeProduct ||
+            typeof codeProduct !== "string" ||
+            codeProduct.trim().length === 0 ||
+            codeProduct.trim().length < 5 ||
+            codeProduct.trim().length > 20
+        ) {
+            return res.status(400).json({
+                message: "El código de producto es obligatorio, no puede estar vacío y debe tener entre 5 y 20 caracteres."
+            });
+        }
+        if (
+            !stock ||
+            typeof stock !== "number" ||
+            stock < 0
+        ) {
+            return res.status(400).json({
+                message: "El stock es obligatorio y debe ser un número no negativo."
+            });
+        }
+        if (
+            !price ||
+            typeof price !== "number" ||
+            price <= 0
+        ) {
+            return res.status(400).json({
+                message: "El precio es obligatorio y debe ser un número positivo."
+            });
+        }
+        if (
+            !productionCost ||
+            typeof productionCost !== "number" ||
+            productionCost < 0
+        ) {
+            return res.status(400).json({
+                message: "El costo de producción es obligatorio y debe ser un número no negativo."
+            });
+        }
+        if (
+            discount &&
+            (typeof discount !== "number" || discount < 0 || discount > 100)
+        ) {
+            return res.status(400).json({
+                message: "El descuento debe ser un número entre 0 y 100."
+            });
+        }
+        if (
+            !collection ||
+            typeof collection !== "string" ||
+            collection.trim().length === 0
+        ) {
+            return res.status(400).json({
+                message: "La colección es obligatoria, no puede estar vacía."
+            });
+        }
+        if (
+            !category ||
+            typeof category !== "string" ||
+            category.trim().length === 0
+        ) {
+            return res.status(400).json({
+                message: "La categoría es obligatoria, no puede estar vacía."
+            });
+        }
+        if (
+            !subcategory ||
+            typeof subcategory !== "string" ||
+            subcategory.trim().length === 0
+        ) {
+            return res.status(400).json({
+                message: "La subcategoría es obligatoria, no puede estar vacía."
+            });
+        }
+        if (
+            !rawMaterialsUsed ||
+            !Array.isArray(rawMaterialsUsed) ||
+            rawMaterialsUsed.length === 0 ||
+            !rawMaterialsUsed.every(item => 
+                typeof item === "string" && 
+                item.trim() !== ""
+            )
+        ) {
+            return res.status(400).json({
+                message: "Los materiales utilizados son obligatorios, deben ser un array no vacío y cada elemento debe ser una cadena no vacía."
+            });
+        }
+        if (
+            highlighted !== undefined &&
+            typeof highlighted !== "boolean"       
+        ) {
+            return res.status(400).json({  
+                message: "El campo 'highlighted' debe ser un booleano."
+            });
+        }
+        if (
+            !correlative ||
+            typeof correlative !== "string" ||
+            correlative.trim().length === 0
+        ) {
+            return res.status(400).json({
+                message: "El correlativo es obligatorio, no puede estar vacío."
+            });
+        }
+        if (
+            !movementType ||
+            typeof movementType !== "string" ||
+            !["venta", "exhibición", "producción", "otro"].includes(movementType)
+        ) {
+            return res.status(400).json({
+                message: "El tipo de movimiento es obligatorio y debe ser 'venta', 'exhibición', 'producción' o 'otro'."
+            });
+        }
+        if (
+            !status ||
+            typeof status !== "string" ||
+            !["Activo", "Inactivo"].includes(status)
+        ) {
+            return res.status(400).json({
+                message: "El estado es obligatorio y debe ser 'Activo' o 'Inactivo'."
+            });
+        }
+        if (
+            applicableCosts &&
+            !Array.isArray(applicableCosts)
+        ) {
+            return res.status(400).json({
+                message: "Los costos aplicables deben ser un array."
+            });
+        }
+        if (
+            hasDiscount !== undefined &&
+            typeof hasDiscount !== "boolean"
+        ) {
+            return res.status(400).json({
+                message: "El campo 'hasDiscount' debe ser un booleano."
+            });
+        }
+        // Validar que el código de producto no esté vacío
+        if (!codeProduct || codeProduct.trim() === '') {
+            return res.status(400).json({
+                message: "El código de producto es obligatorio y no puede estar vacío."
+            });
+        }
+        // Validar que el código de producto tenga un formato válido
+        if (!/^[A-Z0-9-]+$/.test(codeProduct.trim()))
+        {
+            return res.status(400).json({
+                message: "El código de producto solo puede contener letras mayúsculas, números y guiones."
+            });
+        }
+        
+
         // Verificar si el código de producto ya existe
         const existingProduct = await Products.findOne({ codeProduct });
         if (existingProduct) {

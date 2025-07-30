@@ -23,6 +23,101 @@ rawMaterialsController.postRawMaterials = async (req, res) => {
             piecePrice, 
             purchaseDate, 
             stock } = req.body;
+
+            if
+            (!name || typeof name !== "string" || name.trim().length < 2 || name.trim().length > 100) {
+            return res.status(400).json({
+                message: "El nombre es obligatorio, no puede estar vacío y debe tener entre 2 y 100 caracteres."
+            });
+        }
+        if (!description || typeof description !== "string" || description.trim().length === 0) {
+            return res.status(400).json({
+                message: "La descripción es obligatoria y no puede estar vacía."
+            });
+        }
+        if (!type || typeof type !== "string" || type.trim().length === 0) {
+            return res.status(400).json({
+                message: "El tipo es obligatorio y no puede estar vacío."
+            });
+        }
+        if (!color || typeof color !== "string" || color.trim().length === 0) {
+            return res.status(400).json({
+                message: "El color es obligatorio y no puede estar vacío."
+            });
+        }
+        if (!tone || typeof tone !== "string" || tone.trim().length === 0) {
+            return res.status(400).json({
+                message: "El tono es obligatorio y no puede estar vacío."
+            });
+        }
+        if (!toneType || typeof toneType !== "string" || toneType.trim().length === 0) {
+            return res.status(400).json({
+                message: "El tipo de tono es obligatorio y no puede estar vacío."
+            });
+        }
+        if (!texture || typeof texture !== "string" || texture.trim().length === 0) {
+            return res.status(400).json({
+                message: "La textura es obligatoria y no puede estar vacía."
+            });
+        }
+        if (!shape || typeof shape !== "string" || shape.trim().length === 0) {
+            return res.status(400).json({
+                message: "La forma es obligatoria y no puede estar vacía."
+            });
+        }
+        if (!dimension || typeof dimension !== "string" || dimension.trim().length === 0
+        ) {
+            return res.status(400).json({
+                message: "La dimensión es obligatoria y no puede estar vacía."
+            });
+        }
+        if (!provider || typeof provider !== "string" || provider.trim().length === 0
+        ) {
+            return res.status(400).json({
+                message: "El proveedor es obligatorio y no puede estar vacío."
+            });
+        }
+        if (!brand || typeof brand !== "string" || brand.trim().length === 0) {
+            return res.status(400).json({
+                message: "La marca es obligatoria y no puede estar vacía."
+            });
+        }
+        if (!presentation || typeof presentation !== "string" || presentation.trim().length === 0) {
+            return res.status(400).json({
+                message: "La presentación es obligatoria y no puede estar vacía."
+            });
+        }
+        if (!quantity || typeof quantity !== "number" || quantity <= 0) {
+            return res.status(400).json({
+                message: "La cantidad es obligatoria y debe ser un número positivo."
+            });
+        }
+        if (!piecesPerPresentation || typeof piecesPerPresentation !== "number" || piecesPerPresentation <= 0) {
+            return res.status(400).json({
+                message: "Las piezas por presentación son obligatorias y deben ser un número positivo."
+            });
+        }
+        if (!totalPieces || typeof totalPieces !== "number" || totalPieces <= 0) {
+            return res.status(400).json({
+                message: "El total de piezas es obligatorio y debe ser un número positivo."
+            });
+        }
+        if (!piecePrice || typeof piecePrice !== "number" || piecePrice <= 0) {
+            return res.status(400).json({
+                message: "El precio por pieza es obligatorio y debe ser un número positivo."
+            });
+        }
+        if (!purchaseDate || isNaN(new Date(purchaseDate).getTime())) {
+            return res.status(400).json({
+                message: "La fecha de compra es obligatoria y debe ser una fecha válida."
+            });
+        }
+        if (typeof stock !== "boolean") {
+            return res.status(400).json({
+                message: "El estado de stock es obligatorio y debe ser un booleano."
+            });
+        }
+        
         // Verificar si el correlativo ya existe
         const existingMaterial = await RawMaterials.findOne({ correlative });
         if (existingMaterial) {
