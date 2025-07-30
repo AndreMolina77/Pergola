@@ -6,6 +6,58 @@ customDesignsController.postDesigns = async (req, res) => {
     try {
         const { codeRequest, piece, base, baseLength, decoration, clasp, customerComments } = req.body;
 
+        //Validaciones manuales antes de mongoose
+        if (
+            !codeRequest || 
+            typeof codeRequest !== "string" || 
+            codeRequest.trim().length === 0 || 
+            codeRequest.trim().length < 5
+        ) {
+            return res.status(400).json({
+                message: "El código es obligatorio, no puede estar vacío y debe tener al menos 5 caracteres."
+            });
+        }
+              
+        if (!piece || !["Pulsera", "Cadena", "Tobillera"].includes(piece)) {
+            return res.status(400).json({
+                error: "El parámetro 'piece' debe ser 'Pulsera', 'Cadena' o 'Tobillera'."
+            });
+        }
+
+        if(!base || 
+            typeof base !== "string" || 
+            codeRequest.trim().length === 0){
+                return res.status(400).json({
+                    message: "La base es obligatoria, no pueda ser una cadena vacía"
+                })
+        }
+
+        if (
+            !baseLength || 
+            typeof baseLength !== "string" || 
+            baseLength.trim() === '' || 
+            !/^\d{1,3}(cm|mm)$/.test(baseLength.trim())
+        ) {
+            return res.status(400).json({
+                message: "La longitud es obligatoria, no puede estar vacía y debe tener formato como: 123cm o 123mm."
+            });
+        }
+
+        if (
+            !Array.isArray(decoration) ||          // No es un array
+            decoration.length === 0 ||              // Array vacío
+            !decoration.every(item =>               // Algún elemento no cumple
+              typeof item === "string" &&           // No es string
+              item.trim() !== ""                    // Está vacío o solo espacios
+            )
+          ) {
+            return res.status(400).json({
+              message: "El array de decoración no puede estar vacío y cada elemento debe ser una cadena no vacía."
+            });
+          }
+
+        
+
         const newDesign = new CustomDesigns({ codeRequest, piece, base, baseLength, decoration, clasp, customerComments });
         // Guardar diseño
         await newDesign.save();
