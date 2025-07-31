@@ -6,7 +6,7 @@ import ConfirmModal from './Modals/ConfirmModal'
 import DetailModal from './Modals/DetailModal'
 
 // Componente contenedor principal para la tabla y sus acciones/modales
-const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, isLoading = false, className = "", categoriesData, subcategoriesData, collectionsData, suppliersData, customersData, rawMaterialsData, productsData}) => {
+const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, isLoading = false, className = "", categoriesData, subcategoriesData, collectionsData, suppliersData, customersData, rawMaterialsData, productsData, employeesData}) => {
   // Estados para búsqueda, ordenamiento, paginación y modales
   const [searchValue, setSearchValue] = useState("")
   const [sortBy, setSortBy] = useState(null)
@@ -278,7 +278,7 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
         'reseñas': 'reviews',
         'diseñosunicos': 'customdesigns',
         'clientes': 'customers',
-        'empleados': 'employees',
+        'empleados': 'employees'
       }
       modalType = typeMapping[normalizedTitle] || normalizedTitle
     }

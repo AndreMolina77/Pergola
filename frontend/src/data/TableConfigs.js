@@ -96,6 +96,7 @@ export const employeesConfig = {
     { name: 'isVerified', type: 'checkbox', label: 'Verificado' }
   ]
 }
+ 
 // Configuracion para Categorias
 export const categoriesConfig = {
   title: "Categorías",

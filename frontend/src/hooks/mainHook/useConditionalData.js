@@ -7,6 +7,8 @@ import useDataProducts from '../productsHooks/useDataProducts'
 import useDataRawMaterials from '../rawMaterialsHooks/useDataRawMaterials'
 import useDataReviews from '../ReviewsHooks/useDataReviews'
 import useDataCustomDesigns from '../CustomDesignsHooks/useDataCustomDesigns'
+import useDataCustomers from '../customersHooks/useDataCustomers.jsx'
+import useDataEmployees from '../employeesHooks/useDataEmployees.jsx'
 
 // Hook principal para obtener datos condicionales según permisos del usuario
 export const useConditionalData = () => {
@@ -20,6 +22,8 @@ export const useConditionalData = () => {
   const allRawMaterialsData = useDataRawMaterials()
   const allReviewsData = useDataReviews()
   const allCustomDesignsData = useDataCustomDesigns()
+  const allCustomersData = useDataCustomers()
+  const allEmployeesData = useDataEmployees()
   
   // Función para verificar si el usuario tiene acceso a una sección
   const canAccess = (section) => {
@@ -45,7 +49,9 @@ export const useConditionalData = () => {
     products: [],
     rawmaterials: [],
     reviews: [],
-    customdesigns: []
+    customdesigns: [],
+    customers: [],
+    employees: []
   }
   // Retorna los datos según permisos
   return {
@@ -57,6 +63,8 @@ export const useConditionalData = () => {
     rawmaterialsData: canAccess('rawmaterials') ? allRawMaterialsData : emptyData,
     reviewsData: canAccess('reviews') ? allReviewsData : emptyData,
     customDesignsData: canAccess('customdesigns') ? allCustomDesignsData : emptyData,
+    customersData: canAccess('customers') ? allCustomersData: emptyData,
+    employeesData: canAccess('employees') ? allEmployeesData: emptyData,
     canAccess // expone la función para uso
   }
 }
