@@ -276,7 +276,9 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
         'proveedores': 'suppliers',
         'materiasprimas': 'rawmaterials',
         'reseñas': 'reviews',
-        'diseñosunicos': 'customdesigns'
+        'diseñosunicos': 'customdesigns',
+        'clientes': 'customers',
+        'empleados': 'employees',
       }
       modalType = typeMapping[normalizedTitle] || normalizedTitle
     }
@@ -341,7 +343,6 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
     setCurrentPage(1)
     window.location.reload()
   }
-
   return (
     <div className={`font-[Quicksand] ${className}`}>
       {/* Header con título y acciones */}

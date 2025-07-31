@@ -78,7 +78,6 @@ const useDataReviews = () => {
   const createHandlers = (API) => ({
     data: reviews, // Devuelve las reseñas
     loading, // Devuelve el estado de carga
-
     // Agrega una nueva reseña
     onAdd: async (data) => {
       try {

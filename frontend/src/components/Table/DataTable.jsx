@@ -13,12 +13,10 @@ const DataTable = ({data = [], columns = [], isLoading = false,
   onPageChange, onPageSizeChange, onSort, onEdit, onDelete, onView, sortBy = null, sortOrder = 'asc', className = "" }) => {
   // Estado para la configuración de ordenamiento
   const [sortConfig, setSortConfig] = useState({ key: sortBy, direction: sortOrder })
-
   // Maneja el ordenamiento de columnas
   const handleSort = (columnKey) => {
     const column = columns.find(col => col.key === columnKey)
     if (!column?.sortable) return
-
     const direction = sortConfig.key === columnKey && sortConfig.direction === 'asc' ? 'desc' : 'asc'
     setSortConfig({ key: columnKey, direction })
     if (onSort) onSort(columnKey, direction)

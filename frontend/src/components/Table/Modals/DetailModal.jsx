@@ -36,8 +36,17 @@ const DetailModal = ({ isOpen, onClose, data, title = "Detalles", type = "generi
       purchaseDate: Calendar,
       // Usuarios y personas
       name: User,
+      lastName: User,
       contactPerson: User,
+      username: Hash,
       customer: User,
+      preferredColors: Palette,
+      preferredMaterials: Boxes, 
+      preferredJewelStyle: Gem, 
+      purchaseOpportunity: Tag,
+      allergies: XCircle, 
+      jewelSize: Ruler,
+      userType: Tag,
       // Email y contacto
       email: Mail,
       phoneNumber: Phone,
@@ -108,6 +117,46 @@ const DetailModal = ({ isOpen, onClose, data, title = "Detalles", type = "generi
   // Configuración de campos según el tipo de elemento
   const getTypeConfig = () => {
     switch (type) {
+      case 'customers':
+        return {
+          fields: [
+            { key: 'name', label: 'Nombre', type: 'text' },
+            { key: 'lastName', label: 'Apellido', type: 'text' },
+            { key: 'username', label: 'Usuario', type: 'text' },
+            { key: 'email', label: 'Email', type: 'email' },
+            { key: 'phoneNumber', label: 'Teléfono', type: 'text' },
+            { key: 'birthDate', label: 'Fecha de Nacimiento', type: 'date' },
+            { key: 'DUI', label: 'DUI', type: 'text' },
+            { key: 'address', label: 'Dirección', type: 'text' },
+            { key: 'isVerified', label: 'Verificado', type: 'badge' },
+            { key: 'profilePic', label: 'Foto', type: 'image' },
+            { key: 'createdAt', label: 'Fecha de Registro', type: 'date' },
+            { key: 'preferredColors', label: 'Colores Preferidos', type: 'text' },
+            { key: 'preferredMaterials', label: 'Materiales Preferidos', type: 'text' },
+            { key: 'preferredJewelStyle', label: 'Estilo de Joya Preferido', type: 'text' },
+            { key: 'purchaseOpportunity', label: 'Oportunidad de Compra', type: 'text' },
+            { key: 'allergies', label: 'Alergias', type: 'text' },
+            { key: 'jewelSize', label: 'Tamaño de Joya', type: 'text' },
+            { key: 'budget', label: 'Presupuesto', type: 'currency' }
+          ]
+        }
+      case 'employees':
+        return {
+          fields: [
+            { key: 'name', label: 'Nombre', type: 'text' },
+            { key: 'lastName', label: 'Apellido', type: 'text' },
+            { key: 'username', label: 'Usuario', type: 'text' },
+            { key: 'email', label: 'Email', type: 'email' },
+            { key: 'phoneNumber', label: 'Teléfono', type: 'text' },
+            { key: 'birthDate', label: 'Fecha de Nacimiento', type: 'date' },
+            { key: 'DUI', label: 'DUI', type: 'text' },
+            { key: 'userType', label: 'Tipo de Usuario', type: 'badge' },
+            { key: 'hireDate', label: 'Fecha de Contratación', type: 'date' },
+            { key: 'isVerified', label: 'Verificado', type: 'badge' },
+            { key: 'profilePic', label: 'Foto', type: 'image' },
+            { key: 'createdAt', label: 'Fecha de Registro', type: 'date' }
+          ]
+        }
       case 'products':
         return {
           fields: [
