@@ -10,6 +10,27 @@ validatePasswordController.validatePassword = async (req, res) => {
     try {
         // Obtener la contraseña actual del usuario
         const { currentPassword } = req.body
+        if (!currentPassword) {
+            // ESTADO DE ERROR EN INPUT DEL CLIENTE
+            return res.status(400).json({ message: "La contraseña actual es obligatoria" })
+        }
+        // Validar que la contraseña tenga al menos 8 caracteres
+        if (currentPassword.length < 8) {
+            return res.status(400).json({ message: "La contraseña debe tener al menos 8 caracteres" })
+        }
+        // Validar que la contraseña no tenga más de 20 caracteres
+        if (currentPassword.length > 20) {
+            return res.status(400).json({ message: "La contraseña no puede tener más de 20 caracteres" })
+        }
+        // Validar que la contraseña no contenga espacios
+        if (/\s/.test(currentPassword)) {
+            return res.status(400).json({ message: "La contraseña no puede contener espacios" })
+        }
+        // Validar que la contraseña no contenga caracteres especiales
+        const passwordRegex = /^[a-zA-Z0-9]+$/;
+        if (!passwordRegex.test(currentPassword)) {
+            return res.status(400).json({ message: "La contraseña solo puede contener letras y números" });
+        }
         // Obtener el ID y tipo de usuario del usuario 
         const userId = req.userId
         const userType = req.userType

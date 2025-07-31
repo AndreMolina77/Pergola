@@ -14,6 +14,51 @@ cloudinary.config({
 subcategoriesController.postSubcategories = async (req, res) => {
     try {
         const { name, description, isActive } = req.body;
+        if (!name || !description || isActive === undefined) {
+            // ESTADO DE ERROR EN INPUT DEL CLIENTE
+            return res.status(400).json({ message: "Todos los campos son obligatorios" });
+        }
+        // Validar que el nombre no tenga más de 50 caracteres
+        if (name.length > 50) {
+            return res.status(400).json({ message: "El nombre no puede tener más de 50 caracteres" });
+        }
+        // Validar que la descripción no tenga más de 200 caracteres
+        if (description.length > 200) {
+            return res.status(400).json({ message: "La descripción no puede tener más de 200 caracteres" });
+        }
+        // Validar que el estado activo sea un booleano
+        if (typeof isActive !== 'boolean') {
+            return res.status(400).json({ message: "El estado activo debe ser un booleano" });
+        }
+        // Validar que la imagen sea una URL válida si se proporciona
+        if (req.file && !req.file.path) {
+            return res.status(400).json({ message: "La imagen debe ser una URL válida" });
+        }
+        // Validar que la imagen tenga un formato permitido
+        const allowedFormats = ['jpg', 'jpeg', 'png', 'gif'];
+        if (req.file && !allowedFormats.includes(req.file.mimetype.split('/')[1])) {
+            return res.status(400).json({ message: "El formato de la imagen no es permitido" });
+        }
+        // Validar que la imagen no exceda los 2MB
+        if (req.file && req.file.size > 2 * 1024 * 1024) {
+            return res.status(400).json({ message: "La imagen no puede exceder los 2MB" });
+        }
+        // Validar que el nombre no tenga más de 50 caracteres
+        if (name.length > 50) {
+            return res.status(400).json({ message: "El nombre no puede tener más de 50 caracteres" });
+        }
+        // Validar que la descripción no tenga más de 200 caracteres
+        if (description.length > 200) {
+            return res.status(400).json({ message: "La descripción no puede tener más de 200 caracteres" });
+        }
+        // Validar que el estado activo sea un booleano
+        if (typeof isActive !== 'boolean') {
+            return res.status(400).json({ message: "El estado activo debe ser un booleano" });
+        }
+        // Validar que la imagen sea una URL válida si se proporciona
+        if (req.file && !req.file.path) {
+            return res.status(400).json({ message: "La imagen debe ser una URL válida" });
+        }
         // Link de imagen
         let imageURL = ""
         // Subir imagen a cloudinary si se proporciona una imagen en el cuerpo de la solicitud
