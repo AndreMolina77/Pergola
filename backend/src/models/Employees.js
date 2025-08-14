@@ -139,7 +139,9 @@ const employeesSchema = new Schema({
     type: Boolean,
     required: true,
     default: false
-  }
+  },
+  loginAttempts: { type: Number, default: 0 },
+  timeOut: { type: Date, default: null }
 }, {
   timestamps: true,
   strict: false

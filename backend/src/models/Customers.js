@@ -165,7 +165,9 @@ const customersSchema = new Schema({
     budget: {
         type: String,
         trim: true
-    }
+    },
+    loginAttempts: { type: Number, default: 0 },
+    timeOut: { type: Date, default: null }
 }, {
     timestamps: true,
     strict: false

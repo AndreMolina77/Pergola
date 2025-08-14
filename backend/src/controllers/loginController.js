@@ -7,6 +7,7 @@ import bcryptjs from "bcryptjs"
 import jsonwebtoken from "jsonwebtoken"
 import { config } from "../utils/config.js"
 import { API } from "../utils/api.js"
+
 //POST (CREATE)
 loginController.login = async (req, res) => {
     const {email, password, rememberMe} = req.body
@@ -19,6 +20,7 @@ loginController.login = async (req, res) => {
         console.log("Email recibido:", email)
         console.log("Password recibido:", password ? "[PRESENTE]" : "[AUSENTE]")
         console.log("No es admin, verificando otros usuarios...")
+
         //Tipos de usuario: admin, empleados, clientes
         if (email === config.CREDENTIALS.email && password === config.CREDENTIALS.password) {
             console.log("LOGIN ADMIN EXITOSO")
@@ -40,16 +42,19 @@ loginController.login = async (req, res) => {
                     }
                     console.log("Admin data from BD:", adminData)
                 }
+
                 userType = "admin"
                 userFound = {
                     _id: "admin", 
                     email: config.CREDENTIALS.email,
                     ...adminData
                 }
+
                 //TOKEN para admin
-                jsonwebtoken.sign( { id: "admin", email: config.CREDENTIALS.email, userType: "admin", ...adminData }, 
+                jsonwebtoken.sign( 
+                    { id: "admin", email: config.CREDENTIALS.email, userType: "admin", ...adminData }, 
                     config.JWT.secret, 
-                    { expiresIn: rememberMe ? "30d" : config.JWT.expiresIn }, // 30 dias si recordarme, sino el tiempo normal
+                    { expiresIn: rememberMe ? "30d" : config.JWT.expiresIn },
                     (err, token) => {
                         if(err) {
                             console.log("Error generando token:", err)
@@ -59,7 +64,7 @@ loginController.login = async (req, res) => {
                             httpOnly: true,
                             secure: process.env.NODE_ENV === 'production',
                             sameSite: 'lax',
-                            maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000 // 30 dias vs 24 horas
+                            maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000
                         })
                         console.log("Token generado y cookie establecida para admin")
                         res.json({message: "Inicio de sesión exitoso"})
@@ -68,12 +73,12 @@ loginController.login = async (req, res) => {
                 return
             } catch (error) {
                 console.log("Error obteniendo datos de admin:", error)
-                // Continuar con datos por defecto si hay error
                 res.status(500).json({message: "Error interno del servidor"})
             }
-        } 
-        // Si no es admin, verificar credenciales incorrectas inmediatamente
+        }
+
         console.log("No es admin, verificando otros usuarios...")
+
         // Buscar en empleados primero
         userFound = await loginModel.findOne({email})
         if (userFound) {
@@ -88,24 +93,52 @@ loginController.login = async (req, res) => {
                 userType = "customer"
             }
         }
-        // Si no se encuentra el usuario
+
         if (!userFound) {
             console.log("Usuario no encontrado")
             return res.status(401).json({message: "El usuario no existe"})
         }
+
+        // 🔒 INICIO DE CÓDIGO NUEVO: Verificar bloqueo por intentos
+        if (userType !== "admin") {
+            if (userFound.timeOut !== null && Date.now() > userFound.timeOut) {
+                const remainingMinutes = Math.floor((userFound.timeOut - Date.now()) / 60000)
+                return res.status(401).json({message: "El usuario está bloqueado", remainingMinutes: remainingMinutes})
+            }
+        }
+
         // Verificar contraseña para usuarios no-admin
         console.log("Verificando contraseña...")
-        const isMatch = await bcryptjs.compare(password, userFound.password)
-        if (!isMatch) {
-            console.log("Contraseña incorrecta")
-            return res.status(401).json({message: "Contraseña incorrecta"})
+        if (userType !== "admin") {
+            const isMatch = await bcryptjs.compare(password, userFound.password)
+            if (!isMatch) {
+                console.log("Contraseña incorrecta")
+
+                userFound.loginAttempts += 1
+
+                if (userFound.loginAttempts >= 3) {
+                    userFound.timeOut = Date.now() + 3600000 * 24 // 24 horas
+                    await userFound.save()
+                    return res.status(403).json({message: "Contraseña incorrecta", remainingMinutes: 0})
+                }
+
+                await userFound.save()
+                return res.status(403).json({message: "Contraseña incorrecta"})
+            }
+
+            // Limpiar intentos fallidos y desbloquear
+            userFound.loginAttempts = 0
+            userFound.timeOut = null
+            await userFound.save()
         }
+        // 🔒 FIN DE CÓDIGO NUEVO
+
         console.log("Contraseña correcta")
         //TOKEN para empleados/clientes
         jsonwebtoken.sign(
             {id: userFound._id, userType, email: userFound.email, name: userFound.name, lastName: userFound.lastName}, 
             config.JWT.secret, 
-            { expiresIn: rememberMe ? "30d" : config.JWT.expiresIn }, // 30 dias si recordarme, sino el tiempo normal
+            { expiresIn: rememberMe ? "30d" : config.JWT.expiresIn },
             (err, token) => {
                 if(err) {
                     console.log("Error generando token:", err)
@@ -115,7 +148,7 @@ loginController.login = async (req, res) => {
                     httpOnly: true,
                     secure: process.env.NODE_ENV === 'production',
                     sameSite: 'lax',
-                    maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000 // 30 dias vs 24 horas
+                    maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000
                 })
                 console.log("🍪 Token generado y cookie establecida")
                 res.status(200).json({message: "Inicio de sesión exitoso"})
@@ -126,4 +159,5 @@ loginController.login = async (req, res) => {
         res.status(500).json({message: "Error interno del servidor"})
     }
 }
+
 export default loginController
