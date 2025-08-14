@@ -6,16 +6,31 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 
 // Componente modal para formularios dinámicos
 const FormModal = ({isOpen, onClose, onSubmit, title, fields, initialData = {}, isLoading = false, submitButtonText = 'Guardar'}) => {
-  // Estados para mostrar/ocultar contraseñas, previews de imágenes y archivos seleccionados
+  // Estados para mostrar/ocultar contraseñas, previews de imágenes y archivos seleccionados, y si el formulario está inicializado
   const [showPasswords, setShowPasswords] = useState({})
   const [imagePreviews, setImagePreviews] = useState({})
   const [imageArrays, setImageArrays] = useState({})
   const [selectedFiles, setSelectedFiles] = useState({})
+  const isInitialized = useRef(false)
   // Configura react-hook-form
   const { register, handleSubmit, formState: { errors }, reset, watch, setValue } = useForm({
     mode: 'onChange', // Validar en tiempo real
     defaultValues: {}
   })
+  // Función para limpiar states}}
+  const clearStates = useCallback(() => {
+    setShowPasswords({})
+    setImagePreviews({})
+    setImageArrays({})
+    setSelectedFiles({})
+  }, [])
+  // Efecto para reset cuando se cierra el modal
+  useEffect(() => {
+    if (!isOpen) {
+      clearStates()
+      isInitialized.current = false
+    }
+  }, [isOpen, clearStates])
   // Inicializa el formulario cuando se abre el modal
   useEffect(() => {
     if (isOpen && fields && !isInitialized.current) {

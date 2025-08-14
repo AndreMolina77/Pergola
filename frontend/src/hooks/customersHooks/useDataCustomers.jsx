@@ -4,7 +4,7 @@ import { toast } from "react-hot-toast"
 // Hook para manejar datos de cliente
 const useDataCustomers = () => {
   const API = "http://localhost:4000/api/customers"
-  const [customers, setCustomers] = useState([]) // estado de cliente
+  const [customers, setCustomers] = useState([]) // clientes
   const [loading, setLoading] = useState(true) // estado de carga
 
   // Obtiene los cliente desde el backend
@@ -19,7 +19,7 @@ const useDataCustomers = () => {
         return
       }
       // Si hay error en la respuesta, lanza excepción
-      if (!response.ok) throw new Error("Hubo un error al obtener los cliente")
+      if (!response.ok) throw new Error("Hubo un error al obtener los clientes")
       // Si todo bien, guarda los datos
       const data = await response.json()
       setCustomers(data)

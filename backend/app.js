@@ -16,6 +16,7 @@ import reviewsRoutes from "./src/routes/reviews.js"
 import transactionsRoutes from "./src/routes/transactions.js"
 import refundsRoutes from "./src/routes/refunds.js"
 import suppliersRoutes from "./src/routes/suppliers.js"
+import designElementsRoutes from "./src/routes/designElements.js"
 import loginRoutes from "./src/routes/login.js"
 import logoutRoutes from "./src/routes/logout.js"
 import signupRoutes from "./src/routes/signup.js"
@@ -60,5 +61,5 @@ app.use("/api/reviews", validateAuthToken(["admin", "colaborador", "customer"]),
 app.use("/api/refunds", validateAuthToken(["admin", "colaborador", "customer"]), refundsRoutes)
 app.use("/api/transactions", validateAuthToken(["admin", "colaborador", "customer"]), transactionsRoutes)
 app.use("/api/suppliers", validateAuthToken(["admin", "colaborador"]), suppliersRoutes) 
-
+app.use("/api/designelements", validateAuthToken(["admin", "colaborador"]), designElementsRoutes)
 export default app

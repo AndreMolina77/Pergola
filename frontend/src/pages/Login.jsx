@@ -189,12 +189,6 @@ const Login = () => {
                   ¿Olvidaste tu contraseña?
                 </button>
               </div>
-              {/* Social Login Buttons */}
-              <div className="space-y-4 my-6">
-                <AppleAuthButton />
-                <GoogleButton />
-                <FacebookAuthButton />
-              </div>
               {/* Login Button */}
               <button
                 type="submit"

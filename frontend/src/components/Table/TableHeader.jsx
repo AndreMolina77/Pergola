@@ -1,5 +1,4 @@
 import TableActions from './TableActions.jsx'
-
 // Componente para mostrar el encabezado de la tabla con título, subtítulo y barra de acciones
 const TableHeader = ({ 
   title,                // Título principal

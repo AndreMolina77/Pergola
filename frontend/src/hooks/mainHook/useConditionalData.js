@@ -7,8 +7,12 @@ import useDataProducts from '../productsHooks/useDataProducts'
 import useDataRawMaterials from '../rawMaterialsHooks/useDataRawMaterials'
 import useDataReviews from '../ReviewsHooks/useDataReviews'
 import useDataCustomDesigns from '../CustomDesignsHooks/useDataCustomDesigns'
-import useDataCustomers from '../customersHooks/useDataCustomers.jsx'
-import useDataEmployees from '../employeesHooks/useDataEmployees.jsx'
+import useDataCustomers from '../customersHooks/useDataCustomers'
+import useDataEmployees from '../employeesHooks/useDataEmployees'
+import useDataOrders from '../ordersHooks/useDataOrders'
+import useDataRefunds from '../refundsHooks/useDataRefunds'
+import useDataTransactions from '../transactionsHooks/useDataTransactions'
+import useDataDesignElements from '../designElementsHooks/useDataDesignElements'
 
 // Hook principal para obtener datos condicionales según permisos del usuario
 export const useConditionalData = () => {
@@ -24,7 +28,10 @@ export const useConditionalData = () => {
   const allCustomDesignsData = useDataCustomDesigns()
   const allCustomersData = useDataCustomers()
   const allEmployeesData = useDataEmployees()
-  
+  const allOrdersData = useDataOrders()
+  const allRefundsData = useDataRefunds()
+  const allTransactionsData = useDataTransactions()
+  const allDesignElementsData = useDataDesignElements()
   // Función para verificar si el usuario tiene acceso a una sección
   const canAccess = (section) => {
     if (!user?.userType) return false
@@ -50,8 +57,12 @@ export const useConditionalData = () => {
     rawmaterials: [],
     reviews: [],
     customdesigns: [],
+    designelements: [],
     customers: [],
-    employees: []
+    employees: [],
+    orders: [],
+    refunds: [],
+    transactions: []
   }
   // Retorna los datos según permisos
   return {
@@ -60,11 +71,15 @@ export const useConditionalData = () => {
     subcategoriesData: canAccess('subcategories') ? allSubcategoriesData : emptyData,
     collectionsData: canAccess('collections') ? allCollectionsData : emptyData,
     productsData: canAccess('products') ? allProductsData : emptyData,
-    rawmaterialsData: canAccess('rawmaterials') ? allRawMaterialsData : emptyData,
+    rawMaterialsData: canAccess('rawmaterials') ? allRawMaterialsData : emptyData,
     reviewsData: canAccess('reviews') ? allReviewsData : emptyData,
     customDesignsData: canAccess('customdesigns') ? allCustomDesignsData : emptyData,
     customersData: canAccess('customers') ? allCustomersData: emptyData,
     employeesData: canAccess('employees') ? allEmployeesData: emptyData,
+    ordersData: canAccess('orders') ? allOrdersData: emptyData,
+    refundsData: canAccess('refunds') ? allRefundsData: emptyData,
+    transactionsData: canAccess('transactions') ? allTransactionsData: emptyData,
+    designElementsData: canAccess('designelements') ? allDesignElementsData: emptyData,
     canAccess // expone la función para uso
   }
 }

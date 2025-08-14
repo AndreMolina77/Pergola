@@ -96,7 +96,6 @@ export const employeesConfig = {
     { name: 'isVerified', type: 'checkbox', label: 'Verificado' }
   ]
 }
- 
 // Configuracion para Categorias
 export const categoriesConfig = {
   title: "Categorías",
@@ -366,5 +365,192 @@ export const customDesignsConfig = {
     { name: 'decoration', type: 'text', label: 'Decoración', required: true, placeholder: 'Ej: pulsera' },
     { name: 'clasp', type: 'text', label: 'Cierre', required: true, placeholder: 'Ej: clasp' },
     { name: 'customerComments', type: 'textarea', label: 'Comentarios del Cliente', required: true, placeholder: 'Ej: excelente diseño' }
+  ]
+}
+// Configuración para Elementos de Diseño
+export const designElementsConfig = {
+  title: "Elementos de Diseño",
+  columns: [
+    { key: 'name', label: 'Nombre', sortable: true, searchable: true },
+    { key: 'type', label: 'Tipo', sortable: true, searchable: true },
+    { key: 'image', label: 'Imagen', type: 'image' },
+    { key: 'createdAt', label: 'Fecha de Creación', sortable: true, type: 'date' }
+  ],
+  actions: {
+    canAdd: true,
+    canEdit: true,
+    canDelete: true,
+    canExport: true,
+    canView: true
+  },
+  formFields: [
+    { name: 'name', type: 'text', label: 'Nombre', required: true, placeholder: 'Ej: Anillo' },
+    { name: 'type', type: 'select', label: 'Tipo', required: true, options: [
+      { value: 'anillo', label: 'Anillo' },
+      { value: 'pulseras', label: 'Pulsera' },
+      { value: 'cadenas', label: 'Cadena' },
+      { value: 'otro', label: 'Otro' }
+    ] },
+    { name: 'image', type: 'image', label: 'Imagen', accept: 'image/*', placeholder: 'Seleccionar imagen' }
+  ]
+}
+// Configuración para pedidos
+export const ordersConfig = {
+  title: "Pedidos",
+  columns: [
+    { key: 'orderCode', label: 'Código de Pedido', sortable: true, searchable: true },
+    { key: 'customer', label: 'Cliente', sortable: true, searchable: true },
+    { key: 'receiver', label: 'Receptor', sortable: true, searchable: true },
+    { key: 'timetable', label: 'Horario', sortable: true, searchable: true },
+    { key: 'mailingAddress', label: 'Dirección de Envío', sortable: true, searchable: true },
+    { key: 'paymentMethod', label: 'Método de Pago', sortable: true, searchable: true },
+    { key: 'items', label: 'Items', type: 'badge-list' },
+    { key: 'subtotal', label: 'Subtotal', sortable: true, type: 'currency' },
+    { key: 'total', label: 'Total', sortable: true, type: 'currency' },
+    { key: 'status', label: 'Estado', sortable: true, type: 'badge' },
+    { key: 'paymentStatus', label: 'Estado de Pago', sortable: true, type: 'badge' },
+    { key: 'deliveryDate', label: 'Fecha de Entrega', sortable: true, type: 'date' },
+    { key: 'createdAt', label: 'Fecha de Creación', sortable: true, type: 'date' }
+  ],
+  actions: {
+    canAdd: true,
+    canEdit: true,
+    canDelete: true,
+    canExport: true,
+    canView: true
+  },
+  formFields: [
+    { name: 'orderCode', type: 'text', label: 'Código de Pedido', required: true, placeholder: 'Ej: 001' },
+    { name: 'customer', type: 'select', label: 'Cliente', required: true, options: 'customers' },
+    { name: 'receiver', type: 'text', label: 'Receptor', required: true, placeholder: 'Ej: Juan Pérez' },
+    { name: 'timetable', type: 'text', label: 'Horario', required: true, placeholder: 'Ej: 10:00 - 12:00' },
+    { name: 'mailingAddress', type: 'text', label: 'Dirección de Envío', required: true, placeholder: 'Ej: Calle 123, Ciudad, País' },
+    { name: 'paymentMethod', type: 'select', label: 'Método de Pago', required: true,
+      options: [
+        { value: 'efectivo', label: 'Efectivo' },
+        { value: 'tarjeta de crédito', label: 'Tarjeta de Crédito' },
+        { value: 'transferencia', label: 'Transferencia' },
+        { value: 'paypal', label: 'Paypal' },
+        { value: 'otro', label: 'Otro' }
+      ]
+    },
+    { name: 'items', type: 'select-multiple', label: 'Items', required: true, options: 'products' },
+    { name: 'subtotal', type: 'number', label: 'Subtotal', required: true, placeholder: '0.00', min: 0.01, step: 0.01 },
+    { name: 'total', type: 'number', label: 'Total', required: true, placeholder: '0.00', min: 0.01, step: 0.01 },
+    { name: 'status', type: 'select', label: 'Estado', required: true,
+      options: [
+        { value: 'pendiente', label: 'Pendiente' },
+        { value: 'enviado', label: 'Enviado' },
+        { value: 'entregado', label: 'Entregado' },
+        { value: 'cancelado', label: 'Cancelado' }
+      ]
+    },
+    { name: 'paymentStatus', type: 'select', label: 'Estado de Pago', required: true,
+      options: [
+        { value: 'pendiente', label: 'Pendiente' },
+        { value: 'pagado', label: 'Pagado' },
+        { value: 'reembolsado', label: 'Reembolsado' },
+        { value: 'fallido', label: 'Fallido' }
+      ]
+    },
+    { name: 'deliveryDate', type: 'date', label: 'Fecha de Entrega', required: true }
+  ]
+}
+// Configuracion para reembolsos
+export const refundsConfig = {
+  title: "Reembolsos",
+  columns: [
+    { key: 'refundCode', label: 'Código de Reembolso', sortable: true, searchable: true },
+    { key: 'order', label: 'Pedido', sortable: true, searchable: true },
+    { key: 'customer', label: 'Cliente', sortable: true, searchable: true },
+    { key: 'requestDate', label: 'Fecha de Solicitud', sortable: true, type: 'date' },
+    { key: 'reason', label: 'Motivo', sortable: true, searchable: true },
+    { key: 'comments', label: 'Comentarios', searchable: true },
+    { key: 'items', label: 'Items', type: 'badge-list' },
+    { key: 'status', label: 'Estado', sortable: true, type: 'badge' },
+    { key: 'amount', label: 'Monto', sortable: true, type: 'currency' },
+    { key: 'refundMethod', label: 'Método de Reembolso', sortable: true, searchable: true }
+  ],
+  actions: {
+    canAdd: true,
+    canEdit: true,
+    canDelete: true,
+    canExport: true,
+    canView: true
+  },
+  formFields: [
+    { name: 'refundCode', type: 'text', label: 'Código de Reembolso', required: true, placeholder: 'Ej: 001' },
+    { name: 'order', type: 'select', label: 'Pedido', required: true, options: 'orders' },
+    { name: 'customer', type: 'select', label: 'Cliente', required: true, options: 'customers' },
+    { name: 'requestDate', type: 'date', label: 'Fecha de Solicitud', required: true },
+    { name: 'reason', type: 'text', label: 'Motivo', required: true, placeholder: 'Ej: Producto defectuoso' },
+    { name: 'comments', type: 'textarea', label: 'Comentarios', required: true, placeholder: 'Ej: El producto llegó con daños visibles' },
+    { name: 'items', type: 'select-multiple', label: 'Items', required: true, options: 'products' },
+    { name: 'status', type: 'select', label: 'Estado', required: true,
+      options: [
+        { value: 'pendiente', label: 'Pendiente' },
+        { value: 'aprobado', label: 'Aprobado' },
+        { value: 'rechazado', label: 'Rechazado' }
+      ]
+    },
+    { name: 'amount', type: 'number', label: 'Monto', required: true, placeholder: '0.00', min: 0.01, step: 0.01 },
+    { name: 'refundMethod', type: 'select', label: 'Método de Reembolso', required: true,
+      options: [
+        { value: 'tarjeta de crédito', label: 'Tarjeta de Crédito' },
+        { value: 'transferencia', label: 'Transferencia' },
+        { value: 'paypal', label: 'Paypal' },
+        { value: 'otro', label: 'Otro' }
+      ]
+    }
+  ]
+}
+// Configuracion para transacciones
+export const transactionsConfig = {
+  title: "Transacciones",
+  columns: [
+    { key: 'transactionCode', label: 'Código de Transacción', sortable: true, searchable: true },
+    { key: 'order', label: 'Pedido', sortable: true, searchable: true },
+    { key: 'customer', label: 'Cliente', sortable: true, searchable: true },
+    { key: 'amount', label: 'Monto', sortable: true, type: 'currency' },
+    { key: 'type', label: 'Tipo', sortable: true, searchable: true },
+    { key: 'status', label: 'Estado', sortable: true, type: 'badge' },
+    { key: 'paymentMethod', label: 'Método de Pago', sortable: true, searchable: true },
+    { key: 'createdAt', label: 'Fecha de Creación', sortable: true, type: 'date' }
+  ],
+  actions: {
+    canAdd: true,
+    canEdit: true,
+    canDelete: true,
+    canExport: true,
+    canView: true
+  },
+  formFields: [
+    { name: 'transactionCode', type: 'text', label: 'Código de Transacción', required: true, placeholder: 'Ej: 001' },
+    { name: 'order', type: 'select', label: 'Pedido', required: true, options: 'orders' },
+    { name: 'customer', type: 'select', label: 'Cliente', required: true, options: 'customers' },
+    { name: 'amount', type: 'number', label: 'Monto', required: true, placeholder: '0.00', min: 0.01, step: 0.01 },
+    { name: 'type', type: 'select', label: 'Tipo', required: true,
+      options: [
+        { value: 'pago', label: 'Pago' },
+        { value: 'reembolso', label: 'Reembolso' },
+        { value: 'ajuste', label: 'Ajuste' }
+      ]
+    },
+    { name: 'status', type: 'select', label: 'Estado', required: true,
+      options: [
+        { value: 'pendiente', label: 'Pendiente' },
+        { value: 'completado', label: 'Completado' },
+        { value: 'cancelado', label: 'Cancelado' }
+      ]
+    },
+    { name: 'paymentMethod', type: 'select', label: 'Método de Pago', required: true,
+      options: [
+        { value: 'efectivo', label: 'Efectivo' },
+        { value: 'tarjeta de crédito', label: 'Tarjeta de Crédito' },
+        { value: 'transferencia', label: 'Transferencia' },
+        { value: 'paypal', label: 'Paypal' },
+        { value: 'otro', label: 'Otro' }
+      ]
+    }
   ]
 }

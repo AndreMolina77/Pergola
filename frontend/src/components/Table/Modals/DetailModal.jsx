@@ -1,5 +1,5 @@
 // Importa iconos y el modal base
-import { Package, Tag, DollarSign, Star, Hash, FileText, Eye, Image, Layers, Building, Boxes, MessageSquare, CheckCircle, XCircle, Gem, Archive, Palette, Calendar, User, Mail, Phone, MapPin, Ruler, Paintbrush, Link } from 'lucide-react'
+import { Package, Tag, DollarSign, Star, Hash, FileText, Eye, Image, Layers, Building, Boxes, MessageSquare, CheckCircle, XCircle, Gem, Archive, Palette, Calendar, User, Mail, Phone, MapPin, Ruler, Paintbrush, Link, CreditCard, RefreshCcw, Receipt } from 'lucide-react'
 import BaseModal from './BaseModal'
 
 // Componente modal para mostrar detalles de un elemento
@@ -34,12 +34,15 @@ const DetailModal = ({ isOpen, onClose, data, title = "Detalles", type = "generi
       createdAt: Calendar,
       updatedAt: Calendar,
       purchaseDate: Calendar,
+      requestDate: Calendar,
+      deliveryDate: Calendar,
       // Usuarios y personas
       name: User,
       lastName: User,
       contactPerson: User,
       username: Hash,
       customer: User,
+      order: Package,
       preferredColors: Palette,
       preferredMaterials: Boxes, 
       preferredJewelStyle: Gem, 
@@ -57,6 +60,7 @@ const DetailModal = ({ isOpen, onClose, data, title = "Detalles", type = "generi
       piecePrice: DollarSign,
       productionCost: DollarSign,
       discount: DollarSign,
+      amount: DollarSign,
       // Productos y materiales
       stock: Archive,
       quantity: Archive,
@@ -69,6 +73,8 @@ const DetailModal = ({ isOpen, onClose, data, title = "Detalles", type = "generi
       status: Tag,
       type: Tag,
       movementType: Tag,
+      paymentMethod: CreditCard,
+      refundMethod: RefreshCcw,
       // Proveedores
       provider: Building,
       supplier: Building,
@@ -86,6 +92,9 @@ const DetailModal = ({ isOpen, onClose, data, title = "Detalles", type = "generi
       rating: Star,
       // Productos
       codeProduct: Hash,
+      orderCode: Hash,
+      refundCode: Receipt,
+      transactionCode: Receipt,
       rawMaterialsUsed: Boxes,
       highlighted: Star,
       hasDiscount: DollarSign,
@@ -265,7 +274,7 @@ const DetailModal = ({ isOpen, onClose, data, title = "Detalles", type = "generi
             { key: 'updatedAt', label: 'Última Actualización', type: 'date' }
           ]
         }
-      case 'customDesigns':
+      case 'customdesigns':
         return {
           fields: [
             { key: 'codeRequest', label: 'Código de Solicitud', type: 'text' },
@@ -277,6 +286,61 @@ const DetailModal = ({ isOpen, onClose, data, title = "Detalles", type = "generi
             { key: 'customerComments', label: 'Comentarios del Cliente', type: 'text' },
             { key: 'createdAt', label: 'Fecha de solicitud', type: 'date' },
             { key: 'updatedAt', label: 'Fecha de actualización', type: 'date' },
+          ]
+        }
+      case 'designelements':
+        return {
+          fields: [
+            { key: 'name', label: 'Nombre', type: 'text' },
+            { key: 'type', label: 'Tipo', type: 'text' },
+            { key: 'image', label: 'Imagen', type: 'image' },
+            { key: 'createdAt', label: 'Fecha de creación', type: 'date' },
+          ]
+        }
+      case 'orders':
+        return {
+          fields: [
+            { key: 'orderCode', label: 'Código de Pedido', type: 'text' },
+            { key: 'customer', label: 'Cliente', type: 'customer' },
+            { key: 'receiver', label: 'Receptor', type: 'text' },
+            { key: 'timetable', label: 'Horario', type: 'text' },
+            { key: 'mailingAddress', label: 'Dirección de Envío', type: 'text' },
+            { key: 'paymentMethod', label: 'Método de Pago', type: 'text' },
+            { key: 'items', label: 'Items', type: 'array' },
+            { key: 'subtotal', label: 'Subtotal', type: 'currency' },
+            { key: 'total', label: 'Total', type: 'currency' },
+            { key: 'status', label: 'Estado', type: 'badge' },
+            { key: 'paymentStatus', label: 'Estado de Pago', type: 'badge' },
+            { key: 'deliveryDate', label: 'Fecha de Entrega', type: 'date' },
+            { key: 'createdAt', label: 'Fecha de Creación', type: 'date' }
+          ]
+        }
+      case 'refunds':
+        return {
+          fields: [
+            { key: 'refundCode', label: 'Código de Reembolso', type: 'text' },
+            { key: 'order', label: 'Pedido', type: 'reference' },
+            { key: 'customer', label: 'Cliente', type: 'customer' },
+            { key: 'requestDate', label: 'Fecha de Solicitud', type: 'date' },
+            { key: 'reason', label: 'Motivo', type: 'text' },
+            { key: 'comments', label: 'Comentarios', type: 'text' },
+            { key: 'items', label: 'Items', type: 'array' },
+            { key: 'status', label: 'Estado', type: 'badge' },
+            { key: 'amount', label: 'Monto', type: 'currency' },
+            { key: 'refundMethod', label: 'Método de Reembolso', type: 'text' }
+          ]
+        }
+      case 'transactions':
+        return {
+          fields: [
+            { key: 'transactionCode', label: 'Código de Transacción', type: 'text' },
+            { key: 'order', label: 'Pedido', type: 'reference' },
+            { key: 'customer', label: 'Cliente', type: 'customer' },
+            { key: 'amount', label: 'Monto', type: 'currency' },
+            { key: 'type', label: 'Tipo', type: 'text' },
+            { key: 'status', label: 'Estado', type: 'badge' },
+            { key: 'paymentMethod', label: 'Método de Pago', type: 'text' },
+            { key: 'createdAt', label: 'Fecha de Creación', type: 'date' }
           ]
         }
       default:
@@ -338,7 +402,7 @@ const DetailModal = ({ isOpen, onClose, data, title = "Detalles", type = "generi
       case 'reference':
         // Muestra información de referencia si es objeto
         if (typeof value === 'object' && value) {
-          const displayName = value.name || value.contactPerson || value._id?.slice(-6) || 'Sin nombre'
+          const displayName = value.name || value.contactPerson || value.orderCode || value.code || value._id?.slice(-6) || 'Sin nombre'
           return (
             <div className="bg-[#E8E1D8] px-3 py-2 rounded-lg border">
               <div className="font-medium text-[#3D1609]">{displayName}</div>
@@ -349,6 +413,16 @@ const DetailModal = ({ isOpen, onClose, data, title = "Detalles", type = "generi
           )
         }
         return <span className="text-gray-500 italic">Referencia no encontrada</span>
+        case 'customer':
+          if (typeof value === 'object' && value.name) {
+            return (
+              <div>
+                <div className="font-medium">{value.name} {value.lastName}</div>
+                <div className="text-sm text-gray-600">{value.email}</div>
+              </div>
+            )
+          }
+          return <span className="text-gray-500 italic">Cliente no encontrado</span>
       case 'array':
         // Muestra lista de elementos si es array
         if (Array.isArray(value) && value.length > 0) {

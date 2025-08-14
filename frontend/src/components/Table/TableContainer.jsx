@@ -6,7 +6,7 @@ import ConfirmModal from './Modals/ConfirmModal'
 import DetailModal from './Modals/DetailModal'
 
 // Componente contenedor principal para la tabla y sus acciones/modales
-const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, isLoading = false, className = "", categoriesData, subcategoriesData, collectionsData, suppliersData, customersData, rawMaterialsData, productsData, employeesData}) => {
+const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, isLoading = false, className = "", categoriesData, subcategoriesData, collectionsData, suppliersData, customersData, rawMaterialsData, productsData, ordersData, refundsData, transactionsData, employeesData, designElementsData}) => {
   // Estados para búsqueda, ordenamiento, paginación y modales
   const [searchValue, setSearchValue] = useState("")
   const [sortBy, setSortBy] = useState(null)
@@ -74,6 +74,16 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
           }))
         }
       }
+      // Opciones para empleados
+      if (field.options === 'employees' && employeesData?.employees) {
+        return {
+          ...field,
+          options: employeesData.employees.map(emp => ({
+            value: emp._id,
+            label: `${emp.name} (${emp.email})`
+          }))
+        }
+      }
       // Opciones para materias primas
       if (field.options === 'rawMaterials' && rawMaterialsData?.rawMaterials) {
         return {
@@ -94,11 +104,50 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
           }))
         }
       }
+      // Opciones para pedidos
+      if (field.options === 'orders' && ordersData?.orders) {
+        return {
+          ...field,
+          options: ordersData.orders.map(order => ({
+            value: order._id,
+            label: `${order.name} ${order.description}`
+          }))
+        }
+      }
+      // Opciones para reembolsos
+      if (field.options === 'refunds' && refundsData?.refunds) {
+        return {
+          ...field,
+          options: refundsData.refunds.map(refund => ({
+            value: refund._id,
+            label: `${refund.name} ${refund.description}`
+          }))
+        }
+      }
+      // Opciones para transacciones
+      if (field.options === 'transactions' && transactionsData?.transactions) {
+        return {
+          ...field,
+          options: transactionsData.transactions.map(transaction => ({
+            value: transaction._id,
+            label: `${transaction.name} ${transaction.description}`
+          }))
+        }
+      }
+      // Opciones para elementos de diseño
+      if (field.options === 'designElements' && designElementsData?.designElements) {
+        return {
+          ...field,
+          options: designElementsData.designElements.map(designElement => ({
+            value: designElement._id,
+            label: `${designElement.name} ${designElement.description}`
+          }))
+        }
+      }
       // Si no hay opciones dinámicas, retorna el campo tal cual
       return field
     })
-  }, [config.formFields, categoriesData?.categories, subcategoriesData?.subcategories, collectionsData?.collections, suppliersData?.suppliers, customersData?.customers, rawMaterialsData?.rawMaterials, productsData?.products])
-
+  }, [config.formFields, categoriesData?.categories, subcategoriesData?.subcategories, collectionsData?.collections, suppliersData?.suppliers, customersData?.customers, rawMaterialsData?.rawMaterials, productsData?.products, ordersData?.orders, refundsData?.refunds, transactionsData?.transactions, employeesData?.employees, designElementsData?.designElements])
   // Función para obtener el valor buscable de cada columna/item
   const getSearchableValue = (item, column) => {
     const value = item[column.key]
@@ -111,6 +160,9 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
       if (column.key === 'customer') {
         return `${value.name || ''} ${value.lastName || ''} ${value.email || ''} ${value.username || ''}`.toLowerCase()
       }
+      if (column.key === 'employee') {
+        return `${value.name || ''} ${value.lastName || ''} ${value.email || ''}`.toLowerCase()
+      }
       if (column.key === 'provider') {
         return `${value.name || ''} ${value.contactPerson || ''} ${value.email || ''}`.toLowerCase()
       }
@@ -122,6 +174,18 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
       }
       if (column.key === 'customdesigns') {
         return `${value.codeRequest || ''} ${value.piece || ''} ${value.base || ''} ${value.baseLength || ''} ${value.decoration || ''} ${value.clasp || ''} ${value.customerComments || ''}`.toLowerCase()
+      }
+      if (column.key === 'orders') {
+        return `${value.name || ''} ${value.description || ''} ${value.correlative || ''}`.toLowerCase()
+      }
+      if (column.key === 'refunds') {
+        return `${value.name || ''} ${value.description || ''} ${value.correlative || ''}`.toLowerCase()
+      }
+      if (column.key === 'transactions') {
+        return `${value.name || ''} ${value.description || ''} ${value.correlative || ''}`.toLowerCase()
+      }
+      if (column.key === 'designElements') {
+        return `${value.name || ''} ${value.description || ''} ${value.correlative || ''}`.toLowerCase()
       }
       // Valor por defecto para objetos
       return Object.values(value).join(' ').toLowerCase()
@@ -151,7 +215,6 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
     // Valor normal
     return value.toString().toLowerCase()
   }
-
   // Filtra y ordena los datos según búsqueda y ordenamiento
   const filteredAndSortedData = useMemo(() => {
     let filtered = data
@@ -201,13 +264,11 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
     }
     return filtered
   }, [data, searchValue, sortBy, sortOrder, config.columns])
-
   // Datos paginados
   const paginatedData = useMemo(() => {
     const startIndex = (currentPage - 1) * pageSize
     return filteredAndSortedData.slice(startIndex, startIndex + pageSize)
   }, [filteredAndSortedData, currentPage, pageSize])
-
   // Handlers para búsqueda, ordenamiento, paginación y acciones
   const handleSearch = (value) => {
     setSearchValue(value)
@@ -255,6 +316,11 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
         typeof material === 'object' ? material._id : material
       )
     }
+    if (item.items && Array.isArray(item.items)) {
+      processedItem.items = item.items.map(item => 
+        typeof item === 'object' ? item._id : item
+      )
+    }
     setSelectedItem(processedItem)
     setShowEditModal(true)
   }
@@ -278,7 +344,11 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
         'reseñas': 'reviews',
         'diseñosunicos': 'customdesigns',
         'clientes': 'customers',
-        'empleados': 'employees'
+        'empleados': 'employees',
+        'pedidos': 'orders',
+        'reembolsos': 'refunds',
+        'transacciones': 'transactions',
+        'elementos de diseño': 'designElements'
       }
       modalType = typeMapping[normalizedTitle] || normalizedTitle
     }
