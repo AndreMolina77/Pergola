@@ -13,8 +13,8 @@ loginController.login = async (req, res) => {
     const {email, password, rememberMe} = req.body
 
     try {
-        let userFound //Se guarda el usuario encontrado
-        let userType //Se guarda el tipo de usuario (admin, colaborador o cliente)
+        let userFound; //Se guarda el usuario encontrado
+        let userType; //Se guarda el tipo de usuario (admin, colaborador o cliente)
         
         console.log("=== INICIO LOGIN ===")
         console.log("Email recibido:", email)
@@ -49,7 +49,6 @@ loginController.login = async (req, res) => {
                     email: config.CREDENTIALS.email,
                     ...adminData
                 }
-
                 //TOKEN para admin
                 jsonwebtoken.sign( 
                     { id: "admin", email: config.CREDENTIALS.email, userType: "admin", ...adminData }, 
@@ -99,11 +98,12 @@ loginController.login = async (req, res) => {
             return res.status(401).json({message: "El usuario no existe"})
         }
 
-        // 🔒 INICIO DE CÓDIGO NUEVO: Verificar bloqueo por intentos
+        // Manejo de bloqueo temporal por intentos fallidos (solo no-admin)
         if (userType !== "admin") {
-            if (userFound.timeOut !== null && Date.now() > userFound.timeOut) {
-                const remainingMinutes = Math.floor((userFound.timeOut - Date.now()) / 60000)
-                return res.status(401).json({message: "El usuario está bloqueado", remainingMinutes: remainingMinutes})
+            if (userFound.timeOut !== null && Date.now() < userFound.timeOut) {
+                const remainingMinutes = Math.ceil((userFound.timeOut - Date.now()) / 60000)
+                console.log(`Usuario bloqueado. Min restantes: ${remainingMinutes}`)
+                return res.status(401).json({message: "El usuario está bloqueado", remainingMinutes})
             }
         }
 

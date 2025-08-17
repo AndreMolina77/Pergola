@@ -12,27 +12,27 @@ cloudinary.config({
 })
 // CREATE (POST)
 categoriesController.postCategories = async (req, res) => {
-    try {
-        const { name, description, isActive } = req.body;
-        // Link de imagen
-        let imageURL = ""
-        // Subir imagen a cloudinary si se proporciona una imagen en el cuerpo de la solicitud
-        if (req.file) {
-            const result = await cloudinary.uploader.upload(req.file.path, {
-                folder: "categories",
-                allowed_formats: ["jpg", "jpeg", "png", "gif"],
-            })
-            imageURL = result.secure_url
-        }
-        const newCategory = new Categories({ name, description, image: imageURL, isActive });
-        // Guardar categoría
-        await newCategory.save();
-        // ESTADO DE CREACIÓN
-        res.status(201).json({ message: "Categoría creada con éxito", data: newCategory });
-    } catch (error) {
-        // ESTADO DE ERROR EN INPUT DEL CLIENTE
-        res.status(400).json({ message: "Error al crear categoría", error: error.message });
+  try {
+    const { name, description, isActive } = req.body;
+    // Link de imagen
+    let imageURL = ""
+    // Subir imagen a cloudinary si se proporciona una imagen en el cuerpo de la solicitud
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "categories",
+        allowed_formats: ["jpg", "jpeg", "png", "gif"],
+      })
+      imageURL = result.secure_url
     }
+    const newCategory = new Categories({ name, description, image: imageURL, isActive });
+    // Guardar categoría
+    await newCategory.save();
+    // ESTADO DE CREACIÓN
+    res.status(201).json({ message: "Categoría creada con éxito", data: newCategory });
+  } catch (error) {
+    // ESTADO DE ERROR EN INPUT DEL CLIENTE
+    res.status(400).json({ message: "Error al crear categoría", error: error.message });
+  }
 };
 // READ (GET ALL)
 categoriesController.getCategories = async (req, res) => {

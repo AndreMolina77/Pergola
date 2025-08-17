@@ -4,7 +4,7 @@ en la parte pública del sistema. Relacionada con `CustomDesigns`.
     {
         "type": "Cierre",
         "nombre": "Clasp",
-        "imageUrl": "http://example.com/clasp.png"
+        "image": "http://example.com/clasp.png"
     }
 ] */
 // Importar modelo y schema de mongoose

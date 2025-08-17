@@ -290,7 +290,7 @@ const Dashboard = () => {
         lineChartRef.current.destroy()
       }
     }
-  }, [])
+  },)
   return (
     <div className="p-6 bg-white min-h-screen font-[Nunito]">
       <div className="max-w-7xl mx-auto">

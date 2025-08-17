@@ -1,6 +1,6 @@
 const reviewsController = {};
 // Importo el modelo de reseñas
-import Reviews from "../models/Reviews.js";
+import Reviews from "../models/reviews.js";
 // Importo el modelo de productos
 import Products from "../models/Products.js";
 // Importo el modelo de clientes
