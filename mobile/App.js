@@ -2,7 +2,14 @@ import { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import CustomSplashScreen from './src/screens/SplashScreen';
+import OnboardingScreen from "./src/screens/OnboardingScreen";
+import JewelryPreferenceScreen from "./src/screens/JewelryPreferenceScreen";
+import SurveyScreen from "./src/screens/SurveyScreen";
+
 import MainApp from './src/MainApp'; 
+
+
+
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [appIsReady, setAppIsReady] = useState(false);
