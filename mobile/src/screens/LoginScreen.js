@@ -116,7 +116,7 @@ export default function LoginScreen({ navigation }) {
           />
         </TouchableOpacity>
         <TouchableOpacity style={styles.socialButton}>
-          <Text>Continuar con Facebook</Text>
+          <Text>Continuar con Facebookk</Text>
           <Image
             source={require("../../assets/facebook-icon.png")}
             style={styles.socialIcon}
