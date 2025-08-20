@@ -44,11 +44,24 @@ const useDataCustomers = () => {
     // Handler para agregar cliente
     onAdd: async (data) => {
       try {
+        let body
+        let headers = { credentials: "include" }
+        // Usa FormData si hay imagen
+        if (data.image && data.image instanceof File) {
+          const formData = new FormData()
+          Object.keys(data).forEach(key => {
+            formData.append(key, data[key])
+          })
+          body = formData
+        } else {
+          headers["Content-Type"] = "application/json"
+          body = JSON.stringify(data)
+        }
         const response = await fetch(`${API}/customers`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers,
           credentials: "include",
-          body: JSON.stringify(data)
+          body
         })
         if (!response.ok) {
           const errorData = await response.json()
@@ -65,16 +78,30 @@ const useDataCustomers = () => {
     // Handler para editar cliente
     onEdit: async (id, data) => {
       try {
+        let body
+        let headers = { credentials: "include" }
+        // Usa FormData si hay imagen
+        if (data.image && data.image instanceof File) {
+          const formData = new FormData()
+          Object.keys(data).forEach(key => {
+            formData.append(key, data[key])
+          })
+          body = formData
+        } else {
+          headers["Content-Type"] = "application/json"
+          body = JSON.stringify(data)
+        }
+        
         const response = await fetch(`${API}/customers/${id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body: JSON.stringify(data)
-        })
+          body
+        })        
         if (!response.ok) {
           const errorData = await response.json()
           throw new Error(errorData.message || "Error al actualizar cliente")
-        }
+        }        
         toast.success('Cliente actualizado exitosamente')
         fetchCustomers() 
       } catch (error) {

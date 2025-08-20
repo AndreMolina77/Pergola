@@ -5,7 +5,7 @@ import refundsController from "../controllers/refundsController.js"
 
 const router = express.Router()
 // Rutas que no requieren ningún parámetro en específico
-router.route()
+router.route("/")
     .get(refundsController.getRefunds)
     .post(refundsController.postRefunds)
 // Rutas que requieren un parámetro de id 

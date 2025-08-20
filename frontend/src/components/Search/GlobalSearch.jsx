@@ -286,7 +286,7 @@ const GlobalSearch = () => {
               type: 'reviews',
               typeName: 'Reseña',
               title: `Reseña ${review.rating}/5 estrellas`,
-              subtitle: customer ? `Por: ${review.customer.name} ${review.customer.lastName}` : 'Usuario anónimo',
+              subtitle: review ? `Por: ${review.customer.name} ${review.customer.lastName}` : 'Usuario anónimo',
               description: review.comment,
               data: review
             })
@@ -372,7 +372,7 @@ const GlobalSearch = () => {
               title: `Transacción #${transaction.transactionCode}`,
               subtitle: `Monto: ${transaction.amount}`,
               description: `Tipo: ${transaction.type}`,
-              data: refund
+              data: transaction
             })
           }
         })
@@ -391,7 +391,6 @@ const GlobalSearch = () => {
     JSON.stringify(employeesData.employees), 
     JSON.stringify(ordersData.orders), 
     JSON.stringify(reviewsData.reviews), 
-    JSON.stringify(salesData.sales),
     JSON.stringify(suppliersData.suppliers),
     JSON.stringify(categoriesData.categories),
     JSON.stringify(subcategoriesData.subcategories),
@@ -534,8 +533,8 @@ const GlobalSearch = () => {
               {searchCategories.slice(1).map(category => {
                 const IconComponent = category.icon
                 return (
-                  <div key={category.id} className="p-6 border border-gray-200 rounded-lg text-center hover:border-[#E07A5F] transition-colors">
-                    <IconComponent className="w-8 h-8 text-[#E07A5F] mx-auto mb-3" />
+                  <div key={category.id} className="p-6 border border-gray-200 rounded-lg text-center hover:border-[#A73249] transition-colors">
+                    <IconComponent className="w-8 h-8 text-[#A73249] mx-auto mb-3" />
                     <h3 className="font-medium text-[#7A6E6E] mb-1">{category.label}</h3>
                     <p className="text-sm text-gray-500">{category.count} registros</p>
                   </div>

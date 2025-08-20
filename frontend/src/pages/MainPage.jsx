@@ -21,24 +21,24 @@ const MainPage = () => {
     suppliersData,
     categoriesData,
     subcategoriesData,
+    employeesData,
     customersData,
     collectionsData,
     productsData,
-    rawmaterialsData,
+    rawMaterialsData,
     reviewsData,
     customDesignsData,
     ordersData,
     refundsData,
     transactionsData,
-    designElementsData,
-    canAccess
+    designElementsData
   } = useConditionalData()
   
   const handleLogout = async () => {
     await logout()
   }
   // Funcion handleExport
-  const handleDataExport = () => {
+  const handleDataExport = (format, data, sectionName) => {
     console.log(`Exportando ${data?.length || 0} elementos de ${sectionName} en formato ${format}`)
     
     if (!data || data.length === 0) {
@@ -110,7 +110,7 @@ const MainPage = () => {
         return (
           <div className="p-6 bg-white min-h-screen">
             <div className="max-w-7xl mx-auto">
-              <TableContainer config={productsConfig} {...productsData.createHandlers(API)} onExport={handleDataExport} categoriesData={categoriesData} subcategoriesData={subcategoriesData} collectionsData={collectionsData} rawMaterialsData={rawmaterialsData}/>
+              <TableContainer config={productsConfig} {...productsData.createHandlers(API)} onExport={handleDataExport} categoriesData={categoriesData} subcategoriesData={subcategoriesData} collectionsData={collectionsData} rawMaterialsData={rawMaterialsData}/>
             </div>
           </div>
         )
@@ -118,7 +118,7 @@ const MainPage = () => {
         return (
           <div className="p-6 bg-white min-h-screen">
             <div className="max-w-7xl mx-auto">
-              <TableContainer config={rawMaterialsConfig} {...rawmaterialsData.createHandlers(API)} onExport={handleDataExport} suppliersData={suppliersData}/>
+              <TableContainer config={rawMaterialsConfig} {...rawMaterialsData.createHandlers(API)} onExport={handleDataExport} suppliersData={suppliersData}/>
             </div>
           </div>
         )

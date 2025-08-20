@@ -70,7 +70,7 @@ const employeesSchema = new Schema({
     trim: true,
     validate: {
       validator: function(v) {
-        return v.trim() !== '' && /^(?:\+503\s?)?(6|7)\d{3}-?\d{4}$/.test(v);
+        return v.trim() !== '' && /^\+503[-\d]{8,12}$/.test(v);
       },
       message: "El teléfono no puede estar vacío y debe ser válido en El Salvador"
     }
@@ -119,13 +119,13 @@ const employeesSchema = new Schema({
   },
   profilePic: {
     type: String,
-    validate: {
-      validator: function(v) {
-        if (v == null) return true;
-        return v.trim() !== '' && /^https?:\/\/.+\.(jpg|jpeg|png|webp|svg)$/.test(v);
-      },
-      message: "La URL no puede estar vacía y debe ser válida (jpg/jpeg/png/webp/svg)"
-    }
+      validate: {
+        validator: function(v) {
+          if (v == null) return true;
+          return v.trim() !== '' && /^https?:\/\/.+\.(jpg|jpeg|png|webp|svg)$/.test(v);
+        },
+        message: "La URL no puede estar vacía y debe ser válida (jpg/jpeg/png/webp/svg)"
+      }
   },
   hireDate: {
     type: Date,

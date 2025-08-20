@@ -14,6 +14,16 @@ cloudinary.config({
 employeesController.postEmployees = async (req, res) => {
     try {
         const { name, lastName, username, email, phoneNumber, birthDate, DUI, password, userType, hireDate, isVerified } = req.body;
+        // Validaciones manuales ANTES de mongoose
+        const errors = [];
+        
+        if (!name || name.trim().length < 2) errors.push("Nombre inválido");
+        if (!lastName || lastName.trim().length < 2) errors.push("Apellido inválido");
+        if (!username || username.trim().length < 5) errors.push("Usuario debe tener al menos 5 caracteres");
+        if (!email || !/^[\w.-]+@([\w-]+\.)+[a-zA-Z]{2,}$/.test(email)) errors.push("Email inválido");
+        if (!phoneNumber || !/^\+503[-\d]{8,12}$/.test(phoneNumber)) errors.push("Teléfono debe ser formato +503XXXXXXXX");
+        if (!DUI || !/^\d{8}-\d$/.test(DUI)) errors.push("DUI debe tener formato 12345678-9");
+        if (!password || !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(password)) errors.push("Contraseña debe tener mayúsculas, minúsculas, números y caracter especial");
         // Link de imagen
         let profilePicURL = "";
         // Subir imagen a cloudinary si se proporciona una imagen en el cuerpo de la solicitud
@@ -34,8 +44,29 @@ employeesController.postEmployees = async (req, res) => {
             }
         });
     } catch (error) {
-        // ESTADO DE ERROR EN INPUT DEL EMPLEADO
-        res.status(400).json({ message: "Error al crear empleado", error: error.message });
+        console.error("💥 ERROR en postEmployees:", error);
+        
+        // Error de duplicados
+        if (error.code === 11000) {
+            const field = Object.keys(error.keyValue)[0];
+            return res.status(400).json({ 
+                message: `El ${field} ya existe en el sistema` 
+            });
+        }
+        
+        // Error de validación de mongoose
+        if (error.name === 'ValidationError') {
+            const errors = Object.values(error.errors).map(e => e.message);
+            return res.status(400).json({ 
+                message: "Error de validación", 
+                errors 
+            });
+        }
+
+        res.status(400).json({ 
+            message: "Error al crear empleado", 
+            error: error.message 
+        });
     }
 };
 // READ (GET ALL)
@@ -70,17 +101,19 @@ employeesController.getEmployee = async (req, res) => {
 // UPDATE (PUT)
 employeesController.putEmployees = async (req, res) => {
     try {
+        console.log("Body recibido:", req.body);
+        console.log("File recibido:", req.file);
         const updates = req.body;
         // Manejar la imagen si se proporciona
         if (req.file) {
             const result = await cloudinary.uploader.upload(req.file.path, {
-                folder: "customers",
+                folder: "employees",
                 allowed_formats: ["jpg", "jpeg", "png", "webp"]
             });
             updates.profilePic = result.secure_url;
         }
         // Actualizar empleado
-        const updatedEmployee = await Customers.findByIdAndUpdate( req.params.id, updates, { new: true } ).select('-password');
+        const updatedEmployee = await Employees.findByIdAndUpdate( req.params.id, updates, { new: true } ).select('-password');
         // Validar que el cliente si exista
         if (!updatedEmployee) {
             // ESTADO DE NO ENCONTRADO

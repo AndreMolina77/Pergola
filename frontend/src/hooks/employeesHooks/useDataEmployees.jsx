@@ -44,12 +44,26 @@ const useDataEmployees = () => {
     // Handler para agregar empleados
     onAdd: async (data) => {
       try {
+        let body
+        let headers = { credentials: "include" }
+        // Usa FormData si hay imagen
+        if (data.profilePic && data.profilePic instanceof File) {
+          const formData = new FormData()
+          Object.keys(data).forEach(key => {
+            formData.append(key, data[key])
+          })
+          body = formData
+        } else {
+          headers["Content-Type"] = "application/json"
+          body = JSON.stringify(data)
+        }
         const response = await fetch(`${API}/employees`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers,
           credentials: "include",
-          body: JSON.stringify(data)
+          body
         })
+        console.log("📨 Respuesta recibida - Status:", response.status);
         if (!response.ok) {
           const errorData = await response.json()
           throw new Error(errorData.message || "Error al registrar empleados")
@@ -57,7 +71,7 @@ const useDataEmployees = () => {
         toast.success('Empleado registrado exitosamente')
         fetchEmployees() 
       } catch (error) {
-        console.error("Error:", error)
+        console.error("💥 Error en onAdd:", error);
         toast.error(error.message || "Error al registrar empleado")
         throw error
       }
@@ -65,11 +79,22 @@ const useDataEmployees = () => {
     // Handler para editar empleado
     onEdit: async (id, data) => {
       try {
+        let body
+        let headers = { credentials: "include" }
+        // Usa FormData si hay imagen
+        if (data.profilePic && data.profilePic instanceof File) {
+          const formData = new FormData()
+          Object.keys(data).forEach(key => formData.append(key, data[key]))
+          body = formData
+        } else {
+          headers["Content-Type"] = "application/json"
+          body = JSON.stringify(data)
+        }
         const response = await fetch(`${API}/employees/${id}`, {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers,
           credentials: "include",
-          body: JSON.stringify(data)
+          body
         })
         if (!response.ok) {
           const errorData = await response.json()
@@ -86,7 +111,6 @@ const useDataEmployees = () => {
     // Handler para eliminar empleado
     onDelete: deleteEmployee // usa la función de borrar
   })
-
   // Borra empleado por ID
   const deleteEmployee = async (id) => {
     try {
@@ -103,7 +127,6 @@ const useDataEmployees = () => {
       toast.error("Error al eliminar empleado")
     }
   }
-
   // Retorna estados y funciones
   return {
     employees,

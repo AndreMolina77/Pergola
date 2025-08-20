@@ -290,14 +290,14 @@ const Dashboard = () => {
         lineChartRef.current.destroy()
       }
     }
-  },)
+  }, [])
   return (
     <div className="p-6 bg-white min-h-screen font-[Nunito]">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">Dashboard</h1>
-          <p className="text-gray-600">Resumen de tu tienda de arte</p>
+          <p className="text-gray-600">Resumen de tu joyería</p>
         </div>
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

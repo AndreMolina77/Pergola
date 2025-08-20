@@ -104,8 +104,9 @@ const SignUp = () => {
       toast.error('El email no es válido')
       return false
     }
-    if (phoneNumber.length < 9) { // 9 caracteres incluyendo el guión
-      toast.error('El teléfono debe tener el formato correcto (0000-0000)')
+    // En la función validateForm, modifica la validación del teléfono:
+    if (phoneNumber.length !== 13 || !phoneNumber.startsWith('+503')) {
+      toast.error('El teléfono debe tener el formato correcto (+5030000-0000)')
       return false
     }
     if (DUI.length !== 10) {
@@ -121,7 +122,7 @@ const SignUp = () => {
     const hireDateObj = new Date(hireDate)
     const today = new Date()
     if (birthDateObj >= today) {
-      toast.error('La fecha de nacimiento debe ser anterior a hoy')
+        
       return false
     }
     if (hireDateObj > today) {

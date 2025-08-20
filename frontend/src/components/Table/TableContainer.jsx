@@ -348,7 +348,7 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
         'pedidos': 'orders',
         'reembolsos': 'refunds',
         'transacciones': 'transactions',
-        'elementos de diseño': 'designElements'
+        'elementosdediseño': 'designElements'
       }
       modalType = typeMapping[normalizedTitle] || normalizedTitle
     }
@@ -400,7 +400,7 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
   // Handler para exportar
   const handleExport = (format) => {
     if (onExport) {
-      onExport(format, filteredAndSortedData)
+      onExport(format, filteredAndSortedData, config.title)
     } else {
       console.log(`Exportando ${filteredAndSortedData.length} elementos en formato ${format}`)
     }

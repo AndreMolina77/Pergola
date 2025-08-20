@@ -33,7 +33,7 @@ export const customersConfig = {
     { name: 'lastName', type: 'text', label: 'Apellido', required: true, placeholder: 'Ej: Pérez' },
     { name: 'username', type: 'text', label: 'Usuario', required: true, placeholder: 'Ej: juanperez' },
     { name: 'email', type: 'email', label: 'Email', required: true, placeholder: 'correo@ejemplo.com' },
-    { name: 'phoneNumber', type: 'tel', label: 'Teléfono', required: true, placeholder: 'Ej: 7123-4567' },
+    { name: 'phoneNumber', type: 'tel', label: 'Teléfono', required: true, placeholder: 'Ej: +503-7123-4567', helperText: 'Formato: +503 seguido de 8 dígitos (ej: +503-7123-4567)' },
     { name: 'birthDate', type: 'date', label: 'Fecha de Nacimiento', required: true },
     { name: 'DUI', type: 'text', label: 'DUI', required: true, placeholder: '12345678-9' },
     { name: 'password', type: 'password', label: 'Contraseña', required: true, placeholder: '********' },
@@ -83,12 +83,11 @@ export const employeesConfig = {
     { name: 'lastName', type: 'text', label: 'Apellido', required: true, placeholder: 'Ej: Pérez' },
     { name: 'username', type: 'text', label: 'Usuario', required: true, placeholder: 'Ej: juanperez' },
     { name: 'email', type: 'email', label: 'Email', required: true, placeholder: 'correo@ejemplo.com' },
-    { name: 'phoneNumber', type: 'tel', label: 'Teléfono', required: true, placeholder: 'Ej: 7123-4567' },
+    { name: 'phoneNumber', type: 'tel', label: 'Teléfono', required: true, placeholder: 'Ej: +503-7123-4567', helperText: 'Formato: +503 seguido de 8 dígitos (ej: +503-7123-4567)' },
     { name: 'birthDate', type: 'date', label: 'Fecha de Nacimiento', required: true },
     { name: 'DUI', type: 'text', label: 'DUI', required: true, placeholder: '12345678-9' },
     { name: 'password', type: 'password', label: 'Contraseña', required: true, placeholder: '********' },
     { name: 'userType', type: 'select', label: 'Tipo de Usuario', required: true, options: [
-      { value: 'admin', label: 'Administrador' },
       { value: 'colaborador', label: 'Colaborador' }
     ] },
     { name: 'hireDate', type: 'date', label: 'Fecha de Contratación', required: true },

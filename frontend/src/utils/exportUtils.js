@@ -79,7 +79,6 @@ export const exportToCSV = (data, filename = 'datos') => {
     link.setAttribute('href', url)
     link.setAttribute('download', `${filename}.csv`)
     link.style.visibility = 'hidden'
-    documeyle.visibility = 'hidden'
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)

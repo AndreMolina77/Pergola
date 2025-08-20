@@ -137,7 +137,7 @@ const useDataTransactions = () => {
         throw new Error("Hubo un error al eliminar el reembolso");
       }
       toast.success('Reembolso eliminado exitosamente');
-      fetchRefunds();
+      fetchTransactions();
     } catch (error) {
       console.error("Error al eliminar reembolso:", error);
       toast.error("Error al eliminar reembolso");
@@ -149,7 +149,7 @@ const useDataTransactions = () => {
     customers,
     orders,
     loading,
-    fetchRefunds,
+    fetchTransactions,
     fetchCustomers,
     fetchOrders,
     deleteRefund,

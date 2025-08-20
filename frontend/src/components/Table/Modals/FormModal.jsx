@@ -13,7 +13,7 @@ const FormModal = ({isOpen, onClose, onSubmit, title, fields, initialData = {}, 
   const [selectedFiles, setSelectedFiles] = useState({})
   const isInitialized = useRef(false)
   // Configura react-hook-form
-  const { register, handleSubmit, formState: { errors }, reset, watch, setValue } = useForm({
+  const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm({
     mode: 'onChange', // Validar en tiempo real
     defaultValues: {}
   })
@@ -83,10 +83,22 @@ const FormModal = ({isOpen, onClose, onSubmit, title, fields, initialData = {}, 
     }
     if (field.type === 'tel') {
       rules.pattern = {
-        value: /^\d{8,}$/,
-        message: 'Teléfono debe tener al menos 8 dígitos'
+        value: /^\+503[-\d]{8,12}$/,
+        message: 'Teléfono debe ser +503 seguido de 8 dígitos, puedes usar guiones (ej: +503-7123-4567)'
       }
-      rules.setValueAs = (value) => value.replace(/\D/g, '') // Limpiar caracteres no numéricos
+      rules.setValueAs = (value) => {
+        // Permite solo números, + y guiones
+        let cleaned = value.replace(/[^\d+-]/g, '')
+        // Asegura que comience con +503
+        if (!cleaned.startsWith('+503')) {
+          cleaned = '+503' + cleaned.replace(/\D/g, '').slice(0, 8)
+        }
+        // Formatea con guiones si tiene la longitud correcta
+        if (cleaned.length === 12) {
+          cleaned = cleaned.replace(/^(\+503)(\d{4})(\d{4})$/, '$1-$2-$3')
+        }
+        return cleaned
+      }
     }
     if (field.type === 'number') {
       rules.min = {
