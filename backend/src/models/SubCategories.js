@@ -1,4 +1,4 @@
-// Importar modelo y schema de mongoos
+// Importar modelo y schema de mongoose
 import { Schema, model } from 'mongoose';
 // Definir el schema para Subategories
 const subcategoriesSchema = new Schema({
