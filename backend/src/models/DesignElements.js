@@ -25,13 +25,13 @@ const designElementSchema = new Schema({
     image: {
         type: String,
         validate: {
-            validator: function(v) {
-                if (v == null) return true;
-                return v.trim() !== '' && /^https?:\/\/.+\.(jpg|jpeg|png|webp|svg)$/.test(v);
-            },
-            message: "La URL no puede estar vacía y debe ser válida (jpg/jpeg/png/webp/svg)"
+        validator: function(v) {
+            if (v == null || v === '') return true;
+            return v.trim() !== '' && /^https?:\/\/.+\.(jpg|jpeg|png|webp|svg)$/.test(v);
+        },
+        message: "La URL debe ser válida (jpg/jpeg/png/webp/svg)"
         }
-    },
+    }
 }, {
     timestamps: true
 })

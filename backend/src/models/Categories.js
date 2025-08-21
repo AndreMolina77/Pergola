@@ -29,10 +29,10 @@ const categoriesSchema = new Schema({
         type: String,
         validate: {
             validator: function(v) {
-                if (v == null) return true;
+                if (v == null || v === '') return true;
                 return v.trim() !== '' && /^https?:\/\/.+\.(jpg|jpeg|png|webp|svg)$/.test(v);
             },
-            message: "La URL no puede estar vacía y debe ser válida (jpg/jpeg/png/webp/svg)"
+            message: "La URL debe ser válida (jpg/jpeg/png/webp/svg)"
         }
     },
     isActive: {
