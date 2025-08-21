@@ -46,7 +46,7 @@ export default function LoginScreen({ navigation }) {
     <View style={styles.container}>
       {/* Header */}
       <TouchableOpacity style={styles.backButton}>
-        <Ionicons name="arrow-back-circle-outline" size={24} color="black" />
+        <Ionicons name="arrow-back-circle-outline" size={40} color="black" />
       </TouchableOpacity>
       <Text style={styles.title}>Iniciar Sesión</Text>
 
@@ -132,13 +132,13 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   backButton: {
-    width: 48,
-    height: 48,
+    width: "15%",
+    height: "15%",
     marginBottom: 10,
   },
   backIcon: {
-    width: 48,
-    height: 48,
+    width: "15%",
+    height: "15%",
     tintColor: "#3D1609",
   },
   title: {
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     color: "#000",
   },
   input: {
-    width: 380,
+    width: "100%",
     height: 62,
     backgroundColor: "#E8E1D8",
     borderRadius: 8,
@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
   passwordContainer: {
     flexDirection: "row",
     alignItems: "center",
-    width: 380,
+    width: "100%",
     height: 62,
     marginBottom: 10,
   },
@@ -175,8 +175,8 @@ const styles = StyleSheet.create({
     right: 10,
   },
   eyeIcon: {
-    width: 32,
-    height: 32,
+    width: "15%",
+    height: "15%",
     tintColor: "#3D1609",
   },
   rememberContainer: {
@@ -186,10 +186,11 @@ const styles = StyleSheet.create({
   },
   rememberText: {
     marginLeft: 5,
+    fontWeight: "bold",
     color: "#3D1609",
   },
   button: {
-    width: 380,
+    width: "100%",
     height: 62,
     backgroundColor: "#A73249",
     borderRadius: 8,
@@ -216,8 +217,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   socialButton: {
-    width: 388.26,
-    height: 56,
+    width: "90%",
+    height: "15%",
     backgroundColor: "#E3C6B8",
     borderRadius: 8,
     flexDirection: "row",
@@ -234,6 +235,8 @@ const styles = StyleSheet.create({
     textAlign: "center",
     position: "absolute",
     bottom: 10,
+    marginLeft: 25,
+    marginBottom: 10,
     width: "100%",
     color: "#3D1609",
   },
