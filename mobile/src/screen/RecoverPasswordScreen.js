@@ -8,6 +8,7 @@ import {
   Image,
   Alert,
 } from "react-native";
+import { Ionicons } from '@expo/vector-icons';
 
 export default function RecoverPasswordScreen({ navigation }) {
   const [userInput, setUserInput] = useState("");
@@ -27,12 +28,8 @@ export default function RecoverPasswordScreen({ navigation }) {
       {/* Icono de volver */}
       <TouchableOpacity
         style={styles.backButton}
-        onPress={() => navigation.goBack()}
-      >
-        <Image
-          source={require("../../assets/back-icon.png")}
-          style={styles.backIcon}
-        />
+        onPress={() => navigation.goBack()}>
+        <Ionicons name="arrow-back-circle-outline" size={24} color="black" />
       </TouchableOpacity>
 
       {/* Título */}

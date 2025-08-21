@@ -2,18 +2,18 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 
-import LoginScreen from '../screens/LoginScreen';
-import RegisterScreen from '../screens/RegisterScreen';
-import RecoverPasswordScreen from '../screens/RecoverPasswordScreen';
-import VerifyEmailScreen from '../screens/VerifyEmailScreen';
-import HomeScreen from '../screens/HomeScreen';
+import LoginScreen from '../screen/LoginScreen';
+import RegisterScreen from '../screen/RegisterScreen';
+import RecoverPasswordScreen from '../screen/RecoverPasswordScreen';
+import VerifyEmailScreen from '../screen/VerifyEmailScreen';
+import HomeScreen from '../screen/HomeScreen';
 
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login"> {/* empieza en Login */}
+      <Stack.Navigator initialRouteName="Login">{/* empieza en Login */}
         <Stack.Screen
           name="Login"
           component={LoginScreen}
