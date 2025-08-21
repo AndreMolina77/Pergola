@@ -79,7 +79,7 @@ const useDataTransactions = () => {
       try {
         const headers = { "Content-Type": "application/json" };
         const body = JSON.stringify(data);
-        const response = await fetch(`${API}`, {
+        const response = await fetch(`${API}/transactions`, {
           method: "POST",
           headers,
           credentials: "include",
@@ -102,7 +102,7 @@ const useDataTransactions = () => {
       try {
         const headers = { "Content-Type": "application/json" };
         const body = JSON.stringify(data);
-        const response = await fetch(`${API}/${id}`, {
+        const response = await fetch(`${API}/transactions/${id}`, {
           method: "PUT",
           headers,
           credentials: "include",
@@ -116,15 +116,15 @@ const useDataTransactions = () => {
         fetchTransactions();
       } catch (error) {
         console.error("Error:", error);
-        toast.error(error.message || "Error al actualizar reembolso");
+        toast.error(error.message || "Error al actualizar transacción");
         throw error;
       }
     },
-    // Eliminar reembolso
-    onDelete: deleteRefund // Usa la función para borrar reembolso
+    // Eliminar transacción
+    onDelete: deleteTransaction // Usa la función para borrar transacción
   });
-  // Eliminar reembolso por ID
-  const deleteRefund = async (id) => {
+  // Eliminar transacción por ID
+  const deleteTransaction = async (id) => {
     try {
       const response = await fetch(`${API}/${id}`, {
         method: "DELETE",
@@ -134,13 +134,13 @@ const useDataTransactions = () => {
         credentials: "include"
       });
       if (!response.ok) {
-        throw new Error("Hubo un error al eliminar el reembolso");
+        throw new Error("Hubo un error al eliminar la transacción");
       }
-      toast.success('Reembolso eliminado exitosamente');
+      toast.success('Transacción eliminada exitosamente');
       fetchTransactions();
     } catch (error) {
-      console.error("Error al eliminar reembolso:", error);
-      toast.error("Error al eliminar reembolso");
+      console.error("Error al eliminar la transacción:", error);
+      toast.error("Error al eliminar la transacción:");
     }
   };
   // Devuelve los datos y funciones listas para usar en componentes
@@ -152,7 +152,7 @@ const useDataTransactions = () => {
     fetchTransactions,
     fetchCustomers,
     fetchOrders,
-    deleteRefund,
+    deleteTransaction,
     createHandlers
   };
 };

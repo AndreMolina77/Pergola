@@ -3,15 +3,15 @@ import { toast } from "react-hot-toast"
 
 // Hook personalizado para manejar materias primas y sus proveedores
 const useDataRawMaterials = () => {
-  const API = "http://localhost:4000/api" // URL base de la API
-  const [rawmaterials, setRawMaterials] = useState([]) // Lista de materias primas
+  const API = "http://localhost:4000/api/rawmaterials" // URL base de la API
+  const [rawMaterials, setRawMaterials] = useState([]) // Lista de materias primas
   const [suppliers, setSuppliers] = useState([]) // Lista de proveedores
   const [loading, setLoading] = useState(true) // Estado de carga
 
   // Obtener materias primas desde la API
   const fetchRawMaterials = async () => {
     try {
-      const response = await fetch(`${API}/rawmaterials`, {
+      const response = await fetch(`${API}`, {
         credentials: "include"
       })
 
@@ -89,42 +89,24 @@ const useDataRawMaterials = () => {
   }
 
   // Función que retorna los manejadores CRUD para materias primas
-  const createHandlers = () => ({
-    data: rawmaterials,
+  const createHandlers = (API) => ({
+    data: rawMaterials,
     loading,
 
     // Crear nueva materia prima
     onAdd: async (data) => {
       try {
-        let body
-        let headers = { credentials: "include" }
-
-        // Si se incluye una imagen, usar FormData
-        if (data.image && data.image instanceof File) {
-          const formData = new FormData()
-          Object.keys(data).forEach(key => {
-            formData.append(key, data[key])
-          })
-          body = formData
-        } else {
-          headers["Content-Type"] = "application/json"
-          body = JSON.stringify(data)
-        }
-
         const response = await fetch(`${API}/rawmaterials`, {
           method: "POST",
-          headers,
+          headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body
+          body: JSON.stringify(data)
         })
-
-        // Si la respuesta no es exitosa, lanza error
         if (!response.ok) {
           const errorData = await response.json()
           throw new Error(errorData.message || "Error al registrar materia prima")
         }
-
-        toast.success("Materia prima registrada exitosamente")
+        toast.success('Materia prima registrada exitosamente')
         fetchRawMaterials()
       } catch (error) {
         console.error("Error:", error)
@@ -136,35 +118,17 @@ const useDataRawMaterials = () => {
     // Editar materia prima existente
     onEdit: async (id, data) => {
       try {
-        let body
-        let headers = { credentials: "include" }
-
-        // Si hay imagen, usar FormData
-        if (data.image && data.image instanceof File) {
-          const formData = new FormData()
-          Object.keys(data).forEach(key => {
-            formData.append(key, data[key])
-          })
-          body = formData
-        } else {
-          headers["Content-Type"] = "application/json"
-          body = JSON.stringify(data)
-        }
-
         const response = await fetch(`${API}/rawmaterials/${id}`, {
-          method: "PUT",
-          headers,
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body
+          body: JSON.stringify(data)
         })
-
-        // Si la respuesta no es exitosa, lanza error
         if (!response.ok) {
           const errorData = await response.json()
-          throw new Error(errorData.message || "Error al actualizar materia prima")
+          throw new Error(errorData.message || "Error al registrar materia prima")
         }
-
-        toast.success("Materia prima actualizada exitosamente")
+        toast.success('Materia prima registrada exitosamente')
         fetchRawMaterials()
       } catch (error) {
         console.error("Error:", error)
@@ -179,7 +143,7 @@ const useDataRawMaterials = () => {
 
   // Devolver datos y funciones necesarias al componente que use este hook
   return {
-    rawmaterials,
+    rawMaterials,
     suppliers,
     loading,
     fetchRawMaterials,

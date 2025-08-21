@@ -119,16 +119,16 @@ const employeesSchema = new Schema({
   },
   profilePic: {
     type: String,
-      validate: {
-        validator: function(v) {
-          if (v == null) return true;
-          return v.trim() !== '' && /^https?:\/\/.+\.(jpg|jpeg|png|webp|svg)$/.test(v);
-        },
-        message: "La URL no puede estar vacía y debe ser válida (jpg/jpeg/png/webp/svg)"
-      }
+    validate: {
+    validator: function(v) {
+        if (v == null || v === '') return true; // Permite valores null o cadenas vacías
+        return /^https?:\/\/.+\.(jpg|jpeg|png|webp|svg)$/.test(v);
+      },
+      message: "La URL debe ser válida (jpg/jpeg/png/webp/svg)"
+    }
   },
   hireDate: {
-    type: Date,
+    type: Date, 
     required: [true, "La fecha de contratación es obligatoria"],
     validate: {
       validator: v => v <= new Date(),

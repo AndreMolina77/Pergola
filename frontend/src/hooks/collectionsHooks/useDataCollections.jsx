@@ -58,7 +58,7 @@ const useDataCollections = () => {
         // Realiza la petición POST
         const response = await fetch(`${API}/collections`, {
           method: "POST",
-          headers,
+          headers, // No forzado
           credentials: "include",
           body
         })
@@ -91,7 +91,7 @@ const useDataCollections = () => {
         // Realiza la petición PUT
         const response = await fetch(`${API}/collections/${id}`, {
           method: "PUT",
-          headers,
+          headers, // No forzado
           credentials: "include",
           body
         })

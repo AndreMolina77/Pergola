@@ -21,6 +21,7 @@ const useDataDesignElements = () => {
       if (!response.ok) throw new Error("Hubo un error al obtener los elementos de diseño")
       // Si todo bien, guarda los datos
       const data = await response.json()
+      console.log("Design Elements data from API:", data);
       setDesignElements(data)
       setLoading(false)
     } catch (error) {
@@ -55,7 +56,7 @@ const useDataDesignElements = () => {
         // Realiza la petición POST
         const response = await fetch(`${API}/designelements`, {
           method: "POST",
-          headers,
+          headers, // No forzado
           credentials: "include",
           body
         })
@@ -88,7 +89,7 @@ const useDataDesignElements = () => {
         // Realiza la petición PUT
         const response = await fetch(`${API}/designelements/${id}`, {
           method: "PUT",
-          headers,
+          headers, // No forzado
           credentials: "include",
           body
         })

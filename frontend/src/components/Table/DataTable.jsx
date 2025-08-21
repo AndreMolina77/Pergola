@@ -31,7 +31,15 @@ const DataTable = ({data = [], columns = [], isLoading = false,
   // Renderiza el contenido de cada celda según el tipo de columna
   const renderCellContent = (item, column) => {
     const value = item[column.key]
-    
+
+    // DEBUGGING MEJORADO
+    if (column.key === 'items' || column.key === 'product' || column.key === 'customer') {
+      console.log(`🔍 Column: ${column.key}`, value);
+      if (column.key === 'items' && Array.isArray(value)) {
+        console.log('First item structure:', value[0]);
+        console.log('Item has itemId?', value[0]?.itemId);
+      }
+    }
     switch (column.type) {
       case 'badge':
         // Muestra badges de estado/color
@@ -104,7 +112,7 @@ const DataTable = ({data = [], columns = [], isLoading = false,
         // Muestra imagen si existe
         if (value && typeof value === 'string') {
           return (
-            <img src={value} alt="Imagen" className="w-12 h-12 object-cover rounded-lg border" onError={(e) => { e.target.style.display = 'none' }}/>
+            <img src={value} alt="Imagen" className="w-12 h-12 object-contain rounded-lg border" onError={(e) => { e.target.style.display = 'none' }}/>
           )
         }
         return <span className="text-gray-400 text-xs">Sin imagen</span>
@@ -126,15 +134,47 @@ const DataTable = ({data = [], columns = [], isLoading = false,
         }
         return <span className="text-gray-400 text-xs">Sin imágenes</span>
       case 'badge-list':
-        // Muestra lista de badges
         if (Array.isArray(value) && value.length > 0) {
           return (
             <div className="flex flex-wrap gap-1">
-              {value.slice(0, 2).map((item, index) => (
-                <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
-                  {typeof item === 'object' ? (item.name || item.correlative || 'Material') : item}
-                </span>
-              ))}
+              {value.slice(0, 2).map((item, index) => {
+                let displayText = ''
+                
+                if (typeof item === 'object') {
+                  // ✅ ESTRUCTURA ANIDADA: items[].itemId
+                  if (item.itemId && typeof item.itemId === 'object') {
+                    const product = item.itemId
+                    if (product.name && product.price) {
+                      displayText = `${product.name} - $${product.price}`
+                    } else if (product.name) {
+                      displayText = product.name
+                    } else {
+                      displayText = 'Producto'
+                    }
+                    // Agregar cantidad si existe
+                    if (item.quantity) {
+                      displayText += ` (x${item.quantity})`
+                    }
+                  }
+                  // ✅ ESTRUCTURA SIMPLE: objeto directo
+                  else if (item.name && item.price) {
+                    displayText = `${item.name} - $${item.price}`
+                  } else if (item.name) {
+                    displayText = item.name
+                  } else {
+                    displayText = 'Producto'
+                  }
+                } else {
+                  // Si es solo un string (ID)
+                  displayText = 'Producto'
+                }
+                
+                return (
+                  <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+                    {displayText}
+                  </span>
+                )
+              })}
               {value.length > 2 && (
                 <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded text-xs">
                   +{value.length - 2}
@@ -145,27 +185,150 @@ const DataTable = ({data = [], columns = [], isLoading = false,
         }
         return <span className="text-gray-400 text-xs">Sin elementos</span>
       default:
-        // Maneja objetos populados y clientes
+        // Primero chequea si es array
+        if (Array.isArray(value)) {
+          if (value.length === 0) return <span className="text-gray-400 text-xs">Sin elementos</span>
+          // Si son strings, mostrar como badges
+          if (value.every(v => typeof v === 'string')) {
+            return (
+              <div className="flex flex-wrap gap-1">
+                {value.slice(0, 3).map((str, idx) => (
+                  <span key={idx} className="px-2 py-1 bg-pink-100 text-pink-800 rounded text-xs">
+                    {str}
+                  </span>
+                ))}
+                {value.length > 3 && (
+                  <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded text-xs">
+                    +{value.length - 3}
+                  </span>
+                )}
+              </div>
+            )
+          }
+          // Si son objetos, mostrar resumen de los primeros 2
+          if (typeof value[0] === 'object') {
+            return (
+              <div className="flex flex-wrap gap-1">
+                {value.slice(0, 2).map((obj, idx) => {
+                  let displayText = ''
+                  // ✅ PRODUCTOS
+                  if (obj.name && obj.price) {
+                    displayText = `${obj.name} - $${obj.price}`
+                  } else if (obj.name) {
+                    displayText = obj.name
+                  } else if (obj.codeProduct) {
+                    displayText = obj.codeProduct
+                  } else if (obj.correlative) {
+                    displayText = obj.correlative
+                  } else if (obj.username) {
+                    displayText = obj.username
+                  } else if (obj.orderCode) {
+                    displayText = obj.orderCode
+                  } else {
+                    displayText = 'Elemento' // ❌ NUNCA obj._id
+                  }
+                  return (
+                    <span key={idx} className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs">
+                      {displayText}
+                    </span>
+                  )
+                })}
+                {value.length > 2 && (
+                  <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded text-xs">
+                    +{value.length - 2}
+                  </span>
+                )}
+              </div>
+            )
+          }
+          // Si son valores simples (números, booleanos, etc.)
+          return value.slice(0, 3).join(', ') + (value.length > 3 ? `, +${value.length - 3}` : '')
+        }
+        // Para campos normales que pueden contener objetos
         if (value && typeof value === 'object') {
-          // Para clientes: mostrar nombre completo
-          if ((column.key === 'customer' || column.key === 'customer') && value.name && value.lastName) {
+          // ✅ CLIENTE: Mostrar nombre completo
+          if ((column.key === 'customer') && value.name && value.lastName) {
             return `${value.name} ${value.lastName}`
           }
-          // Para proveedores con contactPerson
-          if ((column.key === 'provider' || column.key === 'supplier') && value.contactPerson) {
-            return value.name || value.contactPerson
+          // ✅ PRODUCTO: Mostrar nombre y precio
+          if ((column.key === 'product' || column.key === 'items') && value.name) {
+            return value.price ? `${value.name} - $${value.price}` : value.name
           }
-          // Para objetos con name (categorías, colecciones, subcategorías, productos, etc.)
+          // ✅ PROVEEDOR: Mostrar nombre o contacto
+          if ((column.key === 'provider' || column.key === 'supplier')) {
+            return value.name || value.contactPerson || 'Proveedor'
+          }
+          // ✅ ORDEN: Mostrar código de orden
+          if (column.key === 'order' && value.orderCode) {
+            return value.orderCode
+          }
+          // ✅ CATEGORÍAS/COLECCIONES: Mostrar nombre
+          if (['category', 'subcategory', 'collection'].includes(column.key)) {
+            return value.name || 'Sin nombre'
+          }
+          // ✅ MATERIAS PRIMAS: Mostrar nombre
+          if (column.key === 'rawMaterialsUsed' && Array.isArray(value)) {
+            return (
+              <div className="flex flex-wrap gap-1">
+                {value.slice(0, 2).map((material, idx) => (
+                  <span key={idx} className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs">
+                    {material.name || material.correlative || 'Material'}
+                  </span>
+                ))}
+                {value.length > 2 && (
+                  <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded text-xs">
+                    +{value.length - 2}
+                  </span>
+                )}
+              </div>
+            )
+          }
+          // ✅ MANEJAR ITEMS EN CASO DEFAULT TAMBIÉN
+          if (column.key === 'items') {
+            if (Array.isArray(value)) {
+              return (
+                <div className="flex flex-wrap gap-1">
+                  {value.slice(0, 2).map((item, idx) => {
+                    let displayText = `Producto ${idx + 1}`
+                    
+                    // ✅ ESTRUCTURA ANIDADA
+                    if (item.itemId && typeof item.itemId === 'object') {
+                      const product = item.itemId
+                      if (product.name && product.price) {
+                        displayText = `${product.name} - $${product.price}`
+                      } else if (product.name) {
+                        displayText = product.name
+                      }
+                      
+                      if (item.quantity) {
+                        displayText += ` (x${item.quantity})`
+                      }
+                    }
+                    
+                    return (
+                      <span key={idx} className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+                        {displayText}
+                      </span>
+                    )
+                  })}
+                  {value.length > 2 && (
+                    <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded text-xs">
+                      +{value.length - 2}
+                    </span>
+                  )}
+                </div>
+              )
+            }
+            return <span className="text-gray-400 text-xs">Sin productos</span>
+          }
+          // ✅ FALLBACK: Usar propiedades útiles, NUNCA _id
           if (value.name) return value.name
-          if (value.description) return value.description
-          // Para usuarios con username
           if (value.username) return value.username
-          // Si es un objeto pero no sabemos qué mostrar
-          return value._id?.slice(-6) || 'N/A'
-        }
-        // Para arrays, mostrar cantidad
-        if (Array.isArray(value)) {
-          return `${value.length} elemento${value.length !== 1 ? 's' : ''}`
+          if (value.orderCode) return value.orderCode
+          if (value.codeProduct) return value.codeProduct
+          if (value.description) return value.description
+          // ✅ ÚLTIMO RECURSO: Mostrar "Sin información" en lugar de ID
+          return <span className="text-gray-400 text-xs">Sin información</span>
         }
         // Para valores simples
         return value?.toString() || '-'

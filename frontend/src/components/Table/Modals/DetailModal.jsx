@@ -1,9 +1,12 @@
 // Importa iconos y el modal base
-import { Package, Tag, DollarSign, Star, Hash, FileText, Eye, Image, Layers, Building, Boxes, MessageSquare, CheckCircle, XCircle, Gem, Archive, Palette, Calendar, User, Mail, Phone, MapPin, Ruler, Paintbrush, Link, CreditCard, RefreshCcw, Receipt } from 'lucide-react'
+import { Package, Tag, DollarSign, Star, Hash, FileText, Eye, Image, Layers, Building, Boxes, MessageSquare, CheckCircle, XCircle, Gem, Archive, Palette, Calendar, User, Mail, Phone, MapPin, Ruler, Paintbrush, Link, CreditCard, RefreshCcw, Receipt, Check, Cake, IdCard, RulerDimensionLine, Eclipse, SprayCan, SquaresIntersect, Diameter, Percent, GalleryHorizontal } from 'lucide-react'
 import BaseModal from './BaseModal'
 
 // Componente modal para mostrar detalles de un elemento
 const DetailModal = ({ isOpen, onClose, data, title = "Detalles", type = "generic" }) => {
+   // Agregar esto al inicio para debuggear
+  console.log("DetailModal - type:", type);
+  console.log("DetailModal - data:", data);
   // Si no hay datos, no renderiza nada
   if (!data) return null
 
@@ -36,11 +39,13 @@ const DetailModal = ({ isOpen, onClose, data, title = "Detalles", type = "generi
       purchaseDate: Calendar,
       requestDate: Calendar,
       deliveryDate: Calendar,
+      birthDate: Cake,
+      hireDate: Calendar,
       // Usuarios y personas
       name: User,
       lastName: User,
       contactPerson: User,
-      username: Hash,
+      username: IdCard,
       customer: User,
       order: Package,
       preferredColors: Palette,
@@ -59,7 +64,7 @@ const DetailModal = ({ isOpen, onClose, data, title = "Detalles", type = "generi
       price: DollarSign,
       piecePrice: DollarSign,
       productionCost: DollarSign,
-      discount: DollarSign,
+      discount: Percent,
       amount: DollarSign,
       // Productos y materiales
       stock: Archive,
@@ -80,11 +85,11 @@ const DetailModal = ({ isOpen, onClose, data, title = "Detalles", type = "generi
       supplier: Building,
       // Materiales
       color: Palette,
-      tone: Palette,
-      toneType: Palette,
-      texture: Palette,
-      shape: Palette,
-      dimension: Palette,
+      tone: Eclipse,
+      toneType: SprayCan,
+      texture: SquaresIntersect,
+      shape: Diameter,
+      dimension: RulerDimensionLine,
       brand: Tag,
       presentation: Package,
       correlative: Hash,
@@ -97,7 +102,7 @@ const DetailModal = ({ isOpen, onClose, data, title = "Detalles", type = "generi
       transactionCode: Receipt,
       rawMaterialsUsed: Boxes,
       highlighted: Star,
-      hasDiscount: DollarSign,
+      hasDiscount: Check,
       applicableCosts: DollarSign,
       // IDs
       _id: Hash,
@@ -108,7 +113,7 @@ const DetailModal = ({ isOpen, onClose, data, title = "Detalles", type = "generi
       response: MessageSquare,
       // Imágenes
       image: Image,
-      images: Image,
+      images: GalleryHorizontal,
       // Estados
       isActive: CheckCircle,
       // Genérico
@@ -119,7 +124,9 @@ const DetailModal = ({ isOpen, onClose, data, title = "Detalles", type = "generi
       base: Gem,
       baseLength: Ruler,
       decoration: Paintbrush,
-      clasp: Link
+      clasp: Link,
+      isVerified: Check,
+      profilePic: Image,
     }
     return iconMap[fieldKey] || iconMap.default
   }
@@ -278,7 +285,7 @@ const DetailModal = ({ isOpen, onClose, data, title = "Detalles", type = "generi
         return {
           fields: [
             { key: 'codeRequest', label: 'Código de Solicitud', type: 'text' },
-            { key: 'piece', label: 'Pieza', type: 'text' },
+            { key: 'piece', label: 'Pieza', type: 'badge' }, // Cambiar a badge para mostrar mejor
             { key: 'base', label: 'Base', type: 'text'},
             { key: 'baseLength', label: 'Longitud de Base', type: 'text' },
             { key: 'decoration', label: 'Decoración', type: 'text' },
@@ -288,13 +295,15 @@ const DetailModal = ({ isOpen, onClose, data, title = "Detalles", type = "generi
             { key: 'updatedAt', label: 'Fecha de actualización', type: 'date' },
           ]
         }
+      // Corrección para la configuración de designelements en DetailModal.jsx
       case 'designelements':
         return {
           fields: [
             { key: 'name', label: 'Nombre', type: 'text' },
-            { key: 'type', label: 'Tipo', type: 'text' },
-            { key: 'image', label: 'Imagen', type: 'image' },
+            { key: 'type', label: 'Tipo', type: 'badge' },
+            { key: 'image', label: 'Imagen', type: 'image' }, // ¡DEBE ser 'image' no 'text'!
             { key: 'createdAt', label: 'Fecha de creación', type: 'date' },
+            { key: 'updatedAt', label: 'Fecha de actualización', type: 'date' }
           ]
         }
       case 'orders':
@@ -415,12 +424,23 @@ const DetailModal = ({ isOpen, onClose, data, title = "Detalles", type = "generi
         return <span className="text-gray-500 italic">Referencia no encontrada</span>
         case 'customer':
           if (typeof value === 'object' && value.name) {
-            return (
-              <div>
-                <div className="font-medium">{value.name} {value.lastName}</div>
-                <div className="text-sm text-gray-600">{value.email}</div>
-              </div>
-            )
+            // ✅ VERIFICAR MÚLTIPLES FORMAS DE CLIENTE
+            const customerName = value.name || value.username || value.email?.split('@')[0]
+            const customerLastName = value.lastName || ''
+            const customerEmail = value.email || ''
+            
+            if (customerName) {
+              return (
+                <div className="bg-[#E8E1D8] px-3 py-2 rounded-lg border">
+                  <div className="font-medium text-[#3D1609]">
+                    {customerLastName ? `${customerName} ${customerLastName}` : customerName}
+                  </div>
+                  {customerEmail && (
+                    <div className="text-sm text-gray-600">{customerEmail}</div>
+                  )}
+                </div>
+              )
+            }
           }
           return <span className="text-gray-500 italic">Cliente no encontrado</span>
       case 'array':
@@ -431,8 +451,52 @@ const DetailModal = ({ isOpen, onClose, data, title = "Detalles", type = "generi
               {value.map((item, index) => (
                 <div key={index} className="bg-[#E8E1D8] px-3 py-2 rounded-lg border">
                   <div className="font-medium text-[#3D1609]">
-                    {typeof item === 'object' ? (item.name || item._id?.slice(-6) || `Elemento ${index + 1}`) : item}
+                    {(() => {
+                      if (typeof item === 'object') {
+                        // ✅ ESTRUCTURA ANIDADA: items[].itemId
+                        if (item.itemId && typeof item.itemId === 'object') {
+                          const product = item.itemId
+                          let productInfo = ''
+                          
+                          if (product.name && product.price) {
+                            productInfo = `${product.name} - $${product.price}`
+                          } else if (product.name) {
+                            productInfo = product.name
+                          } else {
+                            productInfo = 'Producto sin nombre'
+                          }
+                          
+                          return productInfo
+                        }
+                        // ✅ PRODUCTOS: Mostrar nombre y precio
+                        if (item.name && item.price) {
+                          return `${item.name} - $${item.price}`
+                        }
+                        // ✅ PRODUCTOS: Solo nombre
+                        if (item.name) {
+                          return item.name
+                        }
+                        // ✅ MATERIALES: Mostrar correlativo o nombre
+                        if (item.correlative) {
+                          return `${item.correlative} - ${item.name || 'Material'}`
+                        }
+                        // ✅ FALLBACK: Cualquier nombre disponible
+                        return item.name || item.username || item.orderCode || `Elemento ${index + 1}`
+                      }
+                      return item.toString()
+                    })()}
                   </div>
+                  {/* ✅ MOSTRAR INFORMACIÓN ADICIONAL PARA ITEMS */}
+                  {typeof item === 'object' && item.quantity && (
+                    <div className="text-sm text-gray-600 mt-1">Cantidad: {item.quantity}</div>
+                  )}
+                  {/* ✅ MOSTRAR INFO ADICIONAL PARA PRODUCTOS */}
+                  {typeof item === 'object' && item.description && (
+                    <div className="text-sm text-gray-600 mt-1">{item.description}</div>
+                  )}
+                  {typeof item === 'object' && item.stock && (
+                    <div className="text-sm text-gray-600 mt-1">Stock: {item.stock}</div>
+                  )}
                 </div>
               ))}
               <div className="text-sm text-gray-600 font-medium">
@@ -462,10 +526,16 @@ const DetailModal = ({ isOpen, onClose, data, title = "Detalles", type = "generi
         )
       case 'image':
         // Muestra imagen si existe
+        console.log("Rendering image field:", field.key, "value:", value);
         if (value && typeof value === 'string') {
           return (
             <div className="mt-2">
-              <img src={value} alt="Imagen" className="w-40 h-40 object-cover rounded-lg border-2 border-[#E8E1D8] shadow-sm" onError={(e) => { e.target.style.display = 'none' }}/>
+              <img src={value} alt="Imagen" className="w-40 h-40 object-cover rounded-lg border-2 border-[#E8E1D8] shadow-sm" onError={(e) => { 
+              console.error("Error loading image:", value);
+              e.target.style.display = 'none';
+            }}
+            onLoad={() => console.log("Image loaded successfully:", value)}
+          />
             </div>
           )
         }

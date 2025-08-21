@@ -1,29 +1,57 @@
 // Utilidades de formato y extracción para exportación
 const getDisplayFromObject = (obj) => {
   if (!obj || typeof obj !== 'object') return obj
+  // ✅ PRODUCTOS: Mostrar nombre y precio
+  if (obj.name && obj.price) return `${obj.name} - $${obj.price}`
+  if (obj.name && obj.codeProduct) return `${obj.name} (${obj.codeProduct})`
   // Preferencias por tipo de entidad/referencia
   if (obj.orderCode) return obj.orderCode
   if (obj.codeProduct) return obj.codeProduct
   if (obj.transactionCode) return obj.transactionCode
   if (obj.refundCode) return obj.refundCode
-  if (obj.categoryName) return obj.categoryName
-  if (obj.supplierName) return obj.supplierName
   if (obj.name && obj.lastName) return `${obj.name} ${obj.lastName}`
   if (obj.name) return obj.name
   if (obj.username) return obj.username
   if (obj.contactPerson) return obj.contactPerson
-  return obj._id || JSON.stringify(obj)
+  // ✅ NUNCA devolver _id
+  return 'Sin información'
 }
 
 const formatDateCell = (value) => {
   if (!value) return ''
-  try {
-    return new Date(value).toLocaleString('es-ES')
-  } catch {
-    return value
+  
+  // Si ya es una fecha válida
+  if (value instanceof Date && !isNaN(value)) {
+    return value.toLocaleString('es-ES')
   }
+  
+  // Si es string o número, intentar convertir
+  if (typeof value === 'string' || typeof value === 'number') {
+    const date = new Date(value)
+    if (!isNaN(date.getTime())) {
+      return date.toLocaleString('es-ES')
+    }
+  }
+  
+  // Si no se puede convertir, devolver el valor original
+  return value.toString()
 }
-const isDateKey = (key) => key && (key.toLowerCase().includes('date') || key.toLowerCase().includes('at'))
+// ✅ DESPUÉS: Ser más específico con las claves de fecha
+const isDateKey = (key) => {
+  if (!key) return false
+  const lowerKey = key.toLowerCase()
+  
+  // Claves específicas que son fechas
+  const dateKeys = [
+    'createdat', 'updatedat', 'date', 'birthdate', 'hiredate', 
+    'purchasedate', 'requestdate', 'deliverydate'
+  ]
+  
+  // Verificar si es una clave de fecha específica
+  return dateKeys.includes(lowerKey) || 
+         lowerKey.endsWith('date') || 
+         lowerKey.endsWith('at') && (lowerKey.includes('created') || lowerKey.includes('updated'))
+}
 const isCurrencyKey = (key) => ['price','productionCost','piecePrice','subtotal','total','amount'].includes(key)
 
 export const exportToCSV = (data, filename = 'datos') => {
@@ -45,19 +73,19 @@ export const exportToCSV = (data, filename = 'datos') => {
         if (value && typeof value === 'object' && !Array.isArray(value)) {
           value = getDisplayFromObject(value)
         }
-        // Arrays (items, rawMaterialsUsed, imágenes)
-        if (Array.isArray(value)) {
+        // Arrays
+        else if (Array.isArray(value)) {
           const joined = value.map(v => (typeof v === 'object' ? getDisplayFromObject(v) : v)).join(' | ')
           value = joined || `${value.length} elementos`
         }
-        // Fechas
-        if (isDateKey(header)) {
+        // ✅ FECHAS: Solo procesar si realmente es una fecha
+        else if (isDateKey(header) && value) {
           value = formatDateCell(value)
         }
         // Booleans
-        if (typeof value === 'boolean') {
+        else if (typeof value === 'boolean') {
           value = value ? 'Sí' : 'No'
-        }
+        }        
         // Moneda: mantener numérico para Excel/CSV
         if (isCurrencyKey(header) && typeof value === 'number') {
           // sin formato para cálculos
@@ -254,9 +282,24 @@ export const exportToPDF = (data, filename = 'datos', title = 'Reporte de Datos'
     console.warn('No hay datos para exportar')
     return
   }
+  
   // Crear contenido HTML para el PDF
   const processedData = data.slice(0, 50) // Limitar a 50 registros para PDF
-  
+  console.log('Debugging data processing:')
+  processedData.forEach((row, index) => {
+    if (index === 0) { // Solo el primer registro
+      Object.keys(row).forEach(key => {
+        const value = row[key]
+        const isDate = isDateKey(key)
+        console.log(`${key}: ${value} (isDate: ${isDate}, type: ${typeof value})`)
+        
+        if (isDate && value) {
+          const formatted = formatDateCell(value)
+          console.log(`  Formatted: ${formatted}`)
+        }
+      })
+    }
+  })
   const headerTranslations = {
     _id: 'ID',
     name: 'Nombre',
@@ -369,31 +412,33 @@ export const exportToPDF = (data, filename = 'datos', title = 'Reporte de Datos'
           </tr>
         </thead>
         <tbody>
-          ${processedData.map(row => `
-            <tr>
-              ${importantColumns.map(col => {
-                let value = row[col]
-                // Procesar valores para mostrar
-                if (value && typeof value === 'object' && !Array.isArray(value)) {
-                  value = getDisplayFromObject(value)
-                }
-                if (Array.isArray(value)) {
-                  value = value.map(v => (typeof v === 'object' ? getDisplayFromObject(v) : v)).join(' | ')
-                }
-                if (['date','at'].some(s => col.toLowerCase().includes(s)) && value) {
-                  try { value = new Date(value).toLocaleString('es-ES') } catch {}
-                }
-                if (typeof value === 'boolean') {
-                  value = value ? 'Sí' : 'No'
-                }
-                // Limitar longitud del texto
-                if (typeof value === 'string' && value.length > 30) {
-                  value = value.substring(0, 27) + '...'
-                }
-                return `<td>${value || '-'}</td>`
-              }).join('')}
-            </tr>
-          `).join('')}
+          ${processedData.map(row => `<tr>${
+            importantColumns.map(header => {
+              let value = row[header]
+              // Objetos de referencia
+              if (value && typeof value === 'object' && !Array.isArray(value)) {
+                value = getDisplayFromObject(value)
+              }
+              // Arrays
+              else if (Array.isArray(value)) {
+                const joined = value.map(v => (typeof v === 'object' ? getDisplayFromObject(v) : v)).join(' | ')
+                value = joined || `${value.length} elementos`
+              }
+              // Fechas
+              else if (isDateKey(header) && value) {
+                value = formatDateCell(value)
+              }
+              // Booleans
+              else if (typeof value === 'boolean') {
+                value = value ? 'Sí' : 'No'
+              }
+              // Escapar comas y comillas
+              if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
+                value = value.replace(/"/g, '""')
+              }
+              return `<td>${value ?? ''}</td>`
+            }).join('')
+          }</tr>`).join('')}
         </tbody>
       </table>
       <div class="footer">

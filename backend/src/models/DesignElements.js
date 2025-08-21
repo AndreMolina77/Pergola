@@ -1,5 +1,4 @@
-/* Esta colección va a almacenar toda la información relacionada con los elementos que los clientes pueden escoger
-en la parte pública del sistema. Relacionada con `CustomDesigns`.
+/*
 "designElements": [
     {
         "type": "Cierre",
@@ -9,18 +8,12 @@ en la parte pública del sistema. Relacionada con `CustomDesigns`.
 ] */
 // Importar modelo y schema de mongoose
 import { Schema, model } from 'mongoose'
-// Tipos de valores admitidos
-const validTypes = ["base", "decoration", "clasp"]
 // Definir el schema para los elementos del diseño
 const designElementSchema = new Schema({
     type: {
         type: String,
         required: [true, "El tipo es obligatorio"],
         trim: true,
-        enum: {
-            values: validTypes,
-            message: "El tipo debe ser 'base', 'decoration' o 'clasp'"
-        }
     },
     name: {
         type: String,
@@ -31,16 +24,14 @@ const designElementSchema = new Schema({
     },
     image: {
         type: String,
-        required: [true, "La URL de la imagen es obligatoria"],
         validate: {
             validator: function(v) {
-                // Solo valida si el campo tiene un valor y no está vacío
-                if (!v || v.trim() === '') return true;
-                return /^https?:\/\/.+\.(jpg|jpeg|png|webp|svg)$/.test(v);
+                if (v == null) return true;
+                return v.trim() !== '' && /^https?:\/\/.+\.(jpg|jpeg|png|webp|svg)$/.test(v);
             },
-            message: "La URL de imagen debe ser válida"
+            message: "La URL no puede estar vacía y debe ser válida (jpg/jpeg/png/webp/svg)"
         }
-    }
+    },
 }, {
     timestamps: true
 })

@@ -37,6 +37,19 @@ const FormModal = ({isOpen, onClose, onSubmit, title, fields, initialData = {}, 
       const defaultValues = {}
       fields.forEach(field => {
         const initialValue = initialData[field.name]
+        if (field.type === 'date') {
+          // Convierte el valor inicial al formato YYYY-MM-DD
+          if (initialValue) {
+            const date = new Date(initialValue)
+            if (!isNaN(date)) {
+              defaultValues[field.name] = date.toISOString().split('T')[0] // Formato YYYY-MM-DD
+            } else {
+              defaultValues[field.name] = '' // Valor por defecto si la fecha es inválida
+            }
+          } else {
+            defaultValues[field.name] = ''
+          }
+        }
         if (field.type === 'checkbox') {
           defaultValues[field.name] = Boolean(initialValue)
         } else if (field.type === 'number') {
@@ -112,6 +125,13 @@ const FormModal = ({isOpen, onClose, onSubmit, title, fields, initialData = {}, 
         }
       }
       rules.setValueAs = (value) => value === '' ? '' : Number(value)
+    }
+    if (field.type === 'date') {
+      rules.setValueAs = (value) => {
+        if (!value) return '' // Maneja valores vacíos
+        const date = new Date(value)
+        return isNaN(date) ? '' : date.toISOString().split('T')[0] // Retorna YYYY-MM-DD
+      }
     }
     if (field.minLength) {
       rules.minLength = {
@@ -301,7 +321,7 @@ const FormModal = ({isOpen, onClose, onSubmit, title, fields, initialData = {}, 
         )
       case 'date':
         return (
-          <input {...register(field.name, validation)} type="date" className={baseInputClasses} disabled={isLoading}/>
+          <input {...register(field.name, validation)} type="date" className={baseInputClasses} disabled={isLoading} min={field.minDate} max={field.maxDate}/>
         )
       default:
         return (

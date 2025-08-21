@@ -18,18 +18,29 @@ designElementsController.postElements = async (req, res) => {
         let imageUrl = ""
         // Subir imagen a cloudinary si se proporciona una imagen en el cuerpo de la solicitud
         if (req.file) {
+            console.log("Uploading file:", req.file); // DEBUG
             const result = await cloudinary.uploader.upload(req.file.path, {
                 folder: "elements",
                 allowed_formats: ["jpg", "jpeg", "png", "gif"],
             })
             imageUrl = result.secure_url
+            console.log("Uploading file:", req.file); // DEBUG
         }
         const newElement = new DesignElements({ type, name, image: imageUrl });
         // Guardar elemento
         await newElement.save();
+        console.log("Saved element:", newElement); // DEBUG
         // ESTADO DE CREACIÓN
         res.status(201).json({ message: "Elemento creado con éxito", data: newElement });
     } catch (error) {
+        console.error("Error creating element:", error); // DEBUG
+        console.error("🔥 ERROR en postDesigns:", error); // log completo
+        res.status(400).json({
+            message: "Error al crear diseño",
+            error: error.message,
+            stack: error.stack,   // incluye stack
+            body: req.body        // qué datos llegaron
+        });
         // ESTADO DE ERROR EN INPUT DEL CLIENTE
         res.status(400).json({ message: "Error al crear el elemento", error: error.message });
     }

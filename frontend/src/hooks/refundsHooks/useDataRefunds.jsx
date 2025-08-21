@@ -7,6 +7,7 @@ const useDataRefunds = () => {
   const [refunds, setRefunds] = useState([]); // Lista de reembolsos
   const [orders, setOrders] = useState([]); // Lista de pedidos
   const [customers, setCustomers] = useState([]); // Lista de clientes
+  const [products, setProducts] = useState([]); // lista de items
   const [loading, setLoading] = useState(true); // Estado de carga
   // Cargar reembolsos desde el servidor
   const fetchRefunds = async () => {
@@ -64,11 +65,27 @@ const useDataRefunds = () => {
       console.error("Error al obtener pedidos:", error);
     }
   };
+  // Cargar productos desde el servidor
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch("http://localhost:4000/api/products", {
+        credentials: "include"
+      });
+      if (!response.ok) {
+        throw new Error("Error al obtener productos");
+      }
+      const data = await response.json();
+      setProducts(data);
+    } catch (error) {
+      console.error("Error al obtener productos:", error);
+    }
+  };
   // Cargar todos los datos relacionados al montar el componente
   useEffect(() => {
     fetchRefunds();
     fetchCustomers();
     fetchOrders();
+    fetchProducts();
   }, []);
   // Handlers para CRUD de pedidos
   const createHandlers = (API) => ({
@@ -79,7 +96,7 @@ const useDataRefunds = () => {
       try {
         const headers = { "Content-Type": "application/json" };
         const body = JSON.stringify(data);
-        const response = await fetch(`${API}`, {
+        const response = await fetch(`${API}/refunds`, {
           method: "POST",
           headers,
           credentials: "include",
@@ -102,7 +119,7 @@ const useDataRefunds = () => {
       try {
         const headers = { "Content-Type": "application/json" };
         const body = JSON.stringify(data);
-        const response = await fetch(`${API}/${id}`, {
+        const response = await fetch(`${API}/refunds/${id}`, {
           method: "PUT",
           headers,
           credentials: "include",
@@ -148,10 +165,12 @@ const useDataRefunds = () => {
     refunds,
     customers,
     orders,
+    products,
     loading,
     fetchRefunds,
     fetchCustomers,
     fetchOrders,
+    fetchProducts,
     deleteRefund,
     createHandlers
   };
