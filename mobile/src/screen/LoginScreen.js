@@ -50,7 +50,7 @@ export default function LoginScreen({ navigation }) {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <TouchableOpacity style={styles.backButton}>
-        <Ionicons name="arrow-back-circle-outline" size={28} color="black" />
+        <Ionicons name="arrow-back-circle-outline" size={40} color="black" />
       </TouchableOpacity>
       <Text style={styles.title}>Iniciar Sesión</Text>
 
@@ -138,7 +138,14 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   backButton: {
+    width: "15%",
+    height: "15%",
     marginBottom: 10,
+  },
+  backIcon: {
+    width: "15%",
+    height: "15%",
+    tintColor: "#3D1609",
   },
   title: {
     textAlign: "center",
@@ -149,7 +156,7 @@ const styles = StyleSheet.create({
   },
   input: {
     width: "100%",
-    height: 56,
+    height: 62,
     backgroundColor: "#E8E1D8",
     borderRadius: 8,
     paddingHorizontal: 12,
@@ -159,8 +166,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     width: "100%",
-    height: 56,
-    marginBottom: 12,
+    height: 62,
+    marginBottom: 10,
   },
   inputPassword: {
     flex: 1,
@@ -171,7 +178,12 @@ const styles = StyleSheet.create({
   },
   eyeIconContainer: {
     position: "absolute",
-    right: 12,
+    right: 10,
+  },
+  eyeIcon: {
+    width: "15%",
+    height: "15%",
+    tintColor: "#3D1609",
   },
   rememberContainer: {
     flexDirection: "row",
@@ -179,12 +191,13 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   rememberText: {
-    marginLeft: 6,
+    marginLeft: 5,
+    fontWeight: "bold",
     color: "#3D1609",
   },
   button: {
     width: "100%",
-    height: 56,
+    height: 62,
     backgroundColor: "#A73249",
     borderRadius: 8,
     alignItems: "center",
@@ -211,8 +224,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   socialButton: {
-    width: "100%",
-    height: 52,
+    width: "90%",
+    height: "15%",
     backgroundColor: "#E3C6B8",
     borderRadius: 8,
     flexDirection: "row",
@@ -228,6 +241,12 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
   bottomText: {
+    textAlign: "center",
+    position: "absolute",
+    bottom: 10,
+    marginLeft: 25,
+    marginBottom: 10,
+    width: "100%",
     color: "#3D1609",
   },
 });
