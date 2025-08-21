@@ -159,7 +159,7 @@ const customersSchema = new Schema({
     },
     jewelSize: {
         type: String,
-        enum: ["pequeño", "mediano", "grande", "muy grande"],
+        enum: ["pequeño", "mediano", "grande", "muy grande", ""],
         trim: true
     },
     budget: {

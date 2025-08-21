@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   input: {
-    width: 398,
+    width: "100%",
     height: 62,
     backgroundColor: "#E8E1D8",
     borderRadius: 8,
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
     tintColor: "#3D1609",
   },
   button: {
-    width: 398,
+    width: "100%",
     height: 62,
     backgroundColor: "#A73249",
     borderRadius: 8,
