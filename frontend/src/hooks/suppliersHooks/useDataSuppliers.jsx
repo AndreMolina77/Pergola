@@ -3,7 +3,7 @@ import { toast } from "react-hot-toast"
 
 // Hook personalizado para manejar la lógica relacionada con proveedores
 const useDataSuppliers = () => {
-  const API = "http://localhost:4000/api/suppliers" // URL base para la API de proveedores
+  const API = "https://pergola.onrender.com/api/suppliers" // URL base para la API de proveedores
 
   // Estado para almacenar la lista de proveedores
   const [suppliers, setSuppliers] = useState([])

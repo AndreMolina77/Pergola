@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect } from "react"
-const API = "http://localhost:4000/api"
+const API = "https://pergola.onrender.com/api"
 const AuthContext = createContext()
 
 // Proveedor de contexto de autenticación

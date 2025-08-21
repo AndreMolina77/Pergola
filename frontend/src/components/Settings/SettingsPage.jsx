@@ -120,7 +120,7 @@ const SettingsPage = () => {
       // Determinar el endpoint según el tipo de usuario
       let endpoint = ''
       if (user.userType === 'admin') {
-        endpoint = `http://localhost:4000/api/admin/profile`
+        endpoint = `https://pergola.onrender.com/api/admin/profile`
       } else if (user.userType === 'customer') {
         endpoint = `${API}/customers/${user.id}`
       } else {

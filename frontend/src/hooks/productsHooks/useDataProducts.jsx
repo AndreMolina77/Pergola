@@ -3,7 +3,7 @@ import { toast } from "react-hot-toast"
 
 // Hook para manejar productos y sus datos relacionados
 const useDataProducts = () => {
-  const API = "http://localhost:4000/api/products"
+  const API = "https://pergola.onrender.com/api/products"
   const [products, setProducts] = useState([]) // Lista de productos
   const [categories, setCategories] = useState([]) // Lista de categorías
   const [subcategories, setSubategories] = useState([]) // Lista de subcategorías

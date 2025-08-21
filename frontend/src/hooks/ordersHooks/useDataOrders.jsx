@@ -3,7 +3,7 @@ import { toast } from "react-hot-toast";
 
 // Hook para manejar pedidos y sus datos relacionados
 const useDataOrders = () => {
-  const API = "http://localhost:4000/api/orders";
+  const API = "https://pergola.onrender.com/api/orders";
   const [orders, setOrders] = useState([]); // Lista de pedidos
   const [customers, setCustomers] = useState([]); // Lista de clientes
   const [products, setProducts] = useState([]); // Lista de productos
@@ -37,7 +37,7 @@ const useDataOrders = () => {
   // Cargar clientes desde el servidor
   const fetchCustomers = async () => {
     try {
-      const response = await fetch("http://localhost:4000/api/customers", {
+      const response = await fetch("https://pergola.onrender.com/api/customers", {
         credentials: "include"
       });
       if (!response.ok) {
@@ -52,7 +52,7 @@ const useDataOrders = () => {
   // Cargar productos desde el servidor
   const fetchProducts = async () => {
     try {
-      const response = await fetch("http://localhost:4000/api/products", {
+      const response = await fetch("https://pergola.onrender.com/api/products", {
         credentials: "include"
       });
       if (!response.ok) {
