@@ -17,27 +17,27 @@ export default function AppNavigator() {
         <Stack.Screen
           name="Login"
           component={LoginScreen}
-          options={{ title: 'Iniciar Sesión' }}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="Register"
           component={RegisterScreen}
-          options={{ title: 'Registro' }}
+          options={{ headerShown: false  }}
         />
         <Stack.Screen
           name="RecoverPassword"
           component={RecoverPasswordScreen}
-          options={{ title: 'Recuperar Contraseña' }}
+          options={{ headerShown: false  }}
         />
         <Stack.Screen
           name="VerifyEmail"
           component={VerifyEmailScreen}
-          options={{ title: 'Verificar Correo' }}
+          options={{ headerShown: false  }}
         />
         <Stack.Screen
           name="Home"
           component={HomeScreen}
-          options={{ title: 'Menú Principal' }}
+          options={{ headerShown: false  }}
         />
       </Stack.Navigator>
     </NavigationContainer>
