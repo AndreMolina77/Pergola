@@ -3,7 +3,7 @@ import { toast } from "react-hot-toast"
 
 // Hook para manejar datos de empleados
 const useDataEmployees = () => {
-  const API = "http://localhost:4000/api/employees"
+  const API = "https://pergola.onrender.com/api/employees"
   const [employees, setEmployees] = useState([]) // empleados
   const [loading, setLoading] = useState(true) // estado de carga
 

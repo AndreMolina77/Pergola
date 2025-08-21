@@ -2,6 +2,9 @@ import express from "express"
 import cors from "cors"
 import dotenv from "dotenv"
 import cookieParser from "cookie-parser"
+import swaggerUi from "swagger-ui-express"
+import fs from "fs"
+import path from "path"
 // Aqui importo todas las rutas que tiene el sistema de Pérgola
 import productsRoutes from "./src/routes/products.js"
 import customDesignsRoutes from "./src/routes/customDesigns.js"
@@ -36,6 +39,8 @@ app.use(cors({
   origin: "http://localhost:5173",
   credentials: true 
 }))
+// Archivo JSON que contiene la documentación de Swagger UI
+const swaggerDocument = JSON.parse(fs.readFileSync(path.resolve("./institutotcnicorical-1ec-Pergola-1.0.0-swagger.json"), "utf8"))
 // Rutas que NO requieren login
 app.use("/api/login", loginRoutes)
 app.use("/api/logout", logoutRoutes)
@@ -44,6 +49,7 @@ app.use("/api/signupCustomer", signupCustomerRoutes)
 app.use("/api/recoveryPassword", recoveryPasswordRoutes)
 app.use("/api/validatePassword", validatePasswordRoutes)
 app.use("/api/admin/profile", adminProfileRoutes) // Esta será pública para /data-public
+app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 // Ruta especial para validar token (acepta cualquier tipo de usuario válido)
 app.use("/api/validateAuthToken", validateAuthTokenRoutes)
 // Rutas que SÍ requieren login (protegidas) 
