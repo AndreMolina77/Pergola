@@ -33,12 +33,15 @@ import { validateAuthToken } from "./src/middlewares/validateAuthToken.js"
  
 dotenv.config()
 const app = express()
-app.use(express.json(({ limit: '10mb' })))
-app.use(cookieParser())
 app.use(cors({
   origin: ["http://localhost:5173", "https://pergola-rose.vercel.app"], 
-  credentials: true 
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 200 // For legacy browser support
 }))
+app.use(express.json(({ limit: '10mb' })))
+app.use(cookieParser())
 // Archivo JSON que contiene la documentación de Swagger UI
 const swaggerDocument = JSON.parse(fs.readFileSync(path.resolve("./institutotcnicorical-1ec-Pergola-1.0.0-swagger.json"), "utf8"))
 // Rutas que NO requieren login
