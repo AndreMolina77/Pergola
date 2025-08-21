@@ -40,9 +40,6 @@ const app = express()
 app.use(cors({
   origin: ["http://localhost:5173", "https://pergola-rose.vercel.app"], 
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  optionsSuccessStatus: 200 // For legacy browser support
 }))
 app.use(express.json(({ limit: '10mb' })))
 app.use(cookieParser())
