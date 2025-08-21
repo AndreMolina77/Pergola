@@ -1,12 +1,12 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Image,
   Alert,
+  SafeAreaView,
 } from "react-native";
 import api from "../../api/api";
 import Checkbox from "expo-checkbox";
@@ -14,6 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import { useFonts } from "expo-font";
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState("");
@@ -21,14 +22,19 @@ export default function LoginScreen({ navigation }) {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
+  const [fontsLoaded] = useFonts({
+    Quicksand: require("../../assets/fonts/Quicksand-Regular.ttf"),
+    QuicksandBold: require("../../assets/fonts/Quicksand-Bold.ttf"),
+    Nunito: require("../../assets/fonts/Nunito-Regular.ttf"),
+  });
+
   const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert("Error", "Por favor ingresa correo y contraseña");
       return;
     }
-
     try {
-      const response = await api.post("/auth/login", { email, password });
+      const response = await api.post(`${api}/login`, { email, password });
       if (response.data.success) {
         Alert.alert("Éxito", "Has iniciado sesión correctamente");
         navigation.navigate("Home");
@@ -40,13 +46,11 @@ export default function LoginScreen({ navigation }) {
       Alert.alert("Error", "No se pudo conectar al servidor");
     }
   };
-
-
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       {/* Header */}
       <TouchableOpacity style={styles.backButton}>
-        <Ionicons name="arrow-back-circle-outline" size={24} color="black" />
+        <Ionicons name="arrow-back-circle-outline" size={28} color="black" />
       </TouchableOpacity>
       <Text style={styles.title}>Iniciar Sesión</Text>
 
@@ -71,19 +75,19 @@ export default function LoginScreen({ navigation }) {
           onPress={() => setShowPassword(!showPassword)}
           style={styles.eyeIconContainer}
         >
-          <AntDesign name="eyeo" size={24} color="black" />
+          <AntDesign name="eyeo" size={22} color="black" />
         </TouchableOpacity>
       </View>
 
       {/* Remember Me */}
       <View style={styles.rememberContainer}>
-  <Checkbox
-    value={rememberMe}
-    onValueChange={setRememberMe}
-    color={rememberMe ? "#3D1609" : undefined}
-  />
-  <Text style={styles.rememberText}>Recuérdame</Text>
-</View>
+        <Checkbox
+          value={rememberMe}
+          onValueChange={setRememberMe}
+          color={rememberMe ? "#3D1609" : undefined}
+        />
+        <Text style={styles.rememberText}>Recuérdame</Text>
+      </View>
 
       {/* Continuar */}
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
@@ -102,26 +106,28 @@ export default function LoginScreen({ navigation }) {
       <View style={styles.socialContainer}>
         <TouchableOpacity style={styles.socialButton}>
           <Text>Continuar con Apple</Text>
-          <AntDesign name="apple-o" size={24} color="black" />
+          <AntDesign name="apple-o" size={22} color="black" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.socialButton}>
           <Text>Continuar con Google</Text>
-          <FontAwesome name="google" size={24} color="black" />
+          <FontAwesome name="google" size={22} color="black" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.socialButton}>
-          <Text>Continuar con Facebookk</Text>
-          <FontAwesome5 name="facebook" size={24} color="black" />
+          <Text>Continuar con Facebook</Text>
+          <FontAwesome5 name="facebook" size={22} color="black" />
         </TouchableOpacity>
       </View>
 
       {/* Crear cuenta */}
-      <Text style={styles.bottomText}>
-        ¿No tienes una cuenta?{" "}
-        <Text style={styles.linkText} onPress={() => navigation.navigate("Register")}>
-          Crea una
+      <View style={styles.bottomContainer}>
+        <Text style={styles.bottomText}>
+          ¿No tienes una cuenta?{" "}
+          <Text style={styles.linkText} onPress={() => navigation.navigate("Register")}>
+            Crea una
+          </Text>
         </Text>
-      </Text>
-    </View>
+      </View>
+    </SafeAreaView>
   );
 }
 
@@ -132,14 +138,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   backButton: {
-    width: 48,
-    height: 48,
     marginBottom: 10,
-  },
-  backIcon: {
-    width: 48,
-    height: 48,
-    tintColor: "#3D1609",
   },
   title: {
     textAlign: "center",
@@ -149,53 +148,48 @@ const styles = StyleSheet.create({
     color: "#000",
   },
   input: {
-    width: 380,
-    height: 62,
+    width: "100%",
+    height: 56,
     backgroundColor: "#E8E1D8",
     borderRadius: 8,
-    paddingHorizontal: 10,
-    marginBottom: 10,
+    paddingHorizontal: 12,
+    marginBottom: 12,
   },
   passwordContainer: {
     flexDirection: "row",
     alignItems: "center",
-    width: 380,
-    height: 62,
-    marginBottom: 10,
+    width: "100%",
+    height: 56,
+    marginBottom: 12,
   },
   inputPassword: {
     flex: 1,
     backgroundColor: "#E8E1D8",
     borderRadius: 8,
-    paddingHorizontal: 10,
-    height: 62,
+    paddingHorizontal: 12,
+    height: "100%",
   },
   eyeIconContainer: {
     position: "absolute",
-    right: 10,
-  },
-  eyeIcon: {
-    width: 32,
-    height: 32,
-    tintColor: "#3D1609",
+    right: 12,
   },
   rememberContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: 12,
   },
   rememberText: {
-    marginLeft: 5,
+    marginLeft: 6,
     color: "#3D1609",
   },
   button: {
-    width: 380,
-    height: 62,
+    width: "100%",
+    height: 56,
     backgroundColor: "#A73249",
     borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
-    marginVertical: 10,
+    marginVertical: 12,
   },
   buttonText: {
     color: "#fff",
@@ -212,12 +206,13 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   socialContainer: {
+    width: "100%",
     alignItems: "center",
     marginBottom: 20,
   },
   socialButton: {
-    width: 388.26,
-    height: 56,
+    width: "100%",
+    height: 52,
     backgroundColor: "#E3C6B8",
     borderRadius: 8,
     flexDirection: "row",
@@ -226,15 +221,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     marginBottom: 10,
   },
-  socialIcon: {
-    width: 24,
-    height: 24,
+  bottomContainer: {
+    flex: 1,
+    justifyContent: "flex-end",
+    alignItems: "center",
+    paddingBottom: 10,
   },
   bottomText: {
-    textAlign: "center",
-    position: "absolute",
-    bottom: 10,
-    width: "100%",
     color: "#3D1609",
   },
 });
