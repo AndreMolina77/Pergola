@@ -62,8 +62,9 @@ loginController.login = async (req, res) => {
                         res.cookie("authToken", token, {
                             httpOnly: true,
                             secure: process.env.NODE_ENV === 'production',
-                            sameSite: 'lax',
-                            maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000
+                            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+                            maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000,
+                            path: '/'
                         })
                         console.log("Token generado y cookie establecida para admin")
                         res.json({message: "Inicio de sesión exitoso"})

@@ -31,6 +31,10 @@ import adminProfileRoutes from "./src/routes/adminProfile.js"
 // Importo middlewares para validar el token de autenticación
 import { validateAuthToken } from "./src/middlewares/validateAuthToken.js"
  
+console.log("🔧 Environment check:");
+console.log("NODE_ENV:", process.env.NODE_ENV);
+console.log("JWT_SECRET present:", !!process.env.JWT_SECRET);
+console.log("Port:", process.env.PORT || 4000);
 dotenv.config()
 const app = express()
 app.use(cors({
