@@ -27,7 +27,7 @@ transactionsController.postTransactions = async (req, res) => {
             // ESTADO DE ERROR DE INPUT DEL CLIENTE
             return res.status(400).json({ message: "El cliente no existe" });
         }
-        const newTransaction = new Refunds({ transactionCode, order, customer, amount, type, paymentMethod, status: status || "pendiente" });
+        const newTransaction = new Transactions({ transactionCode, order, customer, amount, type, paymentMethod, status: status || "pendiente" });
         // Guardar la devolución
         await newTransaction.save();
         // ESTADO DE CREACIÓN

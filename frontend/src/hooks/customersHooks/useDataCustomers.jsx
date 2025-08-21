@@ -47,7 +47,7 @@ const useDataCustomers = () => {
         let body
         let headers = { credentials: "include" }
         // Usa FormData si hay imagen
-        if (data.image && data.image instanceof File) {
+        if (data.profilePic && data.profilePic instanceof File) {
           const formData = new FormData()
           Object.keys(data).forEach(key => {
             formData.append(key, data[key])
@@ -59,7 +59,7 @@ const useDataCustomers = () => {
         }
         const response = await fetch(`${API}/customers`, {
           method: "POST",
-          headers,
+          headers, // No forzado
           credentials: "include",
           body
         })

@@ -190,7 +190,7 @@ const MainPage = () => {
         return (
           <div className="p-6 bg-white min-h-screen">
             <div className="max-w-7xl mx-auto">
-              <TableContainer config={refundsConfig} {...refundsData.createHandlers(API)} onExport={handleDataExport} ordersData={{orders: refundsData.orders || []}} productsData={{products: refundsData.products || []}}/>
+              <TableContainer config={refundsConfig} {...refundsData.createHandlers(API)} onExport={handleDataExport} ordersData={{orders: refundsData.orders || []}} productsData={{products: refundsData.products || []}} customersData={{customers: refundsData.customers || []}}/>
             </div>
           </div>
         )
@@ -198,7 +198,7 @@ const MainPage = () => {
         return (
           <div className="p-6 bg-white min-h-screen">
             <div className="max-w-7xl mx-auto">
-              <TableContainer config={transactionsConfig} {...transactionsData.createHandlers(API)} onExport={handleDataExport} ordersData={{orders: transactionsData.orders || []}} productsData={{products: transactionsData.products || []}}/>
+              <TableContainer config={transactionsConfig} {...transactionsData.createHandlers(API)} onExport={handleDataExport} ordersData={{orders: transactionsData.orders || []}} customersData={{customers: refundsData.customers || []}}/>
             </div>
           </div>
         )

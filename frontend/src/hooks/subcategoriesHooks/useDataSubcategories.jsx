@@ -57,7 +57,7 @@ const useDataSubcategories = () => {
         }
         const response = await fetch(`${API}/subcategories`, {
           method: "POST",
-          headers,
+          headers, // No forzado
           credentials: "include",
           body
         })
@@ -89,7 +89,7 @@ const useDataSubcategories = () => {
         }
         const response = await fetch(`${API}/subcategories/${id}`, {
           method: "PUT",
-          headers,
+          headers, // No forzado
           credentials: "include",
           body
         })

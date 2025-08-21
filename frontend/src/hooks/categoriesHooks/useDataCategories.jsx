@@ -66,7 +66,7 @@ const useDataCategories = () => {
         }
         const response = await fetch(`${API}/categories`, {
           method: "POST",
-          headers,
+          headers, // No forzado
           credentials: "include",
           body
         })
@@ -100,7 +100,7 @@ const useDataCategories = () => {
         }
         const response = await fetch(`${API}/categories/${id}`, {
           method: "PUT",
-          headers,
+          headers, // No forzado
           credentials: "include",
           body
         })

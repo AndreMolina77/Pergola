@@ -30,7 +30,7 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
           ...field,
           options: categoriesData.categories.map(cat => ({
             value: cat._id,
-            label: `${cat.name} ${cat.description}`
+            label: `${cat.name}`
           }))
         }
       }
@@ -40,7 +40,7 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
           ...field,
           options: subcategoriesData.subcategories.map(subcat => ({
             value: subcat._id,
-            label: `${subcat.name} ${subcat.description}`
+            label: `${subcat.name}`
           }))
         }
       }
@@ -50,7 +50,7 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
           ...field,
           options: collectionsData.collections.map(col => ({
             value: col._id,
-            label: `${col.name} ${col.description}`
+            label: `${col.name}`
           }))
         }
       }
@@ -68,9 +68,9 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
       if (field.options === 'customers' && customersData?.customers) {
         return {
           ...field,
-          options: customersData.customers.map(cus => ({
-            value: cus._id,
-            label: `${cus.username} (${cus.email})`
+          options: customersData.customers.map(customer => ({
+            value: customer._id,
+            label: `${customer.name} ${customer.lastName} (${customer.email})`
           }))
         }
       }
@@ -110,7 +110,7 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
           ...field,
           options: ordersData.orders.map(order => ({
             value: order._id,
-            label: `${order.name} ${order.description}`
+            label: `Pedido #${order._id.slice(-6)} - $${order.total}`
           }))
         }
       }
@@ -135,7 +135,7 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
         }
       }
       // Opciones para elementos de diseño
-      if (field.options === 'designElements' && designElementsData?.designElements) {
+      if (field.options === 'designelements' && designElementsData?.designElements) {
         return {
           ...field,
           options: designElementsData.designElements.map(designElement => ({
@@ -155,10 +155,26 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
     // Maneja objetos anidados (categorías, clientes, proveedores, etc.)
     if (value && typeof value === 'object') {
       if (column.key === 'product') {
-        return `${value.name || ''} ${value.description || ''} ${value.codeProduct || ''}`.toLowerCase()
+        // ✅ BUSCAR POR NOMBRE, DESCRIPCIÓN Y PRECIO
+        return `${value.name || ''} ${value.description || ''} ${value.codeProduct || ''} ${value.price || ''}`.toLowerCase()
       }
       if (column.key === 'customer') {
         return `${value.name || ''} ${value.lastName || ''} ${value.email || ''} ${value.username || ''}`.toLowerCase()
+      }
+      // ✅ ITEMS CON ESTRUCTURA ANIDADA
+      if (column.key === 'items' && Array.isArray(value)) {
+        return value.map(item => {
+          if (typeof item === 'object') {
+            // Estructura anidada
+            if (item.itemId && typeof item.itemId === 'object') {
+              const product = item.itemId
+              return `${product.name || ''} ${product.description || ''} ${product.codeProduct || ''} ${product.price || ''}`
+            }
+            // Estructura simple
+            return `${item.name || ''} ${item.description || ''} ${item.codeProduct || ''} ${item.price || ''}`
+          }
+          return item.toString()
+        }).join(' ').toLowerCase()
       }
       if (column.key === 'employee') {
         return `${value.name || ''} ${value.lastName || ''} ${value.email || ''}`.toLowerCase()
@@ -184,7 +200,7 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
       if (column.key === 'transactions') {
         return `${value.name || ''} ${value.description || ''} ${value.correlative || ''}`.toLowerCase()
       }
-      if (column.key === 'designElements') {
+      if (column.key === 'designelements') {
         return `${value.name || ''} ${value.description || ''} ${value.correlative || ''}`.toLowerCase()
       }
       // Valor por defecto para objetos
@@ -310,6 +326,9 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
     if (item.product && typeof item.product === 'object') {
       processedItem.product = item.product._id
     }
+    if (item.order && typeof item.order === 'object') {
+      processedItem.order = item.order._id
+    }
     // Procesa arrays de referencias
     if (item.rawMaterialsUsed && Array.isArray(item.rawMaterialsUsed)) {
       processedItem.rawMaterialsUsed = item.rawMaterialsUsed.map(material => 
@@ -321,6 +340,17 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
         typeof item === 'object' ? item._id : item
       )
     }
+    // Procesa campos de tipo fecha
+    config.formFields.forEach(field => {
+      if (field.type === 'date' && processedItem[field.name]) {
+        const dateValue = new Date(processedItem[field.name]);
+        if (!isNaN(dateValue)) {
+          processedItem[field.name] = dateValue.toISOString().split('T')[0]; // Convierte a YYYY-MM-DD
+        } else {
+          processedItem[field.name] = ''; // Valor vacío si la fecha es inválida
+        }
+      }
+    });
     setSelectedItem(processedItem)
     setShowEditModal(true)
   }
@@ -336,21 +366,25 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
       const normalizedTitle = config.title.toLowerCase().replace(/\s+/g, '').replace('ías', 'ies')
       const typeMapping = {
         'productos': 'products',
-        'categorías': 'categories',
-        'subcategorías': 'subcategories', 
+        'categorías': 'categories', // Sin tilde
+        'subcategorías': 'subcategories', // Sin tilde  
         'colecciones': 'collections',
         'proveedores': 'suppliers',
         'materiasprimas': 'rawmaterials',
-        'reseñas': 'reviews',
-        'diseñosunicos': 'customdesigns',
+        'reseñas': 'reviews', // Sin tilde
+        'diseñosúnicos': 'customdesigns', // Sin tilde - CORREGIDO
         'clientes': 'customers',
         'empleados': 'employees',
         'pedidos': 'orders',
         'reembolsos': 'refunds',
         'transacciones': 'transactions',
-        'elementosdediseño': 'designElements'
+        'elementosdediseño': 'designelements' // Sin tilde - CORREGIDO
       }
       modalType = typeMapping[normalizedTitle] || normalizedTitle
+      // DEBUG: Para verificar el mapeo
+      console.log('Original title:', config.title)
+      console.log('Normalized title:', normalizedTitle)
+      console.log('Mapped modal type:', modalType)
     }
     setDetailModalType(modalType)
     setShowDetailModal(true)
@@ -487,7 +521,7 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
           isOpen={showDetailModal} 
           onClose={() => setShowDetailModal(false)} 
           data={selectedItem} 
-          title={`Detalles de ${config.title?.slice(0, -1) || 'Elemento'}`} 
+          title={`Detalles de ${config.title?.slice(0) || 'Elemento'}`} 
           type={detailModalType}
         />
       )}

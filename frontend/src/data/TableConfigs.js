@@ -5,7 +5,7 @@ export const customersConfig = {
     { key: 'name', label: 'Nombre', sortable: true, searchable: true },
     { key: 'lastName', label: 'Apellido', sortable: true, searchable: true },
     { key: 'username', label: 'Usuario', sortable: true, searchable: true },
-    { key: 'email', label: 'Email', sortable: true, searchable: true },
+    { key: 'email', label: 'Correo Electrónico', sortable: true, searchable: true },
     { key: 'phoneNumber', label: 'Teléfono', searchable: true },
     { key: 'birthDate', label: 'Fecha de Nacimiento', sortable: true, type: 'date' },
     { key: 'DUI', label: 'DUI', sortable: true, searchable: true },
@@ -32,7 +32,7 @@ export const customersConfig = {
     { name: 'name', type: 'text', label: 'Nombre', required: true, placeholder: 'Ej: Juan' },
     { name: 'lastName', type: 'text', label: 'Apellido', required: true, placeholder: 'Ej: Pérez' },
     { name: 'username', type: 'text', label: 'Usuario', required: true, placeholder: 'Ej: juanperez' },
-    { name: 'email', type: 'email', label: 'Email', required: true, placeholder: 'correo@ejemplo.com' },
+    { name: 'email', type: 'email', label: 'Correo Electrónico', required: true, placeholder: 'correo@ejemplo.com' },
     { name: 'phoneNumber', type: 'tel', label: 'Teléfono', required: true, placeholder: 'Ej: +503-7123-4567', helperText: 'Formato: +503 seguido de 8 dígitos (ej: +503-7123-4567)' },
     { name: 'birthDate', type: 'date', label: 'Fecha de Nacimiento', required: true },
     { name: 'DUI', type: 'text', label: 'DUI', required: true, placeholder: '12345678-9' },
@@ -61,7 +61,7 @@ export const employeesConfig = {
     { key: 'name', label: 'Nombre', sortable: true, searchable: true },
     { key: 'lastName', label: 'Apellido', sortable: true, searchable: true },
     { key: 'username', label: 'Usuario', sortable: true, searchable: true },
-    { key: 'email', label: 'Email', sortable: true, searchable: true },
+    { key: 'email', label: 'Correo Electrónico', sortable: true, searchable: true },
     { key: 'phoneNumber', label: 'Teléfono', searchable: true },
     { key: 'birthDate', label: 'Fecha de Nacimiento', sortable: true, type: 'date' },
     { key: 'DUI', label: 'DUI', sortable: true, searchable: true },
@@ -82,7 +82,7 @@ export const employeesConfig = {
     { name: 'name', type: 'text', label: 'Nombre', required: true, placeholder: 'Ej: Juan' },
     { name: 'lastName', type: 'text', label: 'Apellido', required: true, placeholder: 'Ej: Pérez' },
     { name: 'username', type: 'text', label: 'Usuario', required: true, placeholder: 'Ej: juanperez' },
-    { name: 'email', type: 'email', label: 'Email', required: true, placeholder: 'correo@ejemplo.com' },
+    { name: 'email', type: 'email', label: 'Correo Electrónico', required: true, placeholder: 'correo@ejemplo.com' },
     { name: 'phoneNumber', type: 'tel', label: 'Teléfono', required: true, placeholder: 'Ej: +503-7123-4567', helperText: 'Formato: +503 seguido de 8 dígitos (ej: +503-7123-4567)' },
     { name: 'birthDate', type: 'date', label: 'Fecha de Nacimiento', required: true },
     { name: 'DUI', type: 'text', label: 'DUI', required: true, placeholder: '12345678-9' },
@@ -185,8 +185,8 @@ export const suppliersConfig = {
   formFields: [
     { name: 'name', type: 'text', label: 'Nombre del Proveedor', required: true, placeholder: 'Ej: Distcaribe' },
     { name: 'contactPerson', type: 'text', label: 'Persona de Contacto', required: true, placeholder: 'Ej: Juan Pérez' },
-    { name: 'phoneNumber', type: 'tel', label: 'Teléfono', required: true, placeholder: '2234-5678' },
-    { name: 'email', type: 'email', label: 'Email', required: true, placeholder: 'proveedor@email.com' },
+    { name: 'phoneNumber', type: 'tel', label: 'Teléfono', required: true, placeholder: 'Ej: +503-7123-4567', helperText: 'Formato: +503 seguido de 8 dígitos (ej: +503-7123-4567)' },
+    { name: 'email', type: 'email', label: 'Correo electrónico', required: true, placeholder: 'proveedor@email.com' },
     { name: 'address', type: 'textarea', label: 'Dirección', required: true, placeholder: 'Dirección completa...', rows: 2 }
   ]
 }
@@ -336,7 +336,7 @@ export const reviewsConfig = {
     { name: 'response', type: 'textarea', label: 'Respuesta', required: false, placeholder: 'Escribe una respuesta...', rows: 4, maxlength: 500 }
   ]
 }
-// Configuración para diseños únicos
+// Configuración corregida para diseños únicos
 export const customDesignsConfig = {
   title: "Diseños únicos",
   columns: [
@@ -358,15 +358,21 @@ export const customDesignsConfig = {
   },
   formFields: [
     { name: 'codeRequest', type: 'text', label: 'Código de Solicitud', required: true, placeholder: 'Ej: D-001' },
-    { name: 'piece', type: 'text', label: 'Pieza', required: true, placeholder: 'Ej: Pulsera' },
-    { name: 'base', type: 'text', label: 'Base', required: true, placeholder: 'Ej: metal' },
-    { name: 'baseLength', type: 'text', label: 'Longitud de Base', required: true, placeholder: 'Ej: 10 cm' },
-    { name: 'decoration', type: 'text', label: 'Decoración', required: true, placeholder: 'Ej: pulsera' },
-    { name: 'clasp', type: 'text', label: 'Cierre', required: true, placeholder: 'Ej: clasp' },
-    { name: 'customerComments', type: 'textarea', label: 'Comentarios del Cliente', required: true, placeholder: 'Ej: excelente diseño' }
+    { name: 'piece', type: 'select', label: 'Pieza', required: true, 
+      options: [
+        { value: 'Pulsera', label: 'Pulsera' },
+        { value: 'Cadena', label: 'Cadena' },
+        { value: 'Tobillera', label: 'Tobillera' }
+      ]
+    },
+    { name: 'base', type: 'text', label: 'Base', required: true, placeholder: 'Ej: Cadena de eslabones' },
+    { name: 'baseLength', type: 'text', label: 'Longitud de Base', required: true, placeholder: 'Ej: 18cm' },
+    { name: 'decoration', type: 'textarea', label: 'Decoración', required: true, placeholder: 'Describe los elementos decorativos...', rows: 3 },
+    { name: 'clasp', type: 'text', label: 'Cierre', required: true, placeholder: 'Ej: Cierre mosquetón' },
+    { name: 'customerComments', type: 'textarea', label: 'Comentarios del Cliente', required: false, placeholder: 'Comentarios adicionales del cliente...', rows: 3, maxlength: 300 }
   ]
 }
-// Configuración para Elementos de Diseño
+// Configuración corregida para Elementos de Diseño
 export const designElementsConfig = {
   title: "Elementos de Diseño",
   columns: [
@@ -383,14 +389,15 @@ export const designElementsConfig = {
     canView: true
   },
   formFields: [
-    { name: 'name', type: 'text', label: 'Nombre', required: true, placeholder: 'Ej: Anillo' },
-    { name: 'type', type: 'select', label: 'Tipo', required: true, options: [
-      { value: 'anillo', label: 'Anillo' },
-      { value: 'pulseras', label: 'Pulsera' },
-      { value: 'cadenas', label: 'Cadena' },
-      { value: 'otro', label: 'Otro' }
-    ] },
-    { name: 'image', type: 'image', label: 'Imagen', accept: 'image/*', placeholder: 'Seleccionar imagen' }
+    { name: 'name', type: 'text', label: 'Nombre', required: true, placeholder: 'Ej: Cadena de eslabones' },
+    { name: 'type', type: 'select', label: 'Tipo', required: true, 
+      options: [
+        { value: 'base', label: 'Base' },
+        { value: 'decoration', label: 'Decoración' },
+        { value: 'clasp', label: 'Cierre' }
+      ]
+    },
+    { name: 'image', type: 'image', label: 'Imagen', required: true, accept: 'image/*', placeholder: 'Seleccionar imagen' }
   ]
 }
 // Configuración para pedidos

@@ -79,7 +79,7 @@ const useDataOrders = () => {
       try {
         const headers = { "Content-Type": "application/json" };
         const body = JSON.stringify(data);
-        const response = await fetch(`${API}`, {
+        const response = await fetch(`${API}/orders`, {
           method: "POST",
           headers,
           credentials: "include",
@@ -102,7 +102,7 @@ const useDataOrders = () => {
       try {
         const headers = { "Content-Type": "application/json" };
         const body = JSON.stringify(data);
-        const response = await fetch(`${API}/${id}`, {
+        const response = await fetch(`${API}/orders/${id}`, {
           method: "PUT",
           headers,
           credentials: "include",
