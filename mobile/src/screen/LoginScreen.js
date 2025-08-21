@@ -1,51 +1,65 @@
-import React, { useState } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Image,
   Alert,
 } from "react-native";
-import api from "../../api/api";
 import Checkbox from "expo-checkbox";
 import { Ionicons } from '@expo/vector-icons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import { AuthContext } from "../context/AuthContext";
 
-export default function LoginScreen({ navigation }) {
+const LoginScreen = ({ navigation }) => {
+  const { login, authToken } = useContext(AuthContext);
+  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  // Verificar si ya existe una sesión activa
+  useEffect(() => {
+    if (authToken) {
+      navigation.replace("TabNavigator");
+    }
+  }, [authToken]);
 
   const handleLogin = async () => {
+    // Validaciones básicas
     if (!email || !password) {
-      Alert.alert("Error", "Por favor ingresa correo y contraseña");
+      Alert.alert("Error", "Por favor completa todos los campos");
       return;
     }
 
+    setLoading(true);
+    
     try {
-      const response = await api.post("/auth/login", { email, password });
-      if (response.data.success) {
-        Alert.alert("Éxito", "Has iniciado sesión correctamente");
-        navigation.navigate("Home");
+      const success = await login(email, password);
+      if (success) {
+        navigation.replace("TabNavigator");
       } else {
-        Alert.alert("Error", response.data.message || "Datos incorrectos");
+        Alert.alert("Error", "Credenciales incorrectas");
       }
     } catch (error) {
-      console.log(error);
-      Alert.alert("Error", "No se pudo conectar al servidor");
+      Alert.alert("Error", "No se pudo iniciar sesión");
+    } finally {
+      setLoading(false);
     }
   };
-
 
   return (
     <View style={styles.container}>
       {/* Header */}
-      <TouchableOpacity style={styles.backButton}>
+      <TouchableOpacity 
+        style={styles.backButton}
+        onPress={() => navigation.goBack()}
+      >
         <Ionicons name="arrow-back-circle-outline" size={40} color="black" />
       </TouchableOpacity>
       <Text style={styles.title}>Iniciar Sesión</Text>
@@ -58,7 +72,9 @@ export default function LoginScreen({ navigation }) {
         onChangeText={setEmail}
         keyboardType="email-address"
         autoCapitalize="none"
+        editable={!loading}
       />
+      
       <View style={styles.passwordContainer}>
         <TextInput
           style={styles.inputPassword}
@@ -66,34 +82,49 @@ export default function LoginScreen({ navigation }) {
           value={password}
           onChangeText={setPassword}
           secureTextEntry={!showPassword}
+          editable={!loading}
         />
         <TouchableOpacity
           onPress={() => setShowPassword(!showPassword)}
           style={styles.eyeIconContainer}
         >
-          <AntDesign name="eyeo" size={24} color="black" />
+          <AntDesign 
+            name={showPassword ? "eye" : "eyeo"} 
+            size={24} 
+            color="black" 
+          />
         </TouchableOpacity>
       </View>
 
       {/* Remember Me */}
       <View style={styles.rememberContainer}>
-  <Checkbox
-    value={rememberMe}
-    onValueChange={setRememberMe}
-    color={rememberMe ? "#3D1609" : undefined}
-  />
-  <Text style={styles.rememberText}>Recuérdame</Text>
-</View>
+        <Checkbox
+          value={rememberMe}
+          onValueChange={setRememberMe}
+          color={rememberMe ? "#3D1609" : undefined}
+          disabled={loading}
+        />
+        <Text style={styles.rememberText}>Recuérdame</Text>
+      </View>
 
       {/* Continuar */}
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Continuar</Text>
+      <TouchableOpacity 
+        style={[styles.button, loading && styles.buttonDisabled]} 
+        onPress={handleLogin}
+        disabled={loading}
+      >
+        <Text style={styles.buttonText}>
+          {loading ? "Iniciando..." : "Continuar"}
+        </Text>
       </TouchableOpacity>
 
       {/* Restablecer contraseña */}
       <Text style={styles.forgotText}>
         ¿Olvidaste tu contraseña?{" "}
-        <Text style={styles.linkText} onPress={() => navigation.navigate("RecoverPassword")}>
+        <Text 
+          style={styles.linkText} 
+          onPress={() => navigation.navigate("RecoverPassword")}
+        >
           Restablecer
         </Text>
       </Text>
@@ -109,7 +140,7 @@ export default function LoginScreen({ navigation }) {
           <FontAwesome name="google" size={24} color="black" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.socialButton}>
-          <Text>Continuar con Facebookk</Text>
+          <Text>Continuar con Facebook</Text>
           <FontAwesome5 name="facebook" size={24} color="black" />
         </TouchableOpacity>
       </View>
@@ -117,13 +148,18 @@ export default function LoginScreen({ navigation }) {
       {/* Crear cuenta */}
       <Text style={styles.bottomText}>
         ¿No tienes una cuenta?{" "}
-        <Text style={styles.linkText} onPress={() => navigation.navigate("Register")}>
+        <Text 
+          style={styles.linkText} 
+          onPress={() => navigation.navigate("Register")}
+        >
           Crea una
         </Text>
       </Text>
     </View>
   );
-}
+};
+
+export default LoginScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -132,14 +168,9 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   backButton: {
-    width: "15%",
-    height: "15%",
+    width: 40,
+    height: 40,
     marginBottom: 10,
-  },
-  backIcon: {
-    width: "15%",
-    height: "15%",
-    tintColor: "#3D1609",
   },
   title: {
     textAlign: "center",
@@ -153,8 +184,9 @@ const styles = StyleSheet.create({
     height: 62,
     backgroundColor: "#E8E1D8",
     borderRadius: 8,
-    paddingHorizontal: 10,
+    paddingHorizontal: 15,
     marginBottom: 10,
+    fontSize: 16,
   },
   passwordContainer: {
     flexDirection: "row",
@@ -167,25 +199,23 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#E8E1D8",
     borderRadius: 8,
-    paddingHorizontal: 10,
+    paddingHorizontal: 15,
     height: 62,
+    fontSize: 16,
   },
   eyeIconContainer: {
     position: "absolute",
-    right: 10,
-  },
-  eyeIcon: {
-    width: "15%",
-    height: "15%",
-    tintColor: "#3D1609",
+    right: 15,
+    height: 62,
+    justifyContent: "center",
   },
   rememberContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: 20,
   },
   rememberText: {
-    marginLeft: 5,
+    marginLeft: 8,
     fontWeight: "bold",
     color: "#3D1609",
   },
@@ -196,7 +226,10 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
-    marginVertical: 10,
+    marginBottom: 15,
+  },
+  buttonDisabled: {
+    backgroundColor: "#A7324980",
   },
   buttonText: {
     color: "#fff",
@@ -206,38 +239,38 @@ const styles = StyleSheet.create({
   forgotText: {
     color: "#3D1609",
     textAlign: "center",
-    marginBottom: 20,
+    marginBottom: 30,
+    fontSize: 14,
   },
   linkText: {
     color: "#3D1609",
     fontWeight: "bold",
+    textDecorationLine: "underline",
   },
   socialContainer: {
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 30,
   },
   socialButton: {
     width: "90%",
-    height: "15%",
-    backgroundColor: "#E3C6B8",
+    height: 50,
+    backgroundColor: "#E8E1D8",
     borderRadius: 8,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 15,
     marginBottom: 10,
-  },
-  socialIcon: {
-    width: 24,
-    height: 24,
+    borderWidth: 1,
+    borderColor: "#D0C4B8",
   },
   bottomText: {
     textAlign: "center",
     position: "absolute",
-    bottom: 10,
-    marginLeft: 25,
-    marginBottom: 10,
-    width: "100%",
+    bottom: 30,
+    left: 20,
+    right: 20,
     color: "#3D1609",
+    fontSize: 14,
   },
 });

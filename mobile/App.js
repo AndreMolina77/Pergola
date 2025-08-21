@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import CustomSplashScreen from './src/screen/SplashScreen';
 import AppNavigator from './src/navigation/AppNavigator';
+import { AuthProvider } from './src/context/AuthContext';
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -28,9 +29,9 @@ export default function App() {
   if (isLoading) return <CustomSplashScreen onFinish={handleSplashFinish} />;
 
   return (
-    <>
+    <AuthProvider>
       <StatusBar style="auto" />
       <AppNavigator />
-    </>
+    </AuthProvider>
   );
 }

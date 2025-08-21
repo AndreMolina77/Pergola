@@ -41,7 +41,8 @@ const collectionsSchema = new Schema({
   }
 }, {
   timestamps: true,
-  strict: false
+  strict: false,
+  suppressReservedKeysWarning: true 
 });
 // El tercer argumento sirve para indicar el nombre de la colección en MongoDB
 export default model("Collections", collectionsSchema, "Collections")
