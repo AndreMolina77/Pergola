@@ -10,6 +10,10 @@ import {
   FlatList,
   Dimensions
 } from "react-native";
+import AntDesign from '@expo/vector-icons/AntDesign';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import Entypo from '@expo/vector-icons/Entypo';
+
 
 const { width } = Dimensions.get("window");
 
@@ -36,10 +40,7 @@ export default function HomeScreen({ navigation }) {
         style={styles.productImage}
       />
       <TouchableOpacity style={styles.favoriteIcon}>
-        <Image
-          source={require("../../assets/heart-icon.png")}
-          style={styles.heartIcon}
-        />
+        <AntDesign name="heart" size={24} color="black" />
       </TouchableOpacity>
       <Text style={styles.productTitle}>{item.title}</Text>
     </View>
@@ -61,10 +62,7 @@ export default function HomeScreen({ navigation }) {
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => {}}>
-          <Image
-            source={require("../../assets/notification-icon.png")}
-            style={styles.notificationIcon}
-          />
+          <MaterialIcons name="notifications-none" size={24} color="black" />
         </TouchableOpacity>
       </View>
 
@@ -117,16 +115,16 @@ export default function HomeScreen({ navigation }) {
       {/* Footer flotante */}
       <View style={styles.footer}>
         <TouchableOpacity>
-          <Image source={require("../../assets/home-icon.png")} style={styles.footerIcon}/>
+          <AntDesign name="home" size={24} color="black" style={styles.footerIcon}/>
         </TouchableOpacity>
         <TouchableOpacity>
-          <Image source={require("../../assets/cart-icon.png")} style={styles.footerIcon}/>
+          <AntDesign name="shoppingcart" size={24} color="black"  style={styles.footerIcon}/>
         </TouchableOpacity>
         <TouchableOpacity>
-          <Image source={require("../../assets/line-icon.png")} style={styles.footerIcon}/>
+          <Entypo name="flow-line" size={24} color="black"  style={styles.footerIcon}/>
         </TouchableOpacity>
         <TouchableOpacity>
-          <Image source={require("../../assets/profile-icon.png")} style={styles.footerIcon}/>
+          <AntDesign name="profile" size={24} color="black" style={styles.footerIcon}/>
         </TouchableOpacity>
       </View>
     </View>

@@ -8,6 +8,9 @@ import {
   Image,
   Alert,
 } from "react-native";
+import { Ionicons } from '@expo/vector-icons';
+import AntDesign from '@expo/vector-icons/AntDesign';
+
 
 export default function RegisterScreen({ navigation }) {
   const [nombres, setNombres] = useState("");
@@ -38,10 +41,7 @@ export default function RegisterScreen({ navigation }) {
     <View style={styles.container}>
       {/* Icono de volver */}
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-        <Image
-          source={require("../../assets/back-icon.png")}
-          style={styles.backIcon}
-        />
+        <Ionicons name="arrow-back-circle-outline" size={24} color="black" />
       </TouchableOpacity>
 
       {/* Título */}
@@ -88,10 +88,7 @@ export default function RegisterScreen({ navigation }) {
           secureTextEntry={!showPassword}
         />
         <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-          <Image
-            source={require("../../assets/eye-icon.png")}
-            style={styles.eyeIcon}
-          />
+          <AntDesign name="eyeo" size={24} color="black" />
         </TouchableOpacity>
       </View>
 
@@ -104,10 +101,7 @@ export default function RegisterScreen({ navigation }) {
           secureTextEntry={!showConfirmPassword}
         />
         <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
-          <Image
-            source={require("../../assets/eye-icon.png")}
-            style={styles.eyeIcon}
-          />
+          <AntDesign name="eyeo" size={24} color="black" />
         </TouchableOpacity>
       </View>
 
