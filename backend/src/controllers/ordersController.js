@@ -90,6 +90,11 @@ ordersController.postOrders = async (req, res) => {
                 message: "El estado de pago debe ser 'pendiente', 'pagado' o 'rechazado'."
             });
         }
+        if (paymentMethod && !["tarjeta", "paypal", "transferencia"].includes(paymentMethod)) {
+            return res.status(400).json({
+                message: "El método de pago debe ser 'tarjeta', 'paypal' o 'transferencia'."
+            });
+        }
         // Validar que la fecha de entrega sea una fecha válida
         if (deliveryDate && isNaN(new Date(deliveryDate).getTime())) {
             return res.status(400).json({

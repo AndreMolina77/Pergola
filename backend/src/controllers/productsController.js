@@ -174,13 +174,13 @@ productsController.postProducts = async (req, res) => {
                 message: "El estado es obligatorio y debe ser 'Activo' o 'Inactivo'."
             });
         }
-        if (
+        if(
             applicableCosts &&
-            !Array.isArray(applicableCosts)
+            (typeof applicableCosts !== "string" || applicableCosts.trim().length === 0)
         ) {
             return res.status(400).json({
-                message: "Los costos aplicables deben ser un array."
-            });
+                message: "Los costos aplicables deben ser una cadena no vacía si se proporcionan."
+            }); 
         }
         if (
             hasDiscount !== undefined &&
