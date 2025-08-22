@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }) => {
             const response = await fetch (`${API_URL}/login`, {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json",
+                    "Content-Type": "application/json", 
                 },
                 body: JSON.stringify({ email, password }),
                 credentials: "include",
@@ -60,7 +60,7 @@ export const AuthProvider = ({ children }) => {
             if (response.ok) {
                 await AsyncStorage.setItem("token", data.token);
                 setAuthToken(data.token);
-                constole.log(data);
+                console.log(data);
                 setUser(data.username);
                 ToastAndroid.show("Inicio de sesión exitoso", ToastAndroid.SHORT);
                 return true;
