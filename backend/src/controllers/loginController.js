@@ -133,7 +133,6 @@ loginController.login = async (req, res) => {
             await userFound.save()
         }
         // 🔒 FIN DE CÓDIGO NUEVO
-
         console.log("Contraseña correcta")
         //TOKEN para empleados/clientes
         jsonwebtoken.sign(

@@ -85,9 +85,9 @@ const SettingsPage = () => {
   
     if (isEdge) {
       toast.success('🔔 Edge detectado: Las notificaciones pueden no mostrarse en localhost. Revisa el centro de notificaciones de Windows o prueba en Chrome.')
-      new Notification('MixArt Test', { body: 'Prueba en Edge' })
+      new Notification('Pérgola Test', { body: 'Prueba en Edge' })
     } else {
-      new Notification('🎨 MixArt Test', {
+      new Notification('💎 Pérgola Test', {
         body: 'Esta es una notificación de prueba',
         icon: '/vite.svg'
       })
