@@ -164,7 +164,6 @@ loginController.login = async (req, res) => {
             userFound.timeOut = null
             await userFound.save()
         }
-
         console.log("Contraseña correcta")
         
         // TOKEN para empleados/clientes

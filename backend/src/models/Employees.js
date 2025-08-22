@@ -147,4 +147,4 @@ const employeesSchema = new Schema({
   strict: false
 })
 // El tercer argumento sirve para indicar el nombre de la colección en MongoDB
-export default model("Employee", employeesSchema, "Employee")
+export default model("Employees", employeesSchema, "Employees")
