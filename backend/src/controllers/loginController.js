@@ -10,7 +10,7 @@ import { API } from "../utils/api.js"
 
 //POST (CREATE)
 loginController.login = async (req, res) => {
-    const {email, password, rememberMe} = req.body
+    const {email, password, rememberMe, platform} = req.body // Agregar platform
 
     try {
         let userFound; //Se guarda el usuario encontrado
@@ -19,11 +19,21 @@ loginController.login = async (req, res) => {
         console.log("=== INICIO LOGIN ===")
         console.log("Email recibido:", email)
         console.log("Password recibido:", password ? "[PRESENTE]" : "[AUSENTE]")
-        console.log("No es admin, verificando otros usuarios...")
+        console.log("Platform:", platform) // Log para debugging
 
-        //Tipos de usuario: admin, empleados, clientes
+        //Tipos de usuario: admin, colaborador, clientes
         if (email === config.CREDENTIALS.email && password === config.CREDENTIALS.password) {
-            console.log("LOGIN ADMIN EXITOSO")
+            console.log("LOGIN ADMIN DETECTADO")
+            
+            // RESTRICCIÓN: Admin solo puede acceder desde web
+            if (platform === "mobile") {
+                console.log("Intento de login admin desde móvil - BLOQUEADO")
+                return res.status(403).json({
+                    message: "Los administradores deben usar la versión web"
+                })
+            }
+
+            console.log("LOGIN ADMIN EXITOSO (WEB)")
             try {
                 // AGREGAR: Crear/obtener admin de BD
                 const adminDataResponse = await fetch(`${API}/admin/profile/data`, {
@@ -67,13 +77,21 @@ loginController.login = async (req, res) => {
                             path: '/'
                         })
                         console.log("Token generado y cookie establecida para admin")
-                        res.json({message: "Inicio de sesión exitoso"})
+                        res.json({
+                            message: "Inicio de sesión exitoso",
+                            user: {
+                                id: "admin",
+                                email: config.CREDENTIALS.email,
+                                userType: "admin",
+                                ...adminData
+                            }
+                        })
                     }
                 )
                 return
             } catch (error) {
                 console.log("Error obteniendo datos de admin:", error)
-                res.status(500).json({message: "Error interno del servidor"})
+                return res.status(500).json({message: "Error interno del servidor"})
             }
         }
 
@@ -85,12 +103,37 @@ loginController.login = async (req, res) => {
             console.log("Usuario encontrado en empleados")
             userType = userFound.userType 
             console.log("Tipo de usuario:", userType)
+            
+            // RESTRICCIÓN: Colaboradores solo pueden acceder desde web
+            if (platform === "mobile" && (userType === "colaborador" || userType === "admin")) {
+                console.log(`Intento de login ${userType} desde móvil - BLOQUEADO`)
+                return res.status(403).json({
+                    message: "Los colaboradores deben usar la versión web"
+                })
+            }
+            
+            // RESTRICCIÓN: Si es web, no permitir customers
+            if (platform !== "mobile" && userType === "customer") {
+                console.log("Intento de login customer desde web - BLOQUEADO")
+                return res.status(403).json({
+                    message: "Los clientes deben usar la aplicación móvil"
+                })
+            }
+            
         } else {
             // Si no se encuentra en empleados, buscar en clientes
             userFound = await customersModel.findOne({email})
             if (userFound) {
                 console.log("Usuario encontrado en clientes")
                 userType = "customer"
+                
+                // RESTRICCIÓN: Clientes solo pueden acceder desde móvil
+                if (platform !== "mobile") {
+                    console.log("Intento de login customer desde web - BLOQUEADO")
+                    return res.status(403).json({
+                        message: "Los clientes deben usar la aplicación móvil"
+                    })
+                }
             }
         }
 
@@ -132,9 +175,9 @@ loginController.login = async (req, res) => {
             userFound.timeOut = null
             await userFound.save()
         }
-        // 🔒 FIN DE CÓDIGO NUEVO
         console.log("Contraseña correcta")
-        //TOKEN para empleados/clientes
+        
+        // TOKEN para empleados/clientes
         jsonwebtoken.sign(
             {id: userFound._id, userType, email: userFound.email, name: userFound.name, lastName: userFound.lastName}, 
             config.JWT.secret, 
@@ -151,7 +194,16 @@ loginController.login = async (req, res) => {
                     maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000
                 })
                 console.log("🍪 Token generado y cookie establecida")
-                res.status(200).json({message: "Inicio de sesión exitoso"})
+                res.status(200).json({
+                    message: "Inicio de sesión exitoso",
+                    user: {
+                        id: userFound._id,
+                        email: userFound.email,
+                        name: userFound.name,
+                        lastName: userFound.lastName,
+                        userType: userType
+                    }
+                })
             }
         )
     } catch (error) {
@@ -159,5 +211,4 @@ loginController.login = async (req, res) => {
         res.status(500).json({message: "Error interno del servidor"})
     }
 }
-
 export default loginController

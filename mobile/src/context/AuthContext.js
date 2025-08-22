@@ -1,4 +1,4 @@
-import React, { createContext, useState, useCallback, useEffect, use } from 'react';
+import React, { createContext, useState, useCallback, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ToastAndroid } from 'react-native';
 
@@ -10,22 +10,25 @@ export const AuthProvider = ({ children }) => {
     const [authToken, setAuthToken] = useState(null);
     const [loading, setLoading] = useState(false);
     const API_URL = "https://pergola.onrender.com/api";
-    // la ip de la computadora ya no localhost 
 
     useEffect(() => {
-        const loadToken = async () => {
-            const token = await AsyncStorage.getItem("token");
-            if (token) {
-                setAuthToken(token);
-                // Aquí podrías hacer una llamada a la API para obtener el usuario
-                // setUser(obtenidoDesdeLaApi);
+        const loadUserSession = async () => {
+            try {
+                const userSession = await AsyncStorage.getItem("userSession");
+                if (userSession) {
+                    const userData = JSON.parse(userSession);
+                    setUser(userData);
+                    setAuthToken("authenticated");
+                }
+            } catch (error) {
+                console.log("No hay sesión guardada");
             }
-        }
-        loadToken();
+        };
+        loadUserSession();
     }, []);
 
     const clearSession = async () => {
-        await AsyncStorage.removeItem("token");
+        await AsyncStorage.removeItem("userSession");
         setUser(null);
         setAuthToken(null);
     };
@@ -34,9 +37,11 @@ export const AuthProvider = ({ children }) => {
         try{
             await fetch(`${API_URL}/logout`, {
                 method: "POST",
-                credentials: "include",
-        });
-    } catch (error) {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+        } catch (error) {
             console.error("Error during logout:", error);
         } finally {
             await clearSession();
@@ -44,24 +49,44 @@ export const AuthProvider = ({ children }) => {
         }
     }, [API_URL]);
 
-    const login = async (email, password ) => {
-         try {
-            const response = await fetch (`${API_URL}/login`, {
+    const login = async (email, password) => {
+        try {
+            const response = await fetch(`${API_URL}/login`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json", 
                 },
-                body: JSON.stringify({ email, password }),
-                credentials: "include",
+                body: JSON.stringify({ 
+                    email, 
+                    password,
+                    platform: "mobile" // Indicar que es desde móvil
+                }),
             });
          
             const data = await response.json();
+            console.log("Response data:", data);
 
             if (response.ok) {
-                await AsyncStorage.setItem("token", data.token);
-                setAuthToken(data.token);
-                console.log(data);
-                setUser(data.username);
+                // RESTRICCIÓN: Solo permitir clientes en la app móvil
+                if (data.user && data.user.userType !== "customer") {
+                    ToastAndroid.show("Esta aplicación es solo para clientes", ToastAndroid.LONG);
+                    return false;
+                }
+
+                // Guardar sesión del usuario (solo clientes)
+                const userSession = {
+                    id: data.user.id,
+                    email: data.user.email,
+                    name: data.user.name,
+                    lastName: data.user.lastName,
+                    userType: data.user.userType,
+                    loginTime: Date.now()
+                };
+                
+                await AsyncStorage.setItem("userSession", JSON.stringify(userSession));
+                setUser(userSession);
+                setAuthToken("authenticated");
+                
                 ToastAndroid.show("Inicio de sesión exitoso", ToastAndroid.SHORT);
                 return true;
             } else {
