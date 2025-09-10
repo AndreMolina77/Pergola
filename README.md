@@ -3,11 +3,11 @@
 Pérgola Joyería es una tienda de joyas y accesorios elaborados con productos de alta calidad con un proceso de producción artesanal. Inspirándose en los valores de la autenticidad, elegancia y empoderamiento. Este proyecto nace para ofrecer una experiencia personalizada, conectando el arte de la joyería tradicional con el estilo de vida contemporáneo, permitiendo a las clientas encontrar piezas que se conviertan en una extensión de su identidad.
 
 ## 🧑🏻‍🎓 Integrantes del proyecto
-- Juan Pablo Ayala Menjívar - [@pablo-menjivar](https://github.com/pablo-menjivar)
-- Aldo André Molina Maldonado - [@AndreMolina77](https://github.com/AndreMolina77)
-- Carlos Mateo Amaya Meléndez - [@MateoMri](https://github.com/MateoMri)
-- Rafael Alejandro Menéndez Alfaro - [@Alejandroo08](https://github.com/Alejandroo08)
-- Rafael Alberto Vargas Landaverde - [@RafaVargas70](https://github.com/RafaVargas70)
+- Juan Pablo Ayala Menjívar 
+- Aldo André Molina Maldonado
+- Carlos Mateo Amaya Meléndez 
+- Rafael Alejandro Menéndez Alfaro
+- Rafael Alberto Vargas Landaverde
 
 ## 🛍️ Descripción del proyecto
 
