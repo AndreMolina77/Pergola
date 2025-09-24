@@ -1,237 +1,403 @@
-import React from "react";
+import React, { useState } from 'react';
 import {
   View,
   Text,
-  Image,
-  TouchableOpacity,
-  TextInput,
   ScrollView,
+  TextInput,
+  TouchableOpacity,
+  Image,
   StyleSheet,
-  FlatList,
-  Dimensions
-} from "react-native";
-import AntDesign from '@expo/vector-icons/AntDesign';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import Entypo from '@expo/vector-icons/Entypo';
+  SafeAreaView,
+  StatusBar,
+} from 'react-native';
+import SearchModal from './SearchModal.js'; // Importa el componente de búsqueda
 
+const JewelryScreen = () => {
+  const [searchModalVisible, setSearchModalVisible] = useState(false);
 
-const { width } = Dimensions.get("window");
-
-export default function HomeScreen({ navigation }) {
-
-  // Placeholder data para colecciones y productos
-  const collections = [null, null, null]; // 3 colecciones vacías
-  const products = [
-    { id: 1, title: "Producto 1" },
-    { id: 2, title: "Producto 2" },
-    { id: 3, title: "Producto 3" },
+  const creacionesPropias = [
+    {
+      id: 1,
+      title: 'Crear bohemio',
+      image: 'https://via.placeholder.com/80x80/E8E8E8/999999?text=💍',
+    },
+    {
+      id: 2,
+      title: 'Ejercicios ligeros',
+      image: 'https://via.placeholder.com/80x80/E8E8E8/999999?text=💎',
+    },
+    {
+      id: 3,
+      title: 'Plantas recicl.',
+      image: 'https://via.placeholder.com/80x80/E8E8E8/999999?text=🌿',
+    },
   ];
 
-  const renderCollection = (item, index) => (
-    <View key={index} style={styles.collectionCircle}>
-      {item ? <Image source={{uri: item.image}} style={styles.collectionImage}/> : null}
-    </View>
-  );
+  const seleccionExclusiva = [
+    {
+      id: 1,
+      title: 'Pulseras',
+      image: 'https://via.placeholder.com/100x100/4A90E2/FFFFFF?text=🔵',
+      price: '$45.00',
+    },
+    {
+      id: 2,
+      title: 'Anillos',
+      image: 'https://via.placeholder.com/100x100/F5F5F5/999999?text=💖',
+      price: '$65.00',
+    },
+    {
+      id: 3,
+      title: 'Collares',
+      image: 'https://via.placeholder.com/100x100/E8E8E8/999999?text=📿',
+      price: '$85.00',
+    },
+  ];
 
-  const renderProduct = ({ item }) => (
-    <View style={styles.productContainer}>
-      <Image
-        source={{ uri: "https://via.placeholder.com/159x220" }}
-        style={styles.productImage}
-      />
-      <TouchableOpacity style={styles.favoriteIcon}>
-        <AntDesign name="heart" size={24} color="black" />
-      </TouchableOpacity>
-      <Text style={styles.productTitle}>{item.title}</Text>
-    </View>
-  );
+  const disenosUnicos = [
+    'https://via.placeholder.com/100x100/FFB6C1/FFFFFF?text=💕',
+    'https://via.placeholder.com/100x100/98FB98/FFFFFF?text=🌸',
+    'https://via.placeholder.com/100x100/F0E68C/FFFFFF?text=✨',
+    'https://via.placeholder.com/100x100/DDA0DD/FFFFFF?text=🦋',
+    'https://via.placeholder.com/100x100/87CEEB/FFFFFF?text=🌊',
+    'https://via.placeholder.com/100x100/F4A460/FFFFFF?text=🍯',
+  ];
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#F8F3F0" />
+      
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => {}}>
-          <Image
-            source={{ uri: "https://via.placeholder.com/40" }}
-            style={styles.profileIcon}
-          />
+        <TouchableOpacity>
+          <Text style={styles.menuIcon}>👤</Text>
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Explorar productos ⌄</Text>
+        <View style={styles.cartBadge}>
+          <Text style={styles.cartIcon}>🛍️</Text>
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>3</Text>
+          </View>
+        </View>
+      </View>
+
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        {/* Search Bar */}
+        <TouchableOpacity 
+          style={styles.searchContainer}
+          onPress={() => setSearchModalVisible(true)}
+        >
+          <Text style={styles.searchIcon}>🔍</Text>
+          <Text style={styles.searchPlaceholder}>Buscar</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.exploreButton} onPress={() => {}}>
-          <Text style={styles.exploreButtonText}>Explorar productos</Text>
-        </TouchableOpacity>
+        {/* Creaciones Propias */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Creaciones propias</Text>
+            <TouchableOpacity>
+              <Text style={styles.seeAll}>Ver todo</Text>
+            </TouchableOpacity>
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
+            {creacionesPropias.map((item) => (
+              <TouchableOpacity key={item.id} style={styles.creacionItem}>
+                <View style={styles.creacionImage}>
+                  <Text style={styles.creacionIcon}>
+                    {item.id === 1 ? '💍' : item.id === 2 ? '💎' : '🌿'}
+                  </Text>
+                </View>
+                <Text style={styles.creacionText}>{item.title}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
 
-        <TouchableOpacity onPress={() => {}}>
-          <MaterialIcons name="notifications-none" size={24} color="black" />
+        {/* Selección Exclusiva */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Selección exclusiva</Text>
+            <TouchableOpacity>
+              <Text style={styles.seeAll}>Ver todo</Text>
+            </TouchableOpacity>
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
+            {seleccionExclusiva.map((item) => (
+              <TouchableOpacity key={item.id} style={styles.exclusivaItem}>
+                <TouchableOpacity style={styles.heartIcon}>
+                  <Text>🤍</Text>
+                </TouchableOpacity>
+                <View style={styles.exclusivaImage}>
+                  <Text style={styles.exclusivaEmoji}>
+                    {item.id === 1 ? '🔵' : item.id === 2 ? '💖' : '📿'}
+                  </Text>
+                </View>
+                <Text style={styles.exclusivaTitle}>{item.title}</Text>
+                <Text style={styles.exclusivaPrice}>{item.price}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
+        {/* Diseños únicos */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Diseños únicos</Text>
+            <TouchableOpacity>
+              <Text style={styles.seeAll}>Empacar</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.gridContainer}>
+            {disenosUnicos.map((item, index) => (
+              <TouchableOpacity key={index} style={styles.gridItem}>
+                <Text style={styles.gridEmoji}>
+                  {index === 0 ? '💕' : index === 1 ? '🌸' : index === 2 ? '✨' : 
+                   index === 3 ? '🦋' : index === 4 ? '🌊' : '🍯'}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+      </ScrollView>
+
+      {/* Bottom Navigation */}
+      <View style={styles.bottomNav}>
+        <TouchableOpacity style={styles.navItem}>
+          <Text style={styles.navIcon}>🏠</Text>
+          <Text style={styles.navText}>$43.99</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem}>
+          <Text style={styles.navIcon}>🛍️</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem}>
+          <Text style={styles.navIcon}>💬</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem}>
+          <Text style={styles.navIcon}>👤</Text>
+          <Text style={styles.navText}>$35.99</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Search */}
-      <TextInput
-        placeholder="Buscar..."
-        style={styles.searchInput}
+      {/* Search Modal */}
+      <SearchModal 
+        visible={searchModalVisible} 
+        onClose={() => setSearchModalVisible(false)} 
       />
-
-      {/* Sección Diseños Pergola */}
-      <View style={styles.sectionHeader}>
-        <Text style={styles.linkText}>Ver todo</Text>
-        <Text style={styles.sectionTitle}>Diseños Pergola</Text>
-      </View>
-
-      <View style={styles.collectionsContainer}>
-        {collections.map(renderCollection)}
-      </View>
-
-      {/* Sección Selección Exclusiva */}
-      <View style={styles.sectionHeader}>
-        <Text style={styles.linkText}>Ver todo</Text>
-        <Text style={styles.sectionTitle}>Selección Exclusiva</Text>
-      </View>
-
-      <FlatList
-        data={products}
-        horizontal
-        keyExtractor={item => item.id.toString()}
-        renderItem={renderProduct}
-        showsHorizontalScrollIndicator={false}
-        style={styles.carousel}
-      />
-
-      {/* Sección Diseños Únicos */}
-      <View style={styles.sectionHeader}>
-        <Text style={styles.linkText}>Ver todo</Text>
-        <Text style={styles.sectionTitle}>Diseños Únicos</Text>
-      </View>
-
-      <FlatList
-        data={products}
-        horizontal
-        keyExtractor={item => item.id.toString()}
-        renderItem={renderProduct}
-        showsHorizontalScrollIndicator={false}
-        style={styles.carousel}
-      />
-
-      {/* Footer flotante */}
-      <View style={styles.footer}>
-        <TouchableOpacity>
-          <AntDesign name="home" size={24} color="black" style={styles.footerIcon}/>
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <AntDesign name="shoppingcart" size={24} color="black"  style={styles.footerIcon}/>
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Entypo name="flow-line" size={24} color="black"  style={styles.footerIcon}/>
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <AntDesign name="profile" size={24} color="black" style={styles.footerIcon}/>
-        </TouchableOpacity>
-      </View>
-    </View>
+    </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#E3C6B8",
-    paddingTop: 40,
+    backgroundColor: '#F8F3F0',
   },
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 20,
+    paddingVertical: 15,
+    backgroundColor: '#F8F3F0',
+  },
+  menuIcon: {
+    fontSize: 20,
+    color: '#333',
+  },
+  headerTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  cartBadge: {
+    position: 'relative',
+  },
+  cartIcon: {
+    fontSize: 20,
+  },
+  badge: {
+    position: 'absolute',
+    top: -5,
+    right: -5,
+    backgroundColor: '#FF4757',
+    borderRadius: 10,
+    width: 18,
+    height: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  badgeText: {
+    color: 'white',
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    marginBottom: 25,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  searchIcon: {
+    fontSize: 16,
+    marginRight: 10,
+  },
+  searchInput: {
+    flex: 1,
+    height: 45,
+    fontSize: 16,
+    color: '#333',
+  },
+  searchPlaceholder: {
+    flex: 1,
+    height: 45,
+    fontSize: 16,
+    color: '#999',
+    lineHeight: 45,
+    textAlignVertical: 'center',
+  },
+  section: {
+    marginBottom: 30,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 15,
   },
-  profileIcon: { width: 40, height: 40, borderRadius: 20 },
-  exploreButton: {
-    width: 178,
-    height: 42,
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#333',
   },
-  exploreButtonText: { color: "#000", fontWeight: "bold" },
-  notificationIcon: { width: 40, height: 40, tintColor: "#A73249" },
-
-  searchInput: {
-    width: 342,
-    height: 40,
-    backgroundColor: "#E8E1D8",
-    borderRadius: 8,
-    marginHorizontal: 20,
-    paddingHorizontal: 10,
-    marginBottom: 10,
+  seeAll: {
+    fontSize: 14,
+    color: '#666',
+    textDecorationLine: 'underline',
   },
-
-  sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    marginVertical: 10,
+  horizontalScroll: {
+    marginHorizontal: -5,
   },
-  sectionTitle: { fontWeight: "bold", fontSize: 16 },
-  linkText: { color: "#3D1609", fontSize: 14 },
-
-  collectionsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginHorizontal: 20,
-    marginBottom: 20,
+  creacionItem: {
+    alignItems: 'center',
+    marginHorizontal: 15,
+    width: 80,
   },
-  collectionCircle: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: "#E8E1D8",
-    alignItems: "center",
-    justifyContent: "center",
+  creacionImage: {
+    width: 70,
+    height: 70,
+    backgroundColor: 'white',
+    borderRadius: 35,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
-  collectionImage: { width: 56, height: 56, borderRadius: 28 },
-
-  carousel: {
-    marginBottom: 20,
-    paddingLeft: 20,
+  creacionIcon: {
+    fontSize: 24,
   },
-  productContainer: {
-    width: 159,
-    marginRight: 15,
+  creacionText: {
+    fontSize: 12,
+    color: '#666',
+    textAlign: 'center',
+    lineHeight: 16,
   },
-  productImage: {
-    width: "100%",
-    height: 220,
-    borderRadius: 8,
-  },
-  favoriteIcon: {
-    position: "absolute",
-    top: 5,
-    right: 5,
-    width: 24,
-    height: 24,
+  exclusivaItem: {
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 15,
+    marginHorizontal: 8,
+    width: 140,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    position: 'relative',
   },
   heartIcon: {
-    width: 24,
-    height: 24,
-    tintColor: "#3D1609",
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    zIndex: 1,
   },
-  productTitle: {
-    textAlign: "center",
-    marginTop: 5,
+  exclusivaImage: {
+    height: 80,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
   },
-
-  footer: {
-    position: "absolute",
-    bottom: 10,
-    left: 0,
-    right: 0,
-    height: 100,
-    backgroundColor: "#E8E1D8",
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-    borderRadius: 20,
+  exclusivaEmoji: {
+    fontSize: 40,
   },
-  footerIcon: { width: 40, height: 40 },
+  exclusivaTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 5,
+  },
+  exclusivaPrice: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#FF4757',
+  },
+  gridContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  gridItem: {
+    width: '31%',
+    aspectRatio: 1,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  gridEmoji: {
+    fontSize: 30,
+  },
+  bottomNav: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    paddingVertical: 15,
+    borderTopWidth: 1,
+    borderTopColor: '#E8E8E8',
+  },
+  navItem: {
+    alignItems: 'center',
+  },
+  navIcon: {
+    fontSize: 20,
+    marginBottom: 2,
+  },
+  navText: {
+    fontSize: 12,
+    color: '#666',
+    fontWeight: '600',
+  },
 });
+
+export default JewelryScreen;
