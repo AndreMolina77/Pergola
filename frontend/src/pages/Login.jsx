@@ -2,9 +2,6 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { useAuth } from '../hooks/useAuth'
-import GoogleButton from '../components/Buttons/GoogleButton'
-import AppleAuthButton from '../components/Buttons/AppleButton'
-import FacebookAuthButton from '../components/Buttons/FacebookButton'
 import TextInput from '../components/Input/Input'
 import PasswordInput from '../components/Input/PasswordInput'
 import { ChevronLeft } from 'lucide-react'
@@ -127,7 +124,7 @@ const Login = () => {
         <div className="w-full max-w-lg flex flex-col justify-between h-full">
           
           {/* Header */}
-          <div className="flex justify-start items-center mb-6">
+          <div className="flex justify-start items-center mb-1">
             <button
               onClick={() => navigate(-1)}
               className="flex items-center font-[Quicksand] font-semibold hover:opacity-70 text-sm lg:text-base"
@@ -189,12 +186,6 @@ const Login = () => {
                   ¿Olvidaste tu contraseña?
                 </button>
               </div>
-              {/* Social Login Buttons */}
-              <div className="space-y-4 my-6">
-                <AppleAuthButton />
-                <GoogleButton />
-                <FacebookAuthButton />
-              </div>
               {/* Login Button */}
               <button
                 type="submit"
@@ -207,7 +198,7 @@ const Login = () => {
             </form>
           </div>
           {/* Register Link */}
-          <p className="text-center mt-6 font-[Quicksand] font-medium text-sm" style={{ color: '#3D1609' }}>
+          <p className="text-center mt-6 mb-3 font-[Quicksand] font-medium text-sm" style={{ color: '#3D1609' }}>
             ¿No tienes una cuenta?{' '}
             <button 
               onClick={handleGoToRegister}

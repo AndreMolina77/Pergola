@@ -3,7 +3,7 @@ import { toast } from "react-hot-toast"
 
 // Hook personalizado para manejar datos de categorías
 const useDataCategories = () => {
-  const API = "http://localhost:4000/api/categories"
+  const API = "https://pergola-production.up.railway.app/api/categories"
   // Estado para almacenar categorías y estado de carga
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
@@ -66,7 +66,7 @@ const useDataCategories = () => {
         }
         const response = await fetch(`${API}/categories`, {
           method: "POST",
-          headers,
+          headers, // No forzado
           credentials: "include",
           body
         })
@@ -100,7 +100,7 @@ const useDataCategories = () => {
         }
         const response = await fetch(`${API}/categories/${id}`, {
           method: "PUT",
-          headers,
+          headers, // No forzado
           credentials: "include",
           body
         })

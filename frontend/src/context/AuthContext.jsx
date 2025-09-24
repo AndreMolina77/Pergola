@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect } from "react"
-const API = "http://localhost:4000/api"
+const API = "https://pergola-production.up.railway.app/api"
 const AuthContext = createContext()
 
 // Proveedor de contexto de autenticación
@@ -30,15 +30,18 @@ export const AuthProvider = ({ children }) => {
       }
 
       console.log("✅ Login exitoso, obteniendo info del usuario...")
-      
+      // Pequeño retraso para garantizar que la cookie se configure correctamente
+      await new Promise(resolve => setTimeout(resolve, 100))
       // Valida el token y obtiene info básica del usuario
       const userInfoResponse = await fetch(`${API}/validateAuthToken`, {
         method: "POST",
         credentials: "include",
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache' }
       })
       
       if (!userInfoResponse.ok) {
+        const errorData = await userInfoResponse.json()
+        console.log("❌ Validation failed:", errorData)
         throw new Error("No se pudo validar el token")
       }
       

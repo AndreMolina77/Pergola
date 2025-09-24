@@ -3,7 +3,7 @@ import { toast } from "react-hot-toast"
 
 // Hook para manejar datos de colecciones
 const useDataCollections = () => {
-  const API = "http://localhost:4000/api/collections"
+  const API = "https://pergola-production.up.railway.app/api/collections"
   const [collections, setCollections] = useState([]) // estado con colecciones
   const [loading, setLoading] = useState(true) // estado de carga
 
@@ -58,7 +58,7 @@ const useDataCollections = () => {
         // Realiza la petición POST
         const response = await fetch(`${API}/collections`, {
           method: "POST",
-          headers,
+          headers, // No forzado
           credentials: "include",
           body
         })
@@ -91,7 +91,7 @@ const useDataCollections = () => {
         // Realiza la petición PUT
         const response = await fetch(`${API}/collections/${id}`, {
           method: "PUT",
-          headers,
+          headers, // No forzado
           credentials: "include",
           body
         })
@@ -127,7 +127,6 @@ const useDataCollections = () => {
       toast.error("Error al eliminar colección")
     }
   }
-
   // Retorna estados y funciones para usar en componentes
   return {
     collections,
@@ -137,6 +136,5 @@ const useDataCollections = () => {
     createHandlers
   }
 }
-
 // Exporta el hook para su uso en otros componentes
 export default useDataCollections

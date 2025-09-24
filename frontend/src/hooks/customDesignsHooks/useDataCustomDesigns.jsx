@@ -3,7 +3,7 @@ import { toast } from "react-hot-toast"
 
 // Hook para manejar datos de diseños únicos
 const useDataCustomDesigns = () => {
-  const API = "http://localhost:4000/api/customdesigns"
+  const API = "https://pergola-production.up.railway.app/api/customdesigns"
   const [customdesigns, setCustomDesigns] = useState([]) // estado de diseños
   const [loading, setLoading] = useState(true) // estado de carga
 
@@ -44,6 +44,7 @@ const useDataCustomDesigns = () => {
     // Handler para agregar diseño único
     onAdd: async (data) => {
       try {
+        console.log("📤 Enviando al backend:", data);
         const response = await fetch(`${API}/customdesigns`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -54,6 +55,8 @@ const useDataCustomDesigns = () => {
           const errorData = await response.json()
           throw new Error(errorData.message || "Error al registrar diseño único")
         }
+        const result = await response.json();
+        console.log("📥 Respuesta del backend:", result);
         toast.success('Diseño único registrado exitosamente')
         fetchCustomDesigns() 
       } catch (error) {
@@ -96,7 +99,7 @@ const useDataCustomDesigns = () => {
         credentials: "include"
       })
       if (!response.ok) throw new Error("Hubo un error al eliminar el diseño único")
-      toast.success('Diseño único eliminada exitosamente')
+      toast.success('Diseño único eliminado exitosamente')
       fetchCustomDesigns()
     } catch (error) {
       console.error("Error al eliminar diseño único:", error)

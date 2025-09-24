@@ -70,7 +70,7 @@ const employeesSchema = new Schema({
     trim: true,
     validate: {
       validator: function(v) {
-        return v.trim() !== '' && /^(?:\+503\s?)?(6|7)\d{3}-?\d{4}$/.test(v);
+        return v.trim() !== '' && /^\+503[-\d]{8,12}$/.test(v);
       },
       message: "El teléfono no puede estar vacío y debe ser válido en El Salvador"
     }
@@ -120,15 +120,15 @@ const employeesSchema = new Schema({
   profilePic: {
     type: String,
     validate: {
-      validator: function(v) {
-        if (v == null) return true;
-        return v.trim() !== '' && /^https?:\/\/.+\.(jpg|jpeg|png|webp|svg)$/.test(v);
+    validator: function(v) {
+        if (v == null || v === '') return true; // Permite valores null o cadenas vacías
+        return /^https?:\/\/.+\.(jpg|jpeg|png|webp|svg)$/.test(v);
       },
-      message: "La URL no puede estar vacía y debe ser válida (jpg/jpeg/png/webp/svg)"
+      message: "La URL debe ser válida (jpg/jpeg/png/webp/svg)"
     }
   },
   hireDate: {
-    type: Date,
+    type: Date, 
     required: [true, "La fecha de contratación es obligatoria"],
     validate: {
       validator: v => v <= new Date(),
@@ -139,10 +139,12 @@ const employeesSchema = new Schema({
     type: Boolean,
     required: true,
     default: false
-  }
+  },
+  loginAttempts: { type: Number, default: 0 },
+  timeOut: { type: Date, default: null }
 }, {
   timestamps: true,
   strict: false
 })
 // El tercer argumento sirve para indicar el nombre de la colección en MongoDB
-export default model("Employee", employeesSchema, "Employee")
+export default model("Employees", employeesSchema, "Employees")

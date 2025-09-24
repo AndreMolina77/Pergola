@@ -6,7 +6,7 @@ import ConfirmModal from './Modals/ConfirmModal'
 import DetailModal from './Modals/DetailModal'
 
 // Componente contenedor principal para la tabla y sus acciones/modales
-const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, isLoading = false, className = "", categoriesData, subcategoriesData, collectionsData, suppliersData, customersData, rawMaterialsData, productsData}) => {
+const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, isLoading = false, className = "", categoriesData, subcategoriesData, collectionsData, suppliersData, customersData, rawMaterialsData, productsData, ordersData, refundsData, transactionsData, employeesData, designElementsData}) => {
   // Estados para búsqueda, ordenamiento, paginación y modales
   const [searchValue, setSearchValue] = useState("")
   const [sortBy, setSortBy] = useState(null)
@@ -30,7 +30,7 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
           ...field,
           options: categoriesData.categories.map(cat => ({
             value: cat._id,
-            label: `${cat.name} ${cat.description}`
+            label: `${cat.name}`
           }))
         }
       }
@@ -40,7 +40,7 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
           ...field,
           options: subcategoriesData.subcategories.map(subcat => ({
             value: subcat._id,
-            label: `${subcat.name} ${subcat.description}`
+            label: `${subcat.name}`
           }))
         }
       }
@@ -50,7 +50,7 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
           ...field,
           options: collectionsData.collections.map(col => ({
             value: col._id,
-            label: `${col.name} ${col.description}`
+            label: `${col.name}`
           }))
         }
       }
@@ -68,9 +68,19 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
       if (field.options === 'customers' && customersData?.customers) {
         return {
           ...field,
-          options: customersData.customers.map(cus => ({
-            value: cus._id,
-            label: `${cus.username} (${cus.email})`
+          options: customersData.customers.map(customer => ({
+            value: customer._id,
+            label: `${customer.name} ${customer.lastName} (${customer.email})`
+          }))
+        }
+      }
+      // Opciones para empleados
+      if (field.options === 'employees' && employeesData?.employees) {
+        return {
+          ...field,
+          options: employeesData.employees.map(emp => ({
+            value: emp._id,
+            label: `${emp.name} (${emp.email})`
           }))
         }
       }
@@ -94,11 +104,50 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
           }))
         }
       }
+      // Opciones para pedidos
+      if (field.options === 'orders' && ordersData?.orders) {
+        return {
+          ...field,
+          options: ordersData.orders.map(order => ({
+            value: order._id,
+            label: `Pedido #${order._id.slice(-6)} - $${order.total}`
+          }))
+        }
+      }
+      // Opciones para reembolsos
+      if (field.options === 'refunds' && refundsData?.refunds) {
+        return {
+          ...field,
+          options: refundsData.refunds.map(refund => ({
+            value: refund._id,
+            label: `${refund.name} ${refund.description}`
+          }))
+        }
+      }
+      // Opciones para transacciones
+      if (field.options === 'transactions' && transactionsData?.transactions) {
+        return {
+          ...field,
+          options: transactionsData.transactions.map(transaction => ({
+            value: transaction._id,
+            label: `${transaction.name} ${transaction.description}`
+          }))
+        }
+      }
+      // Opciones para elementos de diseño
+      if (field.options === 'designelements' && designElementsData?.designElements) {
+        return {
+          ...field,
+          options: designElementsData.designElements.map(designElement => ({
+            value: designElement._id,
+            label: `${designElement.name} ${designElement.description}`
+          }))
+        }
+      }
       // Si no hay opciones dinámicas, retorna el campo tal cual
       return field
     })
-  }, [config.formFields, categoriesData?.categories, subcategoriesData?.subcategories, collectionsData?.collections, suppliersData?.suppliers, customersData?.customers, rawMaterialsData?.rawMaterials, productsData?.products])
-
+  }, [config.formFields, categoriesData?.categories, subcategoriesData?.subcategories, collectionsData?.collections, suppliersData?.suppliers, customersData?.customers, rawMaterialsData?.rawMaterials, productsData?.products, ordersData?.orders, refundsData?.refunds, transactionsData?.transactions, employeesData?.employees, designElementsData?.designElements])
   // Función para obtener el valor buscable de cada columna/item
   const getSearchableValue = (item, column) => {
     const value = item[column.key]
@@ -106,10 +155,29 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
     // Maneja objetos anidados (categorías, clientes, proveedores, etc.)
     if (value && typeof value === 'object') {
       if (column.key === 'product') {
-        return `${value.name || ''} ${value.description || ''} ${value.codeProduct || ''}`.toLowerCase()
+        // ✅ BUSCAR POR NOMBRE, DESCRIPCIÓN Y PRECIO
+        return `${value.name || ''} ${value.description || ''} ${value.codeProduct || ''} ${value.price || ''}`.toLowerCase()
       }
       if (column.key === 'customer') {
         return `${value.name || ''} ${value.lastName || ''} ${value.email || ''} ${value.username || ''}`.toLowerCase()
+      }
+      // ✅ ITEMS CON ESTRUCTURA ANIDADA
+      if (column.key === 'items' && Array.isArray(value)) {
+        return value.map(item => {
+          if (typeof item === 'object') {
+            // Estructura anidada
+            if (item.itemId && typeof item.itemId === 'object') {
+              const product = item.itemId
+              return `${product.name || ''} ${product.description || ''} ${product.codeProduct || ''} ${product.price || ''}`
+            }
+            // Estructura simple
+            return `${item.name || ''} ${item.description || ''} ${item.codeProduct || ''} ${item.price || ''}`
+          }
+          return item.toString()
+        }).join(' ').toLowerCase()
+      }
+      if (column.key === 'employee') {
+        return `${value.name || ''} ${value.lastName || ''} ${value.email || ''}`.toLowerCase()
       }
       if (column.key === 'provider') {
         return `${value.name || ''} ${value.contactPerson || ''} ${value.email || ''}`.toLowerCase()
@@ -122,6 +190,18 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
       }
       if (column.key === 'customdesigns') {
         return `${value.codeRequest || ''} ${value.piece || ''} ${value.base || ''} ${value.baseLength || ''} ${value.decoration || ''} ${value.clasp || ''} ${value.customerComments || ''}`.toLowerCase()
+      }
+      if (column.key === 'orders') {
+        return `${value.name || ''} ${value.description || ''} ${value.correlative || ''}`.toLowerCase()
+      }
+      if (column.key === 'refunds') {
+        return `${value.name || ''} ${value.description || ''} ${value.correlative || ''}`.toLowerCase()
+      }
+      if (column.key === 'transactions') {
+        return `${value.name || ''} ${value.description || ''} ${value.correlative || ''}`.toLowerCase()
+      }
+      if (column.key === 'designelements') {
+        return `${value.name || ''} ${value.description || ''} ${value.correlative || ''}`.toLowerCase()
       }
       // Valor por defecto para objetos
       return Object.values(value).join(' ').toLowerCase()
@@ -151,7 +231,6 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
     // Valor normal
     return value.toString().toLowerCase()
   }
-
   // Filtra y ordena los datos según búsqueda y ordenamiento
   const filteredAndSortedData = useMemo(() => {
     let filtered = data
@@ -201,13 +280,11 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
     }
     return filtered
   }, [data, searchValue, sortBy, sortOrder, config.columns])
-
   // Datos paginados
   const paginatedData = useMemo(() => {
     const startIndex = (currentPage - 1) * pageSize
     return filteredAndSortedData.slice(startIndex, startIndex + pageSize)
   }, [filteredAndSortedData, currentPage, pageSize])
-
   // Handlers para búsqueda, ordenamiento, paginación y acciones
   const handleSearch = (value) => {
     setSearchValue(value)
@@ -249,12 +326,31 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
     if (item.product && typeof item.product === 'object') {
       processedItem.product = item.product._id
     }
+    if (item.order && typeof item.order === 'object') {
+      processedItem.order = item.order._id
+    }
     // Procesa arrays de referencias
     if (item.rawMaterialsUsed && Array.isArray(item.rawMaterialsUsed)) {
       processedItem.rawMaterialsUsed = item.rawMaterialsUsed.map(material => 
         typeof material === 'object' ? material._id : material
       )
     }
+    if (item.items && Array.isArray(item.items)) {
+      processedItem.items = item.items.map(item => 
+        typeof item === 'object' ? item._id : item
+      )
+    }
+    // Procesa campos de tipo fecha
+    config.formFields.forEach(field => {
+      if (field.type === 'date' && processedItem[field.name]) {
+        const dateValue = new Date(processedItem[field.name]);
+        if (!isNaN(dateValue)) {
+          processedItem[field.name] = dateValue.toISOString().split('T')[0]; // Convierte a YYYY-MM-DD
+        } else {
+          processedItem[field.name] = ''; // Valor vacío si la fecha es inválida
+        }
+      }
+    });
     setSelectedItem(processedItem)
     setShowEditModal(true)
   }
@@ -270,15 +366,25 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
       const normalizedTitle = config.title.toLowerCase().replace(/\s+/g, '').replace('ías', 'ies')
       const typeMapping = {
         'productos': 'products',
-        'categorías': 'categories',
-        'subcategorías': 'subcategories', 
+        'categorías': 'categories', // Sin tilde
+        'subcategorías': 'subcategories', // Sin tilde  
         'colecciones': 'collections',
         'proveedores': 'suppliers',
         'materiasprimas': 'rawmaterials',
-        'reseñas': 'reviews',
-        'diseñosunicos': 'customdesigns'
+        'reseñas': 'reviews', // Sin tilde
+        'diseñosúnicos': 'customdesigns', // Sin tilde - CORREGIDO
+        'clientes': 'customers',
+        'empleados': 'employees',
+        'pedidos': 'orders',
+        'reembolsos': 'refunds',
+        'transacciones': 'transactions',
+        'elementosdediseño': 'designelements' // Sin tilde - CORREGIDO
       }
       modalType = typeMapping[normalizedTitle] || normalizedTitle
+      // DEBUG: Para verificar el mapeo
+      console.log('Original title:', config.title)
+      console.log('Normalized title:', normalizedTitle)
+      console.log('Mapped modal type:', modalType)
     }
     setDetailModalType(modalType)
     setShowDetailModal(true)
@@ -328,7 +434,7 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
   // Handler para exportar
   const handleExport = (format) => {
     if (onExport) {
-      onExport(format, filteredAndSortedData)
+      onExport(format, filteredAndSortedData, config.title)
     } else {
       console.log(`Exportando ${filteredAndSortedData.length} elementos en formato ${format}`)
     }
@@ -341,7 +447,6 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
     setCurrentPage(1)
     window.location.reload()
   }
-
   return (
     <div className={`font-[Quicksand] ${className}`}>
       {/* Header con título y acciones */}
@@ -416,7 +521,7 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
           isOpen={showDetailModal} 
           onClose={() => setShowDetailModal(false)} 
           data={selectedItem} 
-          title={`Detalles de ${config.title?.slice(0, -1) || 'Elemento'}`} 
+          title={`Detalles de ${config.title?.slice(0) || 'Elemento'}`} 
           type={detailModalType}
         />
       )}

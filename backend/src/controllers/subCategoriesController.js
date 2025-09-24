@@ -1,6 +1,6 @@
 const subcategoriesController = {};
 // Importo el modelo de subcategorías
-import Subcategories from "../models/Subcategories.js";
+import Subcategories from "../models/SubCategories.js";
 // Archivo config y librería cloudinary
 import { v2 as cloudinary } from 'cloudinary'
 import { config } from "../utils/config.js"

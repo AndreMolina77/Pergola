@@ -7,21 +7,33 @@ import bcryptjs from "bcryptjs"
 import jsonwebtoken from "jsonwebtoken"
 import { config } from "../utils/config.js"
 import { API } from "../utils/api.js"
+
 //POST (CREATE)
 loginController.login = async (req, res) => {
-    const {email, password, rememberMe} = req.body
+    const {email, password, rememberMe, platform} = req.body // Agregar platform
 
     try {
-        let userFound //Se guarda el usuario encontrado
-        let userType //Se guarda el tipo de usuario (admin, colaborador o cliente)
+        let userFound; //Se guarda el usuario encontrado
+        let userType; //Se guarda el tipo de usuario (admin, colaborador o cliente)
         
         console.log("=== INICIO LOGIN ===")
         console.log("Email recibido:", email)
         console.log("Password recibido:", password ? "[PRESENTE]" : "[AUSENTE]")
-        console.log("No es admin, verificando otros usuarios...")
-        //Tipos de usuario: admin, empleados, clientes
+        console.log("Platform:", platform) // Log para debugging
+
+        //Tipos de usuario: admin, colaborador, clientes
         if (email === config.CREDENTIALS.email && password === config.CREDENTIALS.password) {
-            console.log("LOGIN ADMIN EXITOSO")
+            console.log("LOGIN ADMIN DETECTADO")
+            
+            // RESTRICCIÓN: Admin solo puede acceder desde web
+            if (platform === "mobile") {
+                console.log("Intento de login admin desde móvil - BLOQUEADO")
+                return res.status(403).json({
+                    message: "Los administradores deben usar la versión web"
+                })
+            }
+
+            console.log("LOGIN ADMIN EXITOSO (WEB)")
             try {
                 // AGREGAR: Crear/obtener admin de BD
                 const adminDataResponse = await fetch(`${API}/admin/profile/data`, {
@@ -40,6 +52,7 @@ loginController.login = async (req, res) => {
                     }
                     console.log("Admin data from BD:", adminData)
                 }
+
                 userType = "admin"
                 userFound = {
                     _id: "admin", 
@@ -47,9 +60,10 @@ loginController.login = async (req, res) => {
                     ...adminData
                 }
                 //TOKEN para admin
-                jsonwebtoken.sign( { id: "admin", email: config.CREDENTIALS.email, userType: "admin", ...adminData }, 
+                jsonwebtoken.sign( 
+                    { id: "admin", email: config.CREDENTIALS.email, userType: "admin", ...adminData }, 
                     config.JWT.secret, 
-                    { expiresIn: rememberMe ? "30d" : config.JWT.expiresIn }, // 30 dias si recordarme, sino el tiempo normal
+                    { expiresIn: rememberMe ? "30d" : config.JWT.expiresIn },
                     (err, token) => {
                         if(err) {
                             console.log("Error generando token:", err)
@@ -58,54 +72,116 @@ loginController.login = async (req, res) => {
                         res.cookie("authToken", token, {
                             httpOnly: true,
                             secure: process.env.NODE_ENV === 'production',
-                            sameSite: 'lax',
-                            maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000 // 30 dias vs 24 horas
+                            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+                            maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000,
+                            path: '/'
                         })
                         console.log("Token generado y cookie establecida para admin")
-                        res.json({message: "Inicio de sesión exitoso"})
+                        res.json({
+                            message: "Inicio de sesión exitoso",
+                            user: {
+                                id: "admin",
+                                email: config.CREDENTIALS.email,
+                                userType: "admin",
+                                ...adminData
+                            }
+                        })
                     }
                 )
                 return
             } catch (error) {
                 console.log("Error obteniendo datos de admin:", error)
-                // Continuar con datos por defecto si hay error
-                res.status(500).json({message: "Error interno del servidor"})
+                return res.status(500).json({message: "Error interno del servidor"})
             }
-        } 
-        // Si no es admin, verificar credenciales incorrectas inmediatamente
+        }
+
         console.log("No es admin, verificando otros usuarios...")
+
         // Buscar en empleados primero
         userFound = await loginModel.findOne({email})
         if (userFound) {
             console.log("Usuario encontrado en empleados")
             userType = userFound.userType 
             console.log("Tipo de usuario:", userType)
+            
+            // RESTRICCIÓN: Colaboradores solo pueden acceder desde web
+            if (platform === "mobile" && (userType === "colaborador" || userType === "admin")) {
+                console.log(`Intento de login ${userType} desde móvil - BLOQUEADO`)
+                return res.status(403).json({
+                    message: "Los colaboradores deben usar la versión web"
+                })
+            }
+            
+            // RESTRICCIÓN: Si es web, no permitir customers
+            if (platform !== "mobile" && userType === "customer") {
+                console.log("Intento de login customer desde web - BLOQUEADO")
+                return res.status(403).json({
+                    message: "Los clientes deben usar la aplicación móvil"
+                })
+            }
+            
         } else {
             // Si no se encuentra en empleados, buscar en clientes
             userFound = await customersModel.findOne({email})
             if (userFound) {
                 console.log("Usuario encontrado en clientes")
                 userType = "customer"
+                
+                // RESTRICCIÓN: Clientes solo pueden acceder desde móvil
+                if (platform !== "mobile") {
+                    console.log("Intento de login customer desde web - BLOQUEADO")
+                    return res.status(403).json({
+                        message: "Los clientes deben usar la aplicación móvil"
+                    })
+                }
             }
         }
-        // Si no se encuentra el usuario
+
         if (!userFound) {
             console.log("Usuario no encontrado")
             return res.status(401).json({message: "El usuario no existe"})
         }
+
+        // Manejo de bloqueo temporal por intentos fallidos (solo no-admin)
+        if (userType !== "admin") {
+            if (userFound.timeOut !== null && Date.now() < userFound.timeOut) {
+                const remainingMinutes = Math.ceil((userFound.timeOut - Date.now()) / 60000)
+                console.log(`Usuario bloqueado. Min restantes: ${remainingMinutes}`)
+                return res.status(401).json({message: "El usuario está bloqueado", remainingMinutes})
+            }
+        }
+
         // Verificar contraseña para usuarios no-admin
         console.log("Verificando contraseña...")
-        const isMatch = await bcryptjs.compare(password, userFound.password)
-        if (!isMatch) {
-            console.log("Contraseña incorrecta")
-            return res.status(401).json({message: "Contraseña incorrecta"})
+        if (userType !== "admin") {
+            const isMatch = await bcryptjs.compare(password, userFound.password)
+            if (!isMatch) {
+                console.log("Contraseña incorrecta")
+
+                userFound.loginAttempts += 1
+
+                if (userFound.loginAttempts >= 3) {
+                    userFound.timeOut = Date.now() + 3600000 * 24 // 24 horas
+                    await userFound.save()
+                    return res.status(403).json({message: "Contraseña incorrecta", remainingMinutes: 0})
+                }
+
+                await userFound.save()
+                return res.status(403).json({message: "Contraseña incorrecta"})
+            }
+
+            // Limpiar intentos fallidos y desbloquear
+            userFound.loginAttempts = 0
+            userFound.timeOut = null
+            await userFound.save()
         }
         console.log("Contraseña correcta")
-        //TOKEN para empleados/clientes
+        
+        // TOKEN para empleados/clientes
         jsonwebtoken.sign(
             {id: userFound._id, userType, email: userFound.email, name: userFound.name, lastName: userFound.lastName}, 
             config.JWT.secret, 
-            { expiresIn: rememberMe ? "30d" : config.JWT.expiresIn }, // 30 dias si recordarme, sino el tiempo normal
+            { expiresIn: rememberMe ? "30d" : config.JWT.expiresIn },
             (err, token) => {
                 if(err) {
                     console.log("Error generando token:", err)
@@ -115,10 +191,19 @@ loginController.login = async (req, res) => {
                     httpOnly: true,
                     secure: process.env.NODE_ENV === 'production',
                     sameSite: 'lax',
-                    maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000 // 30 dias vs 24 horas
+                    maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000
                 })
                 console.log("🍪 Token generado y cookie establecida")
-                res.status(200).json({message: "Inicio de sesión exitoso"})
+                res.status(200).json({
+                    message: "Inicio de sesión exitoso",
+                    user: {
+                        id: userFound._id,
+                        email: userFound.email,
+                        name: userFound.name,
+                        lastName: userFound.lastName,
+                        userType: userType
+                    }
+                })
             }
         )
     } catch (error) {

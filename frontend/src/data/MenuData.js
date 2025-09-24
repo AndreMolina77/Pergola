@@ -12,6 +12,7 @@ const menuItems = [
   { icon: SubcategoriesIcon, label: 'Subcategorías', id: 'subcategories' },
   { icon: OrdersIcon, label: 'Pedidos', id: 'orders' },
   { icon: CustomDesignsIcon, label: 'Diseños únicos', id: 'customdesigns' },
+  { icon: DesignElementsIcon, label: 'Elementos de diseño', id: 'designelements' },
   { icon: ReviewsIcon, label: 'Reseñas', id: 'reviews' },
   { icon: SuppliersIcon, label: 'Proveedores', id: 'suppliers' },
   { icon: RefundsIcon, label: 'Devoluciones', id: 'refunds' },

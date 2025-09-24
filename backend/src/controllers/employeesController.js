@@ -14,124 +14,16 @@ cloudinary.config({
 employeesController.postEmployees = async (req, res) => {
     try {
         const { name, lastName, username, email, phoneNumber, birthDate, DUI, password, userType, hireDate, isVerified } = req.body;
-        if (
-            !name ||
-            typeof name !== "string" ||
-            name.trim().length === 0 ||
-            name.trim().length < 2 ||
-            name.trim().length > 100
-        ) {
-            return res.status(400).json({
-                message: "El nombre es obligatorio, no puede estar vacío y debe tener entre 2 y 100 caracteres."
-            });
-        }
-        if (
-            !lastName ||
-            typeof lastName !== "string" ||
-            lastName.trim().length === 0 ||
-            lastName.trim().length < 2 ||
-            lastName.trim().length > 100
-        ) {
-            return res.status(400).json({
-                message: "El apellido es obligatorio, no puede estar vacío y debe tener entre 2 y 100 caracteres."
-            });
-        }
-        if (
-            !username ||
-            typeof username !== "string" ||
-            username.trim().length === 0 ||
-            username.trim().length < 5 ||
-            username.trim().length > 50
-        ) {
-            return res.status(400).json({
-                message: "El nombre de usuario es obligatorio, no puede estar vacío y debe tener entre 5 y 50 caracteres."
-            });
-        }
-        if (
-            !email ||
-            typeof email !== "string" ||
-            email.trim().length === 0 ||
-            !/^[\w.-]+@([\w-]+\.)+[a-zA-Z]{2,}$/.test(email.trim())
-        ) {
-            return res.status(400).json({
-                message: "El correo electrónico es obligatorio, no puede estar vacío y debe ser válido."
-            });
-        }
-        if (
-            !phoneNumber ||
-            typeof phoneNumber !== "string" ||
-            phoneNumber.trim().length === 0 ||
-            !/^(?:\+503\s?)?(6|7)\d{3}-?\d{4}$/.test(phoneNumber.trim())
-        ) {
-            return res.status(400).json({
-                message: "El número de teléfono es obligatorio, no puede estar vacío y debe ser válido en El Salvador."
-            }); 
-        }
-        if (
-            !birthDate ||
-            isNaN(new Date(birthDate).getTime())
-        ) {
-            return res.status(400).json({
-                message: "La fecha de nacimiento es obligatoria y debe ser una fecha válida."
-            });
-        }
-        if (
-            !DUI ||
-            typeof DUI !== "string" ||
-            DUI.trim().length === 0 ||
-            !/^\d{8}-\d{1}$/.test(DUI.trim())
-        ) {
-            return res.status(400).json({
-                message: "El DUI es obligatorio, no puede estar vacío y debe tener el formato 12345678-9."
-            });
-        }
-        if (
-            !password ||
-            typeof password !== "string" ||
-            password.trim().length === 0 ||
-            password.trim().length < 8 ||
-            password.trim().length > 50
-        ) {
-            return res.status(400).json({
-                message: "La contraseña es obligatoria, no puede estar vacía y debe tener entre 8 y 50 caracteres."
-            });
-        }
-        if (
-            !userType ||
-            typeof userType !== "string" ||
-            !["Administrador", "Empleado"].includes(userType)
-        ) {
-            return res.status(400).json({
-                message: "El tipo de usuario es obligatorio y debe ser 'Administrador' o 'Empleado'."
-            });
-        } 
-        if (
-            !hireDate ||
-            isNaN(new Date(hireDate).getTime())
-        ) {
-            return res.status(400).json({
-                message: "La fecha de contratación es obligatoria y debe ser una fecha válida."
-            });
-        }
-        // Validar que la imagen sea un archivo válido
-        if (!req.file) {
-            return res.status(400).json({
-                message: "La imagen de perfil es obligatoria y debe ser un archivo válido."
-            });
-        }
-        // Validar tipo de archivo de imagen
-        const validImageTypes = ["image/jpeg", "image/png", "image/gif"];
-        if (!validImageTypes.includes(req.file.mimetype)) {
-            return res.status(400).json({
-                message: "El archivo debe ser una imagen válida (jpg, png, gif)."
-            });
-        }
-        if (req.file.size > 2 * 1024 * 1024) { // 2MB
-            return res.status(400).json({
-                message: "El tamaño de la imagen no puede exceder los 2MB."
-            });
-        }
+        // Validaciones manuales ANTES de mongoose
+        const errors = [];
         
+        if (!name || name.trim().length < 2) errors.push("Nombre inválido");
+        if (!lastName || lastName.trim().length < 2) errors.push("Apellido inválido");
+        if (!username || username.trim().length < 5) errors.push("Usuario debe tener al menos 5 caracteres");
+        if (!email || !/^[\w.-]+@([\w-]+\.)+[a-zA-Z]{2,}$/.test(email)) errors.push("Email inválido");
+        if (!phoneNumber || !/^\+503[-\d]{8,12}$/.test(phoneNumber)) errors.push("Teléfono debe ser formato +503XXXXXXXX");
+        if (!DUI || !/^\d{8}-\d$/.test(DUI)) errors.push("DUI debe tener formato 12345678-9");
+        if (!password || !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(password)) errors.push("Contraseña debe tener mayúsculas, minúsculas, números y caracter especial");
         // Link de imagen
         let profilePicURL = "";
         // Subir imagen a cloudinary si se proporciona una imagen en el cuerpo de la solicitud
@@ -152,8 +44,29 @@ employeesController.postEmployees = async (req, res) => {
             }
         });
     } catch (error) {
-        // ESTADO DE ERROR EN INPUT DEL EMPLEADO
-        res.status(400).json({ message: "Error al crear empleado", error: error.message });
+        console.error("💥 ERROR en postEmployees:", error);
+        
+        // Error de duplicados
+        if (error.code === 11000) {
+            const field = Object.keys(error.keyValue)[0];
+            return res.status(400).json({ 
+                message: `El ${field} ya existe en el sistema` 
+            });
+        }
+        
+        // Error de validación de mongoose
+        if (error.name === 'ValidationError') {
+            const errors = Object.values(error.errors).map(e => e.message);
+            return res.status(400).json({ 
+                message: "Error de validación", 
+                errors 
+            });
+        }
+
+        res.status(400).json({ 
+            message: "Error al crear empleado", 
+            error: error.message 
+        });
     }
 };
 // READ (GET ALL)
@@ -188,17 +101,19 @@ employeesController.getEmployee = async (req, res) => {
 // UPDATE (PUT)
 employeesController.putEmployees = async (req, res) => {
     try {
+        console.log("Body recibido:", req.body);
+        console.log("File recibido:", req.file);
         const updates = req.body;
         // Manejar la imagen si se proporciona
         if (req.file) {
             const result = await cloudinary.uploader.upload(req.file.path, {
-                folder: "customers",
+                folder: "employees",
                 allowed_formats: ["jpg", "jpeg", "png", "webp"]
             });
             updates.profilePic = result.secure_url;
         }
         // Actualizar empleado
-        const updatedEmployee = await Customers.findByIdAndUpdate( req.params.id, updates, { new: true } ).select('-password');
+        const updatedEmployee = await Employees.findByIdAndUpdate( req.params.id, updates, { new: true } ).select('-password');
         // Validar que el cliente si exista
         if (!updatedEmployee) {
             // ESTADO DE NO ENCONTRADO

@@ -6,22 +6,50 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 
 // Componente modal para formularios dinámicos
 const FormModal = ({isOpen, onClose, onSubmit, title, fields, initialData = {}, isLoading = false, submitButtonText = 'Guardar'}) => {
-  // Estados para mostrar/ocultar contraseñas, previews de imágenes y archivos seleccionados
+  // Estados para mostrar/ocultar contraseñas, previews de imágenes y archivos seleccionados, y si el formulario está inicializado
   const [showPasswords, setShowPasswords] = useState({})
   const [imagePreviews, setImagePreviews] = useState({})
   const [imageArrays, setImageArrays] = useState({})
   const [selectedFiles, setSelectedFiles] = useState({})
+  const isInitialized = useRef(false)
   // Configura react-hook-form
-  const { register, handleSubmit, formState: { errors }, reset, watch, setValue } = useForm({
+  const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm({
     mode: 'onChange', // Validar en tiempo real
     defaultValues: {}
   })
+  // Función para limpiar states}}
+  const clearStates = useCallback(() => {
+    setShowPasswords({})
+    setImagePreviews({})
+    setImageArrays({})
+    setSelectedFiles({})
+  }, [])
+  // Efecto para reset cuando se cierra el modal
+  useEffect(() => {
+    if (!isOpen) {
+      clearStates()
+      isInitialized.current = false
+    }
+  }, [isOpen, clearStates])
   // Inicializa el formulario cuando se abre el modal
   useEffect(() => {
     if (isOpen && fields && !isInitialized.current) {
       const defaultValues = {}
       fields.forEach(field => {
         const initialValue = initialData[field.name]
+        if (field.type === 'date') {
+          // Convierte el valor inicial al formato YYYY-MM-DD
+          if (initialValue) {
+            const date = new Date(initialValue)
+            if (!isNaN(date)) {
+              defaultValues[field.name] = date.toISOString().split('T')[0] // Formato YYYY-MM-DD
+            } else {
+              defaultValues[field.name] = '' // Valor por defecto si la fecha es inválida
+            }
+          } else {
+            defaultValues[field.name] = ''
+          }
+        }
         if (field.type === 'checkbox') {
           defaultValues[field.name] = Boolean(initialValue)
         } else if (field.type === 'number') {
@@ -68,10 +96,22 @@ const FormModal = ({isOpen, onClose, onSubmit, title, fields, initialData = {}, 
     }
     if (field.type === 'tel') {
       rules.pattern = {
-        value: /^\d{8,}$/,
-        message: 'Teléfono debe tener al menos 8 dígitos'
+        value: /^\+503[-\d]{8,12}$/,
+        message: 'Teléfono debe ser +503 seguido de 8 dígitos, puedes usar guiones (ej: +503-7123-4567)'
       }
-      rules.setValueAs = (value) => value.replace(/\D/g, '') // Limpiar caracteres no numéricos
+      rules.setValueAs = (value) => {
+        // Permite solo números, + y guiones
+        let cleaned = value.replace(/[^\d+-]/g, '')
+        // Asegura que comience con +503
+        if (!cleaned.startsWith('+503')) {
+          cleaned = '+503' + cleaned.replace(/\D/g, '').slice(0, 8)
+        }
+        // Formatea con guiones si tiene la longitud correcta
+        if (cleaned.length === 12) {
+          cleaned = cleaned.replace(/^(\+503)(\d{4})(\d{4})$/, '$1-$2-$3')
+        }
+        return cleaned
+      }
     }
     if (field.type === 'number') {
       rules.min = {
@@ -85,6 +125,13 @@ const FormModal = ({isOpen, onClose, onSubmit, title, fields, initialData = {}, 
         }
       }
       rules.setValueAs = (value) => value === '' ? '' : Number(value)
+    }
+    if (field.type === 'date') {
+      rules.setValueAs = (value) => {
+        if (!value) return '' // Maneja valores vacíos
+        const date = new Date(value)
+        return isNaN(date) ? '' : date.toISOString().split('T')[0] // Retorna YYYY-MM-DD
+      }
     }
     if (field.minLength) {
       rules.minLength = {
@@ -274,7 +321,7 @@ const FormModal = ({isOpen, onClose, onSubmit, title, fields, initialData = {}, 
         )
       case 'date':
         return (
-          <input {...register(field.name, validation)} type="date" className={baseInputClasses} disabled={isLoading}/>
+          <input {...register(field.name, validation)} type="date" className={baseInputClasses} disabled={isLoading} min={field.minDate} max={field.maxDate}/>
         )
       default:
         return (

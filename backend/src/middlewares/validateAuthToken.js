@@ -4,18 +4,27 @@ import { config } from "../utils/config.js"
 export const validateAuthToken = (allowedUserTypes = []) => {
     return (req, res, next) => {
         try {
+            console.log("=== VALIDATE AUTH TOKEN ROUTE ===");
+            console.log("All cookies:", req.cookies);
+            console.log("Headers:", req.headers);
+            console.log("Origin:", req.headers.origin);
             console.log("VALIDATE AUTH TOKEN MIDDLEWARE")
             console.log("Allowed user types:", allowedUserTypes)
             
             const { authToken } = req.cookies
             console.log("Auth token present:", !!authToken)
+            console.log("Auth token length:", authToken?.length);
             
             if (!authToken) {
-                console.log("No token provided")
+                console.log("❌ No token found in cookies");
                 return res.status(401).json({ 
-                    message: "Token no proporcionado, debes iniciar sesión primero",
-                    code: "NO_TOKEN"
-                })
+                    message: "Token no proporcionado", 
+                    success: false,
+                    debug: {
+                        cookiesReceived: Object.keys(req.cookies),
+                        allCookies: req.cookies
+                    }
+                });
             }
             const decodedToken = jsonwebtoken.verify(authToken, config.JWT.secret)
             console.log("Token decoded successfully")
@@ -53,16 +62,19 @@ export const validateAuthToken = (allowedUserTypes = []) => {
             if (error.name === 'TokenExpiredError') {
                 return res.status(401).json({ 
                     message: "Token expirado, inicia sesión nuevamente",
+                    success: false,
                     code: "TOKEN_EXPIRED"
                 })
             } else if (error.name === 'JsonWebTokenError') {
                 return res.status(401).json({ 
                     message: "Token inválido",
+                    success: false,
                     code: "INVALID_TOKEN"
                 })
             } else {
                 return res.status(500).json({ 
                     message: "Error al validar el token",
+                    success: false,
                     code: "VALIDATION_ERROR"
                 })
             }

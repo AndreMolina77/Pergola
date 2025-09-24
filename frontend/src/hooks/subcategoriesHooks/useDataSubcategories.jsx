@@ -3,7 +3,7 @@ import { toast } from "react-hot-toast"
 
 // Hook para manejar datos de subcategorías
 const useDataSubcategories = () => {
-  const API = "http://localhost:4000/api/subcategories"
+  const API = "https://pergola-production.up.railway.app/api/subcategories"
   const [subcategories, setSubcategories] = useState([]) // estado con subcategorías
   const [loading, setLoading] = useState(true) // estado de carga
 
@@ -57,7 +57,7 @@ const useDataSubcategories = () => {
         }
         const response = await fetch(`${API}/subcategories`, {
           method: "POST",
-          headers,
+          headers, // No forzado
           credentials: "include",
           body
         })
@@ -89,7 +89,7 @@ const useDataSubcategories = () => {
         }
         const response = await fetch(`${API}/subcategories/${id}`, {
           method: "PUT",
-          headers,
+          headers, // No forzado
           credentials: "include",
           body
         })

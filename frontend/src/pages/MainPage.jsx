@@ -6,10 +6,11 @@ import Header from '../components/Dashboard/Header'
 import Dashboard from '../components/Dashboard/Dashboard'
 import TableContainer from '../components/Table/TableContainer'
 import SettingsPage from '../components/Settings/SettingsPage'
-import ProgressScreen from '../components/Misc/ProgressScreen.jsx'
+import { handleExport } from '../utils/exportUtils.js'
+import GlobalSearch from '../components/Search/GlobalSearch'
 import { useConditionalData } from '../hooks/mainHook/useConditionalData.js'
 // Importar configuraciones de tablas
-import { suppliersConfig, categoriesConfig, subcategoriesConfig, collectionsConfig, productsConfig, rawMaterialsConfig, reviewsConfig, customDesignsConfig} from '../data/TableConfigs.js'
+import { suppliersConfig, categoriesConfig, subcategoriesConfig, collectionsConfig, productsConfig, rawMaterialsConfig, reviewsConfig, customDesignsConfig, ordersConfig, refundsConfig, transactionsConfig, designElementsConfig, employeesConfig, customersConfig} from '../data/TableConfigs.js'
 
 const MainPage = () => {
   const { user, logout, API } = useAuth()
@@ -19,21 +20,40 @@ const MainPage = () => {
     suppliersData,
     categoriesData,
     subcategoriesData,
+    employeesData,
     customersData,
     collectionsData,
     productsData,
-    rawmaterialsData,
+    rawMaterialsData,
     reviewsData,
     customDesignsData,
-    canAccess
+    ordersData,
+    refundsData,
+    transactionsData,
+    designElementsData
   } = useConditionalData()
-
+  
   const handleLogout = async () => {
     await logout()
   }
   // Funcion handleExport
-  const handleDataExport = () => {
-    toast.error('⚠️ Función de exportar actualmente no disponible, muy pronto')
+  const handleDataExport = (format, data, sectionName) => {
+    console.log(`Exportando ${data?.length || 0} elementos de ${sectionName} en formato ${format}`)
+    
+    if (!data || data.length === 0) {
+      toast.error('No hay datos para exportar')
+      return
+    }
+    try {
+      const filename = `${sectionName.toLowerCase().replace(/\s+/g, '_')}`
+      const title = `Reporte de ${sectionName} - Pérgola`
+      
+      handleExport(format, data, filename, title)
+      toast.success(`Exportación de ${sectionName} iniciada en formato ${format.toUpperCase()}`)
+    } catch (error) {
+      console.error('Error al exportar:', error)
+      toast.error('Error al exportar los datos')
+    }
   }
   // Agregar funcion para verificar permisos
   const hasPermission = (view) => {
@@ -68,16 +88,28 @@ const MainPage = () => {
       case 'dashboard':
         return <Dashboard/>
       case 'search':
-        return <ProgressScreen/>
+        return <GlobalSearch/>
       case 'employees':
-        return <ProgressScreen/>
+        return (
+          <div className="p-6 bg-white min-h-screen">
+            <div className="max-w-7xl mx-auto">
+              <TableContainer config={employeesConfig} {...employeesData.createHandlers(API)} onExport={handleDataExport}/>
+            </div>
+          </div>
+        )
       case 'customers':
-        return <ProgressScreen/>
+        return (
+          <div className="p-6 bg-white min-h-screen">
+            <div className="max-w-7xl mx-auto">
+              <TableContainer config={customersConfig} {...customersData.createHandlers(API)} onExport={handleDataExport}/>
+            </div>
+          </div>
+        )
       case 'products':
         return (
           <div className="p-6 bg-white min-h-screen">
             <div className="max-w-7xl mx-auto">
-              <TableContainer config={productsConfig} {...productsData.createHandlers(API)} onExport={handleDataExport} categoriesData={categoriesData} subcategoriesData={subcategoriesData} collectionsData={collectionsData} rawMaterialsData={rawmaterialsData}/>
+              <TableContainer config={productsConfig} {...productsData.createHandlers(API)} onExport={handleDataExport} categoriesData={categoriesData} subcategoriesData={subcategoriesData} collectionsData={collectionsData} rawMaterialsData={rawMaterialsData}/>
             </div>
           </div>
         )
@@ -85,7 +117,7 @@ const MainPage = () => {
         return (
           <div className="p-6 bg-white min-h-screen">
             <div className="max-w-7xl mx-auto">
-              <TableContainer config={rawMaterialsConfig} {...rawmaterialsData.createHandlers(API)} onExport={handleDataExport} suppliersData={suppliersData}/>
+              <TableContainer config={rawMaterialsConfig} {...rawMaterialsData.createHandlers(API)} onExport={handleDataExport} suppliersData={suppliersData}/>
             </div>
           </div>
         )
@@ -114,12 +146,26 @@ const MainPage = () => {
           </div>
         )
       case 'orders':
-        return <ProgressScreen/>
+        return (
+          <div className="p-6 bg-white min-h-screen">
+            <div className="max-w-7xl mx-auto">
+              <TableContainer config={ordersConfig} {...ordersData.createHandlers(API)} onExport={handleDataExport} customersData={{customers: ordersData.customers || []}} productsData={{products: ordersData.products || []}}/>
+            </div>
+          </div>
+        )
       case 'customdesigns':
         return (
           <div className="p-6 bg-white min-h-screen">
             <div className="max-w-7xl mx-auto">
               <TableContainer config={customDesignsConfig} {...customDesignsData.createHandlers(API)} onExport={handleDataExport}/>
+            </div>
+          </div>
+        )
+      case 'designelements':
+        return (
+          <div className="p-6 bg-white min-h-screen">
+            <div className="max-w-7xl mx-auto">
+              <TableContainer config={designElementsConfig} {...designElementsData.createHandlers(API)} onExport={handleDataExport}/>
             </div>
           </div>
         )
@@ -140,9 +186,21 @@ const MainPage = () => {
           </div>
         )
       case 'refunds':
-        return <ProgressScreen/>
+        return (
+          <div className="p-6 bg-white min-h-screen">
+            <div className="max-w-7xl mx-auto">
+              <TableContainer config={refundsConfig} {...refundsData.createHandlers(API)} onExport={handleDataExport} ordersData={{orders: refundsData.orders || []}} productsData={{products: refundsData.products || []}} customersData={{customers: refundsData.customers || []}}/>
+            </div>
+          </div>
+        )
       case 'transactions':
-        return <ProgressScreen/>
+        return (
+          <div className="p-6 bg-white min-h-screen">
+            <div className="max-w-7xl mx-auto">
+              <TableContainer config={transactionsConfig} {...transactionsData.createHandlers(API)} onExport={handleDataExport} ordersData={{orders: transactionsData.orders || []}} customersData={{customers: refundsData.customers || []}}/>
+            </div>
+          </div>
+        )
       case 'settings':
         return <SettingsPage/>
       default: 

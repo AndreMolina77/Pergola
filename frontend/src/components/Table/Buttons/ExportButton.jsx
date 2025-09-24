@@ -74,7 +74,7 @@ const ExportButton = ({
             {exportOptions.map((option) => {
               const IconComponent = option.icon
               return (
-                <button key={option.key} onClick={() => handleExport(option.key)} className="flex items-center w-full px-4 py-3 text-left text-[#3D1609] hover:bg-[#EBFEF5] hover:text-[#A73249] transition-colors duration-200 group">
+                <button key={option.key} onClick={() => handleExport(option.key)} className="flex items-center w-full px-4 py-3 text-left text-[#3D1609] hover:bg-[#E8E1D8] hover:text-[#A73249] transition-colors duration-200 group">
                   <IconComponent className="w-4 h-4 mr-3 text-[#3D1609] group-hover:text-[#A73249] transition-colors" />
                   <span className="text-sm font-medium">{option.label}</span>
                 </button>

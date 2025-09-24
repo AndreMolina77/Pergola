@@ -44,15 +44,14 @@ const customDesignsSchema = new Schema({
             message: "La longitud no puede estar vacía y debe tener formato: 123cm o 123mm"
         }
     },
-    decoration: [{
-        type: String,
+    decoration: {
+        type: [String],
         required: true,
-        trim: true,
         validate: {
-            validator: v => Array.isArray(v) && v.length > 0,  // Asegurarse de que no sea un array vacío
+            validator: arr => Array.isArray(arr) && arr.length > 0,
             message: "El array de decoración no puede estar vacío"
         }
-    }],
+    },
     clasp: {
         type: String,
         required: [true, "El cierre es obligatorio"],

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { toast } from "react-hot-toast"
 // Hook personalizado para manejar reseñas, clientes y productos
 const useDataReviews = () => {
-  const API = "http://localhost:4000/api/reviews"
+  const API = "https://pergola-production.up.railway.app/api/reviews"
   const [reviews, setReviews] = useState([]) // Lista de reseñas
   const [customers, setCustomers] = useState([]) // Lista de clientes
   const [products, setProducts] = useState([]) // Lista de productos
@@ -41,7 +41,7 @@ const useDataReviews = () => {
   // Obtener clientes desde el servidor
   const fetchCustomers = async () => {
     try {
-      const response = await fetch("http://localhost:4000/api/customers", {
+      const response = await fetch("https://pergola-production.up.railway.app/api/customers", {
         credentials: "include"
       })
       if (!response.ok) {
@@ -56,7 +56,7 @@ const useDataReviews = () => {
   // Obtener productos desde el servidor
   const fetchProducts = async () => {
     try {
-      const response = await fetch("http://localhost:4000/api/products", {
+      const response = await fetch("https://pergola-production.up.railway.app/api/products", {
         credentials: "include"
       })
       if (!response.ok) {
@@ -78,7 +78,6 @@ const useDataReviews = () => {
   const createHandlers = (API) => ({
     data: reviews, // Devuelve las reseñas
     loading, // Devuelve el estado de carga
-
     // Agrega una nueva reseña
     onAdd: async (data) => {
       try {
@@ -158,5 +157,4 @@ const useDataReviews = () => {
     createHandlers
   }
 }
-
 export default useDataReviews

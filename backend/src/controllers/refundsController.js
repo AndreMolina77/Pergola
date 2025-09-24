@@ -10,9 +10,9 @@ import Orders from "../models/Orders.js";
 // CREATE (POST)
 refundsController.postRefunds = async (req, res) => {
     try {
-        const { refundCode, order, customer, requestDate, reason, comment, items, status, amount, refundMethod } = req.body;
+        const { refundCode, order, customer, requestDate, reason, comments, items, status, amount, refundMethod } = req.body;
         // Verificar si el código de pedido ya existe
-        const existingRefund = await Refunds.findOne({ orderCode });
+        const existingRefund = await Refunds.findOne({ refundCode });
         if (existingRefund) {
             // ESTADO DE ERROR DE INPUT DEL CLIENTE
             return res.status(400).json({ message: "El código de devolución ya está en uso" });
@@ -35,7 +35,7 @@ refundsController.postRefunds = async (req, res) => {
             // ESTADO DE ERROR DE INPUT DEL CLIENTE
             return res.status(400).json({ message: "Uno o más productos no existen" });
         }
-        const newRefund = new Refunds({ refundCode, order, customer, requestDate: requestDate ? new Date(requestDate) : null, reason, comment, items, status: status || "pendiente", amount, refundMethod });
+        const newRefund = new Refunds({ refundCode, order, customer, requestDate: requestDate ? new Date(requestDate) : null, reason, comments, items, status: status || "pendiente", amount, refundMethod });
         // Guardar la devolución
         await newRefund.save();
         // ESTADO DE CREACIÓN
@@ -125,7 +125,7 @@ refundsController.putRefunds = async (req, res) => {
             return res.status(404).json({ message: "Devolución no encontrada" });
         }
         // ESTADO DE OK
-        res.status(200).json({ message: "Devolución actualizada con éxito", data: updatedCustomer });
+        res.status(200).json({ message: "Devolución actualizada con éxito", data: updatedRefund });
     } catch (error) {
         // ESTADO DE ERROR EN INPUT DEL CLIENTE
         res.status(400).json({ message: "Error al actualizar devolución", error: error.message });

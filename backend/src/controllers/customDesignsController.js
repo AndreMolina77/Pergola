@@ -88,8 +88,10 @@ customDesignsController.postDesigns = async (req, res) => {
         // ESTADO DE CREACIÓN
         res.status(201).json({ message: "Diseño creado con éxito", data: newDesign });
     } catch (error) {
+        console.error("🔥 ERROR en postDesigns:", error); // log completo
+
         // ESTADO DE ERROR EN INPUT DEL CLIENTE
-        res.status(400).json({ message: "Error al crear diseño", error: error.message });
+        res.status(400).json({ message: "Error al crear diseño", error: error.message, stack: error.stack, body: req.body });
     }
 };
 // READ (GET ALL)

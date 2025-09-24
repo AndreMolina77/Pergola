@@ -18,12 +18,10 @@ const transactionsSchema = new Schema({
         trim: true,
         unique: true,
         validate: {
-            validator: v => /^[A-Z0-9-]+$/.test(v),
-            message: "El código solo puede contener letras mayúsculas, números y guiones"
-        },
-        validate: {
-            validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
-            message: "El código de transacción no puede estar vacío"
+            validator: function(v) {
+                return v.trim() !== '' && /^[A-Z0-9-]+$/.test(v);
+            },
+            message: "El código no puede estar vacío y solo puede contener letras mayúsculas, números y guiones"
         }
     },
     order: {

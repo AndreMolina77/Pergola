@@ -5,6 +5,7 @@ import RawMaterials from "../models/RawMaterials.js";
 rawMaterialsController.postRawMaterials = async (req, res) => {
     try {
         const { 
+            correlative,
             name, 
             description, 
             type, 
@@ -125,6 +126,7 @@ rawMaterialsController.postRawMaterials = async (req, res) => {
             return res.status(400).json({ message: "El correlativo ya está en uso" });
         }
         const newRawMaterial = new RawMaterials({ 
+            correlative,
             name, 
             description,
             type, 
@@ -147,8 +149,8 @@ rawMaterialsController.postRawMaterials = async (req, res) => {
         // ESTADO DE CREACIÓN
         res.status(201).json({ message: "Materia prima creada con éxito", data: newRawMaterial });
     } catch (error) {
-        // ESTADO DE ERROR EN INPUT DEL CLIENTE
-        res.status(400).json({ message: "Error al crear materia prima", error: error.message });
+         // ESTADO DE ERROR EN INPUT DEL CLIENTE
+        res.status(400).json({ message: "Error al crear materia prima", error: error.message, stack: error.stack, body: req.body });
     }
 };
 // READ (GET ALL)

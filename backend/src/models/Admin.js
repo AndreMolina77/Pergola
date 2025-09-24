@@ -26,7 +26,9 @@ const adminSchema = new Schema({
     emailNotifications: { 
         type: Boolean, 
         default: false 
-    }
+    },
+    loginAttempts: { type: Number, default: 0 },
+    timeOut: { type: Date, default: null }
 }, {
     timestamps: true,
     strict: false
