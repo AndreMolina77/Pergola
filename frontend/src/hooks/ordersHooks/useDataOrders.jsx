@@ -3,7 +3,7 @@ import { toast } from "react-hot-toast";
 
 // Hook para manejar pedidos y sus datos relacionados
 const useDataOrders = () => {
-  const API = "https://pergola.onrender.com/api/orders";
+  const API = "https://pergola-production.up.railway.app/api/orders";
   const [orders, setOrders] = useState([]); // Lista de pedidos
   const [customers, setCustomers] = useState([]); // Lista de clientes
   const [products, setProducts] = useState([]); // Lista de productos
