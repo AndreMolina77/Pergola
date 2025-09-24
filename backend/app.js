@@ -31,10 +31,6 @@ import adminProfileRoutes from "./src/routes/adminProfile.js"
 // Importo middlewares para validar el token de autenticación
 import { validateAuthToken } from "./src/middlewares/validateAuthToken.js"
  
-console.log("🔧 Environment check:");
-console.log("NODE_ENV:", process.env.NODE_ENV);
-console.log("JWT_SECRET present:", !!process.env.JWT_SECRET);
-console.log("Port:", process.env.PORT || 4000);
 dotenv.config()
 const app = express()
 app.use(cors({
@@ -54,22 +50,32 @@ app.use("/api/recoveryPassword", recoveryPasswordRoutes)
 app.use("/api/validatePassword", validatePasswordRoutes)
 app.use("/api/admin/profile", adminProfileRoutes) // Esta será pública para /data-public
 app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument))
+// Para la app móvil
+app.use("/api/public/products", productsRoutes)
+app.use("/api/public/customdesigns", customDesignsRoutes)
+app.use("/api/public/categories", categoriesRoutes);
+app.use("/api/public/subcategories", subcategoriesRoutes);
+app.use("/api/public/collections", collectionsRoutes);
+app.use("/api/public/reviews", reviewsRoutes);
+app.use("/api/public/customers", customersRoutes);
+app.use("/api/public/orders", ordersRoutes);
+
 // Ruta especial para validar token (acepta cualquier tipo de usuario válido)
 app.use("/api/validateAuthToken", validateAuthTokenRoutes)
 // Rutas que SÍ requieren login (protegidas) 
-app.use("/api/products", validateAuthToken(["admin", "colaborador"]), productsRoutes)
-app.use("/api/rawmaterials", validateAuthToken(["admin", "colaborador"]), rawMaterialsRoutes)
-app.use("/api/customdesigns", validateAuthToken(["admin", "colaborador", "customer"]), customDesignsRoutes)
-app.use("/api/employees", validateAuthToken(["admin", "colaborador"]), employeesRoutes)
+app.use("/api/products", validateAuthToken(["admin", "employee"]), productsRoutes)
+app.use("/api/rawmaterials", validateAuthToken(["admin", "employee"]), rawMaterialsRoutes)
+app.use("/api/customdesigns", validateAuthToken(["admin", "employee", "customer"]), customDesignsRoutes)
+app.use("/api/employees", validateAuthToken(["admin", "employee"]), employeesRoutes)
 app.use("/api/admin/profile", validateAuthToken(["admin"]), adminProfileRoutes) // Solo admin
-app.use("/api/collections", validateAuthToken(["admin", "colaborador"]), collectionsRoutes) 
-app.use("/api/categories", validateAuthToken(["admin", "colaborador"]), categoriesRoutes)
-app.use("/api/subcategories", validateAuthToken(["admin", "colaborador"]), subcategoriesRoutes) 
-app.use("/api/customers", validateAuthToken(["admin", "colaborador", "customer"]), customersRoutes)
-app.use("/api/orders", validateAuthToken(["admin", "colaborador", "customer"]), ordersRoutes)
-app.use("/api/reviews", validateAuthToken(["admin", "colaborador", "customer"]), reviewsRoutes) 
-app.use("/api/refunds", validateAuthToken(["admin", "colaborador", "customer"]), refundsRoutes)
-app.use("/api/transactions", validateAuthToken(["admin", "colaborador", "customer"]), transactionsRoutes)
-app.use("/api/suppliers", validateAuthToken(["admin", "colaborador"]), suppliersRoutes) 
-app.use("/api/designelements", validateAuthToken(["admin", "colaborador"]), designElementsRoutes)
+app.use("/api/collections", validateAuthToken(["admin", "employee"]), collectionsRoutes) 
+app.use("/api/categories", validateAuthToken(["admin", "employee"]), categoriesRoutes)
+app.use("/api/subcategories", validateAuthToken(["admin", "employee"]), subcategoriesRoutes) 
+app.use("/api/customers", validateAuthToken(["admin", "employee", "customer"]), customersRoutes)
+app.use("/api/orders", validateAuthToken(["admin", "employee", "customer"]), ordersRoutes)
+app.use("/api/reviews", validateAuthToken(["admin", "employee", "customer"]), reviewsRoutes) 
+app.use("/api/refunds", validateAuthToken(["admin", "employee", "customer"]), refundsRoutes)
+app.use("/api/transactions", validateAuthToken(["admin", "employee", "customer"]), transactionsRoutes)
+app.use("/api/suppliers", validateAuthToken(["admin", "employee"]), suppliersRoutes) 
+app.use("/api/designelements", validateAuthToken(["admin", "employee"]), designElementsRoutes)
 export default app

@@ -2,19 +2,19 @@
 import mongoose from "mongoose";
 // Importo el archivo config
 import { config } from "./src/utils/config.js";
-//1- Configurar la URI de la base de datos y conectarse a la base de datos
+// 1- Configurar la URI de la base de datos y conectarse a la base de datos
 mongoose.connect(config.db.URI);
 // -------- Comprobar que todo funciona ----------
 const connection = mongoose.connection;
-//veo si funciona
+// veo si funciona
 connection.once("open", () => {
   console.log("Base de datos conectada");
 });
-//veo si se desconectó
+// veo si se desconectó
 connection.on("disconnected", () => {
   console.log("La base de datos se desconectó");
 });
-//veo si hay un error
+// veo si hay un error
 connection.on("error", () => {
   console.log("Error al conectarse a la base de datos");
 });

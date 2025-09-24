@@ -1,31 +1,31 @@
 import nodemailer from 'nodemailer'
 import { config } from './config.js'
-//Configurar el transportador para enviar correos
+// Configurar el transportador para enviar correos
 const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
-    auth: {
-        user: config.APPUSER.USER,
-        pass: config.APPUSER.PASS
-    }
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true,
+  auth: {
+    user: config.APPUSER.USER,
+    pass: config.APPUSER.PASS
+  }
 })
-//Definir a quien se le va a enviar el correo
+// Definir a quien se le va a enviar el correo
 const sendEmail = async (to, subject, text, html) => {
-    try {
-        const info = await transporter.sendMail({
-            from: `"Soporte Pérgola" <${config.APPUSER.USER}>`,
-            to: to,
-            subject: subject,
-            text: text,
-            html: html
-        })
-        return info
-    } catch (err) {
-        console.log("error: ", err)
-    }
+  try {
+    const info = await transporter.sendMail({
+      from: `"Soporte Pérgola" <${config.APPUSER.USER}>`,
+      to: to,
+      subject: subject,
+      text: text,
+      html: html
+    })
+    return info
+  } catch (err) {
+    console.log("error: ", err)
+  }
 }
-//Generar el código HTML para el correo
+// Generar el código HTML para el correo
 const HTMLRecoveryEmail = (code) => {
     return `
       <!DOCTYPE html>

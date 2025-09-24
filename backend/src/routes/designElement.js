@@ -9,12 +9,12 @@ const router = express.Router();
 const upload = multer({dest: "public/"})
 // Rutas que no requieren un parámetro en específico
 router.route("/")
-    .get(designElementsController.getElements)
-    .post(upload.single("image"), designElementsController.postElements)
+  .get(designElementsController.getElements)
+  .post(upload.single("image"), designElementsController.postElements)
 // Rutas que requieren un parámetro en específico
 router.route("/:id")
-    .get(designElementsController.getElement)
-    .put(upload.single("image"), designElementsController.putElements)
-    .delete(designElementsController.deleteElements)
+  .get(designElementsController.getElement)
+  .put(upload.single("image"), designElementsController.putElements)
+  .delete(designElementsController.deleteElements)
 
 export default router

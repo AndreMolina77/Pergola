@@ -7,14 +7,15 @@ import categoriesController from "../controllers/categoriesController.js"
 const router = express.Router()
 // Especificamos que los archivos multimedia se guarden en la carpeta public
 const upload = multer({dest: "public/"})
+// Ruta para obtener las categorías sin iniciar sesión
+router.get("/public", categoriesController.getPublicCategories)
 // Rutas que no requieren ningún parámetro en específico
 router.route("/")
-    .get(categoriesController.getCategories)
-    .post(upload.single("image"), categoriesController.postCategories)
+  .get(categoriesController.getCategories)
+  .post(upload.single("image"), categoriesController.postCategories)
 // Rutas que requieren un parámetro de id 
 router.route("/:id")
-    .get(categoriesController.getCategory)
-    .put(upload.single("image"), categoriesController.putCategories)
-    .delete(categoriesController.deleteCategories)
-
+  .get(categoriesController.getCategory)
+  .put(upload.single("image"), categoriesController.putCategories)
+  .delete(categoriesController.deleteCategories)
 export default router

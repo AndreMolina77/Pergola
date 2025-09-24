@@ -1,23 +1,8 @@
-/* Esta colección va a almacenar toda la información relacionada con los empleados (incluyendo admin y colaborador).
-"Employees": [
-    "name": "John",
-    "lastName": "Doe",
-    "username": "john_doe",
-    "email": "john.doe@example.com",
-    "phone": "123-456-7890",
-    "birthDate": "1990-05-15",
-    "DUI": "123456789-0",
-    "password": "securepassword123",
-    "userType": "admin",
-    "profilePic": "https://example.com/profile.jpg",
-    "hireDate": "2023-01-01",
-    "isVerified": true,
-] */
 // Importar modelo y schema de mongoose
 import { Schema, model } from 'mongoose'
 // Definir el schema para los empleados
 const employeesSchema = new Schema({
-   name: {
+  name: {
     type: String,
     required: [true, "El nombre es obligatorio"],
     trim: true,
@@ -107,16 +92,6 @@ const employeesSchema = new Schema({
       message: "La contraseña no puede estar vacía y debe incluir mayúsculas, minúsculas, números y caracteres especiales"
     }
   },
-  userType: {
-    type: String,
-    required: [true, "El tipo de usuario es obligatorio"],
-    enum: ["admin", "colaborador"],
-    default: "colaborador",
-    validate: {
-      validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
-      message: "El tipo de usuario no puede estar vacío"
-    }
-  },
   profilePic: {
     type: String,
     validate: {
@@ -135,11 +110,7 @@ const employeesSchema = new Schema({
       message: "La fecha de contratación no puede estar en el futuro"
     }
   },
-  isVerified: {
-    type: Boolean,
-    required: true,
-    default: false
-  },
+  isVerified: { type: Boolean, default: false },
   loginAttempts: { type: Number, default: 0 },
   timeOut: { type: Date, default: null }
 }, {

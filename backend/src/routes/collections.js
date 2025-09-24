@@ -7,14 +7,16 @@ import collectionsController from "../controllers/collectionsController.js"
 const router = express.Router()
 // Especificamos que los archivos multimedia se guarden en la carpeta public
 const upload = multer({dest: "public/"})
+// Ruta para obtener las colecciones sin iniciar sesión
+router.get("/public", collectionsController.getPublicCollections)
 // Rutas que no requieren ningún parámetro en específico
 router.route("/")
-    .get(collectionsController.getCollections)
-    .post(upload.single("image"), collectionsController.postCollections)
+  .get(collectionsController.getCollections)
+  .post(upload.single("image"), collectionsController.postCollections)
 // Rutas que requieren un parámetro de id 
 router.route("/:id")
-    .get(collectionsController.getCollection)
-    .put(upload.single("image"), collectionsController.putCollections)
-    .delete(collectionsController.deleteCollections)
+  .get(collectionsController.getCollection)
+  .put(upload.single("image"), collectionsController.putCollections)
+  .delete(collectionsController.deleteCollections)
 
 export default router
