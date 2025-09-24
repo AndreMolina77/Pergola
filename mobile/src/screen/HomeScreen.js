@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -10,8 +10,11 @@ import {
   SafeAreaView,
   StatusBar,
 } from 'react-native';
+import SearchModal from './SearchModal.js'; // Importa el componente de búsqueda
 
 const JewelryScreen = () => {
+  const [searchModalVisible, setSearchModalVisible] = useState(false);
+
   const creacionesPropias = [
     {
       id: 1,
@@ -80,14 +83,13 @@ const JewelryScreen = () => {
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Search Bar */}
-        <View style={styles.searchContainer}>
+        <TouchableOpacity 
+          style={styles.searchContainer}
+          onPress={() => setSearchModalVisible(true)}
+        >
           <Text style={styles.searchIcon}>🔍</Text>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Buscar"
-            placeholderTextColor="#999"
-          />
-        </View>
+          <Text style={styles.searchPlaceholder}>Buscar</Text>
+        </TouchableOpacity>
 
         {/* Creaciones Propias */}
         <View style={styles.section}>
@@ -175,6 +177,12 @@ const JewelryScreen = () => {
           <Text style={styles.navText}>$35.99</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Search Modal */}
+      <SearchModal 
+        visible={searchModalVisible} 
+        onClose={() => setSearchModalVisible(false)} 
+      />
     </SafeAreaView>
   );
 };
@@ -249,6 +257,14 @@ const styles = StyleSheet.create({
     height: 45,
     fontSize: 16,
     color: '#333',
+  },
+  searchPlaceholder: {
+    flex: 1,
+    height: 45,
+    fontSize: 16,
+    color: '#999',
+    lineHeight: 45,
+    textAlignVertical: 'center',
   },
   section: {
     marginBottom: 30,
