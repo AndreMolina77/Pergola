@@ -165,7 +165,7 @@ customersController.putCustomers = async (req, res) => {
 // DELETE (DELETE)
 customersController.deleteCustomers = async (req, res) => {
   try {
-    // Primero obtener el cliente para eliminar la imagen de Cloudinary si existe
+    // Primero obtener el cliente 
     const customer = await Customers.findById(req.params.id);
     // Validar que el cliente si exista
     if (!customer) {
@@ -184,6 +184,30 @@ customersController.deleteCustomers = async (req, res) => {
   } catch (error) {
     // ESTADO DE ERROR DEL SERVIDOR
     res.status(500).json({ message: "Error al eliminar cliente", error: error.message });
+  }
+};
+// DELETE PROFILE PICTURE ONLY
+customersController.deleteProfilePic = async (req, res) => {
+  try {
+    // Primero obtener el cliente 
+    const customer = await Customers.findById(req.params.id);
+    // Validar que el cliente si exista
+    if (!customer) {
+      // ESTADO DE NO ENCONTRADO
+      return res.status(404).json({ message: "Cliente no encontrado" });
+    }
+    // Eliminar de Cloudinary si existe
+    if (customer.profilePic) {
+      const publicId = customer.profilePic.split('/').pop().split('.')[0];
+      await cloudinary.uploader.destroy(`customers/${publicId}`);
+    }
+    // Eliminar solo el campo profilePic
+    await Customers.findByIdAndUpdate(req.params.id, { $unset: { profilePic: "" } }, { new: true });
+    // ESTADO DE OK
+    res.status(200).json({ message: "Foto de perfil eliminada con éxito" });
+  } catch (error) {
+    // ESTADO DE ERROR DEL SERVIDOR
+    res.status(500).json({message: "Error al eliminar foto de perfil", error: error.message});
   }
 };
 export default customersController;

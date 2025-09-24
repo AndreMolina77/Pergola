@@ -134,4 +134,39 @@ adminProfileController.updateNotifications = async (req, res) => {
     res.status(500).json({ message: "Error del servidor" })
   }
 }
+// Eliminar foto de perfil del admin
+adminProfileController.deleteProfilePic = async (req, res) => {
+  try {
+    console.log("Eliminando foto de perfil del admin...");
+    // Obtener el admin actual
+    const adminUser = await adminModel.findOne({ email: config.CREDENTIALS.email });
+    // Validar que el admin exista
+    if (!adminUser) {
+      return res.status(404).json({ message: "Administrador no encontrado" });
+    }
+    // Validar que tenga foto de perfil
+    if (!adminUser.profilePic) {
+      return res.status(400).json({ message: "El administrador no tiene foto de perfil" });
+    }
+    // Eliminar imagen de Cloudinary si existe
+    if (adminUser.profilePic) {
+      try {
+        const publicId = adminUser.profilePic.split('/').pop().split('.')[0];
+        await cloudinary.uploader.destroy(`admin/${publicId}`);
+        console.log("Foto eliminada de Cloudinary");
+      } catch (cloudinaryError) {
+        console.error("Error al eliminar de Cloudinary:", cloudinaryError);
+        // Continuar aunque falle Cloudinary para eliminar la referencia en BD
+      }
+    }
+    // Eliminar solo la URL de la foto de perfil en la base de datos
+    const updatedAdmin = await adminModel.findOneAndUpdate({ email: config.CREDENTIALS.email }, { $unset: { profilePic: 1 } }, { new: true } );
+    console.log("Foto de perfil eliminada correctamente");
+    res.status(200).json({ message: "Foto de perfil eliminada con éxito", user: updatedAdmin });
+    
+  } catch (error) {
+    console.error("Error al eliminar foto de perfil del admin:", error);
+    res.status(500).json({ message: "Error al eliminar foto de perfil", error: error.message });
+  }
+};
 export default adminProfileController

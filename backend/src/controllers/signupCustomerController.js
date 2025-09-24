@@ -56,7 +56,7 @@ signupCustomerController.registerCustomer = async (req, res) => {
     res.json({message: "Cliente registrado, por favor verifica tu correo"})
   } catch (error) {
     console.log("error", error)
-    res.status(500).json({message: "Error al registrar el empleado", error: error.message})
+    res.status(500).json({message: "Error al registrar el cliente", error: error.message})
   }
 }
 // Verificar el código de verificación
