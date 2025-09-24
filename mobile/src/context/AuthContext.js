@@ -9,7 +9,7 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [authToken, setAuthToken] = useState(null);
     const [loading, setLoading] = useState(false);
-    const API_URL = "https://pergola.onrender.com/api";
+    const API_URL = "https://pergola-production.up.railway.app/api";
 
     useEffect(() => {
         const loadUserSession = async () => {

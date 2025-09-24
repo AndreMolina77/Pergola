@@ -56,12 +56,7 @@ const LoginScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <TouchableOpacity 
-        style={styles.backButton}
-        onPress={() => navigation.goBack()}
-      >
-        <Ionicons name="arrow-back-circle-outline" size={40} color="black" />
-      </TouchableOpacity>
+      
       <Text style={styles.title}>Iniciar Sesión</Text>
 
       {/* Inputs */}
@@ -129,21 +124,7 @@ const LoginScreen = ({ navigation }) => {
         </Text>
       </Text>
 
-      {/* Social login */}
-      <View style={styles.socialContainer}>
-        <TouchableOpacity style={styles.socialButton}>
-          <Text>Continuar con Apple</Text>
-          <AntDesign name="apple-o" size={24} color="black" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.socialButton}>
-          <Text>Continuar con Google</Text>
-          <FontAwesome name="google" size={24} color="black" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.socialButton}>
-          <Text>Continuar con Facebook</Text>
-          <FontAwesome5 name="facebook" size={24} color="black" />
-        </TouchableOpacity>
-      </View>
+      
 
       {/* Crear cuenta */}
       <Text style={styles.bottomText}>
@@ -178,6 +159,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 20,
     color: "#000",
+    marginTop: 60
   },
   input: {
     width: "100%",
@@ -187,13 +169,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     marginBottom: 10,
     fontSize: 16,
+    marginTop: 40,
+    marginBottom: 30
   },
   passwordContainer: {
     flexDirection: "row",
     alignItems: "center",
     width: "100%",
     height: 62,
-    marginBottom: 10,
+    marginBottom: 10
   },
   inputPassword: {
     flex: 1,
@@ -213,6 +197,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 20,
+    marginTop: 30
   },
   rememberText: {
     marginLeft: 8,
@@ -227,6 +212,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 15,
+    marginTop: 30
   },
   buttonDisabled: {
     backgroundColor: "#A7324980",
@@ -241,6 +227,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 30,
     fontSize: 14,
+    marginTop: 30
   },
   linkText: {
     color: "#3D1609",

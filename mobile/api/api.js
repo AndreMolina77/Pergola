@@ -1,6 +1,2 @@
-import axios from 'axios';
-
-const api = axios.create({
-  baseURL: 'https://pergola.onrender.com/api', // NO VAYAN A TOCAR
-});
+const api = "https://pergola-production.up.railway.app/api"
 export default api;
