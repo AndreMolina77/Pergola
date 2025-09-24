@@ -37,7 +37,7 @@ const useDataOrders = () => {
   // Cargar clientes desde el servidor
   const fetchCustomers = async () => {
     try {
-      const response = await fetch("https://pergola.onrender.com/api/customers", {
+      const response = await fetch("https://pergola-production.up.railway.app/apicustomers", {
         credentials: "include"
       });
       if (!response.ok) {
@@ -52,7 +52,7 @@ const useDataOrders = () => {
   // Cargar productos desde el servidor
   const fetchProducts = async () => {
     try {
-      const response = await fetch("https://pergola.onrender.com/api/products", {
+      const response = await fetch("https://pergola-production.up.railway.app/api/products", {
         credentials: "include"
       });
       if (!response.ok) {
