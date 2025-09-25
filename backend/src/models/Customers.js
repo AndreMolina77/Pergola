@@ -62,7 +62,6 @@ const customersSchema = new Schema({
   },
   birthDate: {
     type: Date,
-    required: [true, "La fecha de nacimiento es obligatoria"],
     validate: {
       validator: v => v <= new Date(),
       message: "La fecha de nacimiento debe ser anterior a la fecha actual"
@@ -74,7 +73,6 @@ const customersSchema = new Schema({
   },
   DUI: {
     type: String,
-    required: [true, "El DUI es obligatorio"],
     trim: true,
     validate: {
       validator: function(v) {
@@ -108,7 +106,6 @@ const customersSchema = new Schema({
   },
   address: {
     type: String,
-    required: [true, "La dirección es obligatoria"],
     trim: true,
     minlength: [5, "La dirección debe tener al menos 5 caracteres"],
     maxlength: [200, "La dirección no puede exceder los 200 caracteres"],

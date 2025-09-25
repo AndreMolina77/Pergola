@@ -6,12 +6,14 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView
 } from "react-native";
 import Checkbox from "expo-checkbox";
 import { Ionicons } from '@expo/vector-icons';
-import AntDesign from '@expo/vector-icons/AntDesign';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import { useFonts } from 'expo-font';
 import { AuthContext } from "../context/AuthContext";
 
 const LoginScreen = ({ navigation }) => {
@@ -23,7 +25,15 @@ const LoginScreen = ({ navigation }) => {
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Verificar si ya existe una sesión activa
+  const [fontsLoaded] = useFonts({
+    'Quicksand-Bold': require('../../assets/fonts/Quicksand-Bold.ttf'),
+    'Quicksand-Medium': require('../../assets/fonts/Quicksand-Medium.ttf'),
+    'Quicksand-Regular': require('../../assets/fonts/Quicksand-Regular.ttf'),
+    'Nunito-Bold': require('../../assets/fonts/Nunito-Bold.ttf'),
+    'Nunito-SemiBold': require('../../assets/fonts/Nunito-SemiBold.ttf'),
+    'Nunito-Regular': require('../../assets/fonts/Nunito-Regular.ttf'),
+  });
+
   useEffect(() => {
     if (authToken) {
       navigation.replace("TabNavigator");
@@ -31,7 +41,6 @@ const LoginScreen = ({ navigation }) => {
   }, [authToken]);
 
   const handleLogin = async () => {
-    // Validaciones básicas
     if (!email || !password) {
       Alert.alert("Error", "Por favor completa todos los campos");
       return;
@@ -53,109 +62,131 @@ const LoginScreen = ({ navigation }) => {
     }
   };
 
+  if (!fontsLoaded) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#A73249" />
+      </View>
+    );
+  }
+
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <TouchableOpacity 
-        style={styles.backButton}
-        onPress={() => navigation.goBack()}
+    <KeyboardAvoidingView 
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <ScrollView 
+        contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
-        <Ionicons name="arrow-back-circle-outline" size={40} color="black" />
-      </TouchableOpacity>
-      <Text style={styles.title}>Iniciar Sesión</Text>
+        {/* Mensaje de Bienvenida */}
+        <View style={styles.welcomeSection}>
+          <Text style={styles.welcomeTitle}>¡Bienvenido de nuevo!</Text>
+          <Text style={styles.welcomeSubtitle}>
+            Ingresa a tu cuenta para continuar con tu experiencia
+          </Text>
+        </View>
 
-      {/* Inputs */}
-      <TextInput
-        style={styles.input}
-        placeholder="Correo electrónico"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-        editable={!loading}
-      />
-      
-      <View style={styles.passwordContainer}>
-        <TextInput
-          style={styles.inputPassword}
-          placeholder="Contraseña"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry={!showPassword}
-          editable={!loading}
-        />
-        <TouchableOpacity
-          onPress={() => setShowPassword(!showPassword)}
-          style={styles.eyeIconContainer}
-        >
-          <AntDesign 
-            name={showPassword ? "eye" : "eyeo"} 
-            size={24} 
-            color="black" 
-          />
-        </TouchableOpacity>
-      </View>
+        {/* Formulario de Login */}
+        <View style={styles.loginCard}>
+          <Text style={styles.loginTitle}>Iniciar Sesión</Text>
+          
+          {/* Campos del Formulario */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Correo electrónico</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="tu@email.com"
+              placeholderTextColor="#A73249AA"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              editable={!loading}
+            />
+          </View>
+          
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Contraseña</Text>
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={styles.inputPassword}
+                placeholder="Ingresa tu contraseña"
+                placeholderTextColor="#A73249AA"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+                editable={!loading}
+              />
+              <TouchableOpacity
+                onPress={() => setShowPassword(!showPassword)}
+                style={styles.eyeIconContainer}
+                activeOpacity={0.7}
+              >
+                <Ionicons 
+                  name={showPassword ? "eye-off" : "eye"} 
+                  size={24} 
+                  color="#3D1609" 
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
 
-      {/* Remember Me */}
-      <View style={styles.rememberContainer}>
-        <Checkbox
-          value={rememberMe}
-          onValueChange={setRememberMe}
-          color={rememberMe ? "#3D1609" : undefined}
-          disabled={loading}
-        />
-        <Text style={styles.rememberText}>Recuérdame</Text>
-      </View>
+          {/* Recordar y Olvidar Contraseña */}
+          <View style={styles.optionsContainer}>
+            <TouchableOpacity 
+              style={styles.rememberContainer}
+              onPress={() => setRememberMe(!rememberMe)}
+              activeOpacity={0.7}
+            >
+              <Checkbox
+                value={rememberMe}
+                onValueChange={setRememberMe}
+                color={rememberMe ? "#A73249" : undefined}
+                disabled={loading}
+                style={styles.checkbox}
+              />
+              <Text style={styles.rememberText}>Recuérdame</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              onPress={() => navigation.navigate("RecoverPassword")}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.forgotText}>¿Olvidaste tu contraseña?</Text>
+            </TouchableOpacity>
+          </View>
 
-      {/* Continuar */}
-      <TouchableOpacity 
-        style={[styles.button, loading && styles.buttonDisabled]} 
-        onPress={handleLogin}
-        disabled={loading}
-      >
-        <Text style={styles.buttonText}>
-          {loading ? "Iniciando..." : "Continuar"}
+          {/* Botón de Login */}
+          <TouchableOpacity 
+            style={[styles.loginButton, loading && styles.buttonDisabled]} 
+            onPress={handleLogin}
+            disabled={loading}
+            activeOpacity={0.8}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" size="small" />
+            ) : (
+              <Text style={styles.loginButtonText}>Continuar</Text>
+            )}
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+
+      {/* Footer */}
+      <View style={styles.footer}>
+        <Text style={styles.footerText}>
+          ¿No tienes una cuenta?{" "}
+          <Text 
+            style={styles.footerLink} 
+            onPress={() => navigation.navigate("Register")}
+          >
+            Crea una
+          </Text>
         </Text>
-      </TouchableOpacity>
-
-      {/* Restablecer contraseña */}
-      <Text style={styles.forgotText}>
-        ¿Olvidaste tu contraseña?{" "}
-        <Text 
-          style={styles.linkText} 
-          onPress={() => navigation.navigate("RecoverPassword")}
-        >
-          Restablecer
-        </Text>
-      </Text>
-
-      {/* Social login */}
-      <View style={styles.socialContainer}>
-        <TouchableOpacity style={styles.socialButton}>
-          <Text>Continuar con Apple</Text>
-          <AntDesign name="apple-o" size={24} color="black" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.socialButton}>
-          <Text>Continuar con Google</Text>
-          <FontAwesome name="google" size={24} color="black" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.socialButton}>
-          <Text>Continuar con Facebook</Text>
-          <FontAwesome5 name="facebook" size={24} color="black" />
-        </TouchableOpacity>
       </View>
-
-      {/* Crear cuenta */}
-      <Text style={styles.bottomText}>
-        ¿No tienes una cuenta?{" "}
-        <Text 
-          style={styles.linkText} 
-          onPress={() => navigation.navigate("Register")}
-        >
-          Crea una
-        </Text>
-      </Text>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -165,112 +196,191 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#E3C6B8",
-    padding: 20,
   },
-  backButton: {
-    width: 40,
-    height: 40,
-    marginBottom: 10,
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: "#E3C6B8",
+    justifyContent: "center",
+    alignItems: "center",
   },
-  title: {
+  scrollContainer: {
+    flexGrow: 1,
+    paddingHorizontal: 25,
+    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+    paddingBottom: 20, // Espacio para el footer
+  },
+  welcomeSection: {
+    alignItems: "center",
+    marginBottom: 40,
+    marginTop: 20,
+  },
+  welcomeTitle: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 32,
+    color: "#3D1609",
     textAlign: "center",
-    fontSize: 28,
-    fontWeight: "bold",
+    marginBottom: 12,
+    lineHeight: 38,
+  },
+  welcomeSubtitle: {
+    fontFamily: "Nunito-Regular",
+    fontSize: 16,
+    color: "#3D1609",
+    textAlign: "center",
+    lineHeight: 22,
+    opacity: 0.8,
+    paddingHorizontal: 20,
+  },
+  loginCard: {
+    backgroundColor: "#F5EDE8",
+    borderRadius: 20,
+    padding: 25,
+    marginBottom: 20, // Espacio antes del footer
+    shadowColor: "#3D1609",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: "#E8D5C9",
+  },
+  loginTitle: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 24,
+    color: "#3D1609",
+    textAlign: "center",
+    marginBottom: 30,
+  },
+  inputContainer: {
     marginBottom: 20,
-    color: "#000",
+  },
+  label: {
+    fontSize: 16,
+    fontFamily: "Nunito-SemiBold",
+    color: "#3D1609",
+    marginBottom: 8,
+    marginLeft: 5,
   },
   input: {
     width: "100%",
-    height: 62,
-    backgroundColor: "#E8E1D8",
-    borderRadius: 8,
-    paddingHorizontal: 15,
-    marginBottom: 10,
+    height: 56,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    paddingHorizontal: 20,
     fontSize: 16,
+    fontFamily: "Nunito-Regular",
+    borderWidth: 2,
+    borderColor: "#E8E1D8",
+    color: "#3D1609",
   },
   passwordContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    position: "relative",
     width: "100%",
-    height: 62,
-    marginBottom: 10,
   },
   inputPassword: {
-    flex: 1,
-    backgroundColor: "#E8E1D8",
-    borderRadius: 8,
-    paddingHorizontal: 15,
-    height: 62,
+    width: "100%",
+    height: 56,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    paddingHorizontal: 20,
     fontSize: 16,
+    fontFamily: "Nunito-Regular",
+    borderWidth: 2,
+    borderColor: "#E8E1D8",
+    color: "#3D1609",
+    paddingRight: 60, // Más espacio para el ícono
   },
   eyeIconContainer: {
     position: "absolute",
     right: 15,
-    height: 62,
+    top: 0,
+    bottom: 0,
     justifyContent: "center",
+    alignItems: "center",
+    width: 40,
+    height: 56,
+  },
+  optionsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 25,
+    marginTop: 5,
+    flexWrap: "wrap", // Por si el texto es muy largo
   },
   rememberContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 20,
+    flex: 1,
+    marginRight: 10,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    marginRight: 8,
   },
   rememberText: {
-    marginLeft: 8,
-    fontWeight: "bold",
+    fontFamily: "Nunito-SemiBold",
     color: "#3D1609",
+    fontSize: 14,
+    flex: 1,
   },
-  button: {
+  forgotText: {
+    color: "#A73249",
+    fontFamily: "Nunito-SemiBold",
+    fontSize: 14,
+    textDecorationLine: "underline",
+    flexShrink: 0, // No se encoge
+  },
+  loginButton: {
     width: "100%",
-    height: 62,
+    height: 56,
     backgroundColor: "#A73249",
-    borderRadius: 8,
+    borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 15,
+    shadowColor: "#A73249",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
   buttonDisabled: {
     backgroundColor: "#A7324980",
+    shadowOpacity: 0.1,
+    elevation: 2,
   },
-  buttonText: {
+  loginButtonText: {
     color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
+    fontFamily: "Quicksand-Bold",
+    fontSize: 18,
+    letterSpacing: 0.5,
   },
-  forgotText: {
-    color: "#3D1609",
+  footer: {
+    paddingVertical: 20,
+    paddingHorizontal: 25,
+    borderTopWidth: 1,
+    borderTopColor: "#D0C4B8",
+    alignItems: "center",
+    backgroundColor: "#E3C6B8", // Asegurar color de fondo
+  },
+  footerText: {
     textAlign: "center",
-    marginBottom: 30,
-    fontSize: 14,
-  },
-  linkText: {
     color: "#3D1609",
-    fontWeight: "bold",
+    fontSize: 15,
+    fontFamily: "Nunito-Regular",
+    lineHeight: 20,
+  },
+  footerLink: {
+    color: "#A73249",
+    fontFamily: "Nunito-Bold",
     textDecorationLine: "underline",
-  },
-  socialContainer: {
-    alignItems: "center",
-    marginBottom: 30,
-  },
-  socialButton: {
-    width: "90%",
-    height: 50,
-    backgroundColor: "#E8E1D8",
-    borderRadius: 8,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 15,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: "#D0C4B8",
-  },
-  bottomText: {
-    textAlign: "center",
-    position: "absolute",
-    bottom: 30,
-    left: 20,
-    right: 20,
-    color: "#3D1609",
-    fontSize: 14,
   },
 });

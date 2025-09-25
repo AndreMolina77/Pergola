@@ -356,19 +356,6 @@ const SignUp = () => {
           </p>
         </div>
       </div>
-
-      {/* Footer con marca */}
-      <div className="py-4 px-4 text-center" style={{ backgroundColor: '#E8E1D8' }}>
-        <div className="flex items-center justify-center mb-2">
-          <img src={Pergola} alt="P decorativa" className="w-6 h-auto opacity-60 mr-2"/>
-          <p className="font-[Quicksand] font-semibold text-sm" style={{ color: '#A73249' }}>
-            PÉRGOLA JOYERÍA
-          </p>
-        </div>
-        <p className="font-[Quicksand] text-xs" style={{ color: '#3D1609' }}>
-          Tu belleza merece cada pieza ✨
-        </p>
-      </div>
     </div>
   );
 };
