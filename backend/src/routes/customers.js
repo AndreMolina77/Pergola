@@ -18,5 +18,7 @@ router.route("/:id")
   .get(customersController.getCustomer)
   .put(upload.single("profilePic"), customersController.putCustomers)
   .delete(customersController.deleteCustomers)
+// Nueva ruta para eliminar solo la foto de perfil
+router.delete("/:id/profile-pic", customersController.deleteProfilePic);
 
 export default router

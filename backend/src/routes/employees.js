@@ -19,5 +19,7 @@ router.route("/:id")
   .get(employeesController.getEmployee)
   .put(upload.single("profilePic"), employeesController.putEmployees)
   .delete(employeesController.deleteEmployees)
+// Nueva ruta para eliminar solo la foto de perfil
+router.delete("/:id/profile-pic", employeesController.deleteProfilePic);
 
 export default router

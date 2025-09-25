@@ -7,11 +7,12 @@ import adminProfileController from "../controllers/adminProfileController.js"
 const router = express.Router()
 // Especificamos que los archivos multimedia se guarden en la carpeta public
 const upload = multer({dest: "public/"})
-// Rutas para obtener y actualizar datos del perfil de administrador
+// Rutas para obtener, borrar y actualizar datos del perfil de administrador
 router.get("/data-public", adminProfileController.getProfilePublic)
 router.get("/data", adminProfileController.getProfile)
 router.put("/", upload.single("profilePic"), adminProfileController.updateProfile)
 router.put("/password", adminProfileController.changePassword)
 router.put("/notifications", adminProfileController.updateNotifications)
+router.delete("/delete-profilepic", adminProfileController.deleteProfilePic)
 
 export default router

@@ -86,7 +86,7 @@ employeesController.getEmployee = async (req, res) => {
     res.status(200).json(employee);
   } catch (error) {
     // ESTADO DE ERROR DEL SERVIDOR
-    res.status(500).json({ message: "Error al obtener cliente", error: error.message });
+    res.status(500).json({ message: "Error al obtener empleado", error: error.message });
   }
 };
 // UPDATE (PUT)
@@ -115,7 +115,7 @@ employeesController.putEmployees = async (req, res) => {
     } */
     // Actualizar empleado
     const updatedEmployee = await Employees.findByIdAndUpdate( req.params.id, updates, { new: true } ).select('-password');
-    // Validar que el cliente si exista
+    // Validar que el empleado si exista
     if (!updatedEmployee) {
       // ESTADO DE NO ENCONTRADO
       return res.status(404).json({ message: "Empleado no encontrado" });
@@ -123,7 +123,7 @@ employeesController.putEmployees = async (req, res) => {
     // ESTADO DE OK
     res.status(200).json({ message: "Empleado actualizado con éxito", data: updatedEmployee });
   } catch (error) {
-    // ESTADO DE ERROR EN INPUT DEL CLIENTE
+    // ESTADO DE ERROR EN INPUT DEL EMPLEADO
     res.status(400).json({ message: "Error al actualizar empleado", error: error.message });
   }
 };
@@ -149,6 +149,30 @@ employeesController.deleteEmployees = async (req, res) => {
   } catch (error) {
     // ESTADO DE ERROR DEL SERVIDOR
     res.status(500).json({ message: "Error al eliminar empleado", error: error.message });
+  }
+};
+// DELETE PROFILE PICTURE ONLY
+employeesController.deleteProfilePic = async (req, res) => {
+  try {
+    // Primero obtener el empleado 
+    const employee = await Employees.findById(req.params.id);
+    // Validar que el empleado si exista
+    if (!employee) {
+      // ESTADO DE NO ENCONTRADO
+      return res.status(404).json({ message: "Empleado no encontrado" });
+    }
+    // Eliminar de Cloudinary si existe
+    if (employee.profilePic) {
+      const publicId = employee.profilePic.split('/').pop().split('.')[0];
+      await cloudinary.uploader.destroy(`employees/${publicId}`);
+    }
+    // Eliminar solo el campo profilePic
+    await Employees.findByIdAndUpdate(req.params.id, { $unset: { profilePic: "" } }, { new: true });
+    // ESTADO DE OK
+    res.status(200).json({ message: "Foto de perfil eliminada con éxito" });
+  } catch (error) {
+    // ESTADO DE ERROR DEL SERVIDOR
+    res.status(500).json({message: "Error al eliminar foto de perfil", error: error.message});
   }
 };
 export default employeesController;

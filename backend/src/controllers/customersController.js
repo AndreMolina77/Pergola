@@ -146,7 +146,7 @@ customersController.putCustomers = async (req, res) => {
     if (validationError) {
       return res.status(400).json({ message: validationError });
     } */
-    // Actualizar empleado
+    // Actualizar cliente
     const updatedCustomer = await Customers.findByIdAndUpdate( req.params.id, updates, { new: true } ).select('-password');
     // Validar que el cliente si exista
     if (!updatedCustomer) {
