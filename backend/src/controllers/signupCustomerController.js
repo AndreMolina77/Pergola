@@ -31,7 +31,7 @@ signupCustomerController.registerCustomer = async (req, res) => {
     const verCode = crypto.randomBytes(3).toString('hex')
     // TOKEN
     const token = jsonwebtoken.sign({email, verCode}, config.JWT.secret, { expiresIn: "2h"})
-    res.cookie("verificationToken", token, {maxAge: 2 * 60 * 60 * 1000})
+    res.cookie("verificationToken", token, {maxAge: 2 * 60 * 60 * 1000, httpOnly: true, sameSite: "lax"})
     // NUEVA IMPLEMENTACIÓN: Enviar email con Brevo API (sin SMTP)
     try {
       await sendVerificationEmail(newCustomer.email, verCode, 'customer')
