@@ -10,7 +10,7 @@ const useProducts = () => {
   const [error, setError] = useState(null);
 
   // Configuración de la API
-  const API_URL = 'https://pergola-production.up.railway.app/api'; // Cambia por tu URL
+  const API_URL = 'https://pergola-production.up.railway.app/api'; 
   
   // Headers base para las requests
   const getHeaders = (contentType = 'application/json') => ({
