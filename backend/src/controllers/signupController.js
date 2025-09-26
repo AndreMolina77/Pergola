@@ -67,6 +67,10 @@ signupController.registerEmployee = async (req, res) => {
 signupController.verifyCodeEmail = async (req, res) => {
   const { verCodeRequest } = req.body
   try {
+    console.log('=== VERIFY CODE EMAIL DEBUG ===')
+    console.log('All cookies:', req.cookies)
+    console.log('verificationToken:', req.cookies.verificationToken)
+    console.log('authToken:', req.cookies.authToken)
     // TOKEN
     const token = req.cookies.verificationToken
     // Verificar si el token existe y es válido
