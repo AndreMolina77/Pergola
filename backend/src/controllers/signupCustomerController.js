@@ -3,7 +3,6 @@ const signupCustomerController = {}
 import customersModel from "../models/Customers.js"
 import bcryptjs from "bcryptjs"
 import jsonwebtoken from "jsonwebtoken"
-import nodemailer from 'nodemailer'
 import crypto from 'crypto'
 import { config } from "../utils/config.js"
 // Función helper para validar

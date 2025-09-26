@@ -28,7 +28,7 @@ const VerifyCodeEmail = () => {
 
     setIsLoading(true)
     try {
-      const response = await fetch(`${API}/signUpVerifyCode`, {
+      const response = await fetch(`${API}/signup/verifyCode`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
