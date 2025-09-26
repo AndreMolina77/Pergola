@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer'
+/* import nodemailer from 'nodemailer'
 import { config } from './config.js'
 // Configurar el transportador para enviar correos
 const transporter = nodemailer.createTransport({
@@ -304,9 +304,9 @@ const HTMLRecoveryEmail = (code) => {
             font-size: 0.75rem;
             margin-top: 1.5rem;
             font-weight: 300;
-          }
+          } 
 
-          /* Responsive styles */
+          /* Responsive styles
           @media (max-width: 640px) {
             .content {
               padding: 1.5rem !important;
@@ -425,4 +425,4 @@ const HTMLRecoveryEmail = (code) => {
       </html>
     `
 }
-export { sendEmail, HTMLRecoveryEmail }
+export { sendEmail, HTMLRecoveryEmail } */

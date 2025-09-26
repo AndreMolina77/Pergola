@@ -5,7 +5,7 @@ import customersModel from "../models/Customers.js"
 import employeesModel from "../models/Employees.js"
 import bcryptjs from "bcryptjs"
 import jsonwebtoken from "jsonwebtoken"
-import { sendEmail, HTMLRecoveryEmail } from "../utils/mailRecoveryPassword.js"
+import { sendRecoveryEmail } from "../utils/emailService.js"
 import { config } from "../utils/config.js"
 // POST (CREATE)
 recoveryPasswordController.requestCode = async (req, res) => {
@@ -33,10 +33,17 @@ recoveryPasswordController.requestCode = async (req, res) => {
     const code = Math.floor(10000 + Math.random() * 90000).toString()
     // TOKEN
     const token = jsonwebtoken.sign({email, code, userType, verified: false}, config.JWT.secret, { expiresIn: "20m"})
-    res.cookie("tokenRecoveryCode", token, { maxAge: 20 * 60 * 1000, httpOnly: true, sameSite: "lax" })
-
-    await sendEmail(email, "Código de recuperación de contraseña", `Tu código de recuperación es: ${code}`, HTMLRecoveryEmail(code))
-    res.status(200).json({message: "Código de recuperación enviado"})
+    res.cookie("tokenRecoveryCode", token, { maxAge: 20 * 60 * 1000, httpOnly: true, sameSite: "none" })
+    // NUEVA IMPLEMENTACIÓN: Enviar email con Brevo API (sin SMTP)
+    try {
+      await sendRecoveryEmail(email, code)
+      
+      console.log("Email de recuperación enviado exitosamente con Brevo API")
+      res.status(200).json({message: "Código de recuperación enviado"})
+    } catch (emailError) {
+      console.error("Error al enviar email de recuperación con Brevo API:", emailError)
+      res.status(500).json({message: "Error al enviar el código de recuperación"})
+    }
   } catch (error) {
     console.log("error: ", error)
   }
@@ -59,7 +66,7 @@ recoveryPasswordController.verifyCode = async (req, res) => {
     // TOKEN
     const newToken = jsonwebtoken.sign({email: decoded.email, code: decoded.code, userType: decoded.userType, verified: true}, config.JWT.secret, { expiresIn: "20m"})
     // El token se almacenará en una cookie
-    res.cookie("tokenRecoveryCode", newToken, {maxAge: 24*60*1000, httpOnly: true, sameSite: "lax"})
+    res.cookie("tokenRecoveryCode", newToken, {maxAge: 24*60*1000, httpOnly: true, sameSite: "none"})
     res.status(200).json({message: "Código de recuperación verificado"})
   } catch (error) {
     console.log("error: ", error)

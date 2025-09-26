@@ -3,7 +3,6 @@ const signupCustomerController = {}
 import customersModel from "../models/Customers.js"
 import bcryptjs from "bcryptjs"
 import jsonwebtoken from "jsonwebtoken"
-import nodemailer from 'nodemailer'
 import crypto from 'crypto'
 import { config } from "../utils/config.js"
 // Función helper para validar
@@ -32,7 +31,7 @@ signupCustomerController.registerCustomer = async (req, res) => {
     const verCode = crypto.randomBytes(3).toString('hex')
     // TOKEN
     const token = jsonwebtoken.sign({email, verCode}, config.JWT.secret, { expiresIn: "2h"})
-    res.cookie("verificationToken", token, {maxAge: 2 * 60 * 60 * 1000})
+    res.cookie("verificationToken", token, {maxAge: 2 * 60 * 60 * 1000, httpOnly: false, secure: true, sameSite: "none"})
     // NUEVA IMPLEMENTACIÓN: Enviar email con Brevo API (sin SMTP)
     try {
       await sendVerificationEmail(newCustomer.email, verCode, 'customer')

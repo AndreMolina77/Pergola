@@ -11,7 +11,7 @@ import { validateEmployee } from "../validators/validator.js"
 import { sendVerificationEmail } from "../utils/emailService.js"
 // POST (CREATE)
 signupController.registerEmployee = async (req, res) => {
-  const { name, lastName, username, email, phoneNumber, birthDate, DUI, password, hireDate } = req.body
+  const { name, lastName, username, email, phoneNumber, birthDate, DUI, password, hireDate, isVerified } = req.body
 
   try {
     // Verificacion de si el empleado ya existe
@@ -23,7 +23,7 @@ signupController.registerEmployee = async (req, res) => {
     // Encriptación de contraseña
     const hashedPassword = await bcryptjs.hash(password, 10)
     /* // Validar lo que venga en req.body
-    const validationError = validateEmployee({name, lastName, username, email, phoneNumber, birthDate, DUI, password: hashedPassword, hireDate});
+    const validationError = validateEmployee({name, lastName, username, email, phoneNumber, birthDate, DUI, password: hashedPassword, hireDate, isVerified});
     if (validationError) {
       return res.status(400).json({ message: validationError });
     } */
@@ -34,7 +34,7 @@ signupController.registerEmployee = async (req, res) => {
     const verCode = crypto.randomBytes(3).toString('hex')
     // TOKEN de verificación
     const token = jsonwebtoken.sign({ email: newUser.email, verCode }, config.JWT.secret, { expiresIn: "2h" })
-    res.cookie("verificationToken", token, {maxAge: 2 * 60 * 60 * 1000}) // 2 horas
+    res.cookie("verificationToken", token, {maxAge: 2 * 60 * 60 * 1000, httpOnly: false, secure: true, sameSite: "none"}) // 2 horas
     // NUEVA IMPLEMENTACIÓN: Enviar email con Brevo API (sin SMTP)
     try {
       await sendVerificationEmail(newUser.email, verCode, 'employee')
@@ -67,6 +67,10 @@ signupController.registerEmployee = async (req, res) => {
 signupController.verifyCodeEmail = async (req, res) => {
   const { verCodeRequest } = req.body
   try {
+    console.log('=== VERIFY CODE EMAIL DEBUG ===')
+    console.log('All cookies:', req.cookies)
+    console.log('verificationToken:', req.cookies.verificationToken)
+    console.log('authToken:', req.cookies.authToken)
     // TOKEN
     const token = req.cookies.verificationToken
     // Verificar si el token existe y es válido

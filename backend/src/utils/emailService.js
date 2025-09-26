@@ -4,6 +4,20 @@ import { config } from './config.js'
 // Función principal para enviar emails
 const sendEmail = async (to, subject, text, html, options = {}) => {
   try {
+    console.log("🎯 Preparando email para:", to)
+    
+    // Validaciones básicas
+    if (!to || !subject) {
+      throw new Error("Email y subject son requeridos")
+    }
+
+    if (!config.BREVO?.API_KEY) {
+      throw new Error("BREVO_API_KEY no está configurada")
+    }
+
+    if (!config.APPUSER?.USER) {
+      throw new Error("APPUSER.USER no está configurada")
+    }
     const emailData = {
       to: to,
       subject: subject,
@@ -17,38 +31,34 @@ const sendEmail = async (to, subject, text, html, options = {}) => {
     }
 
     const result = await sendBrevoEmail(emailData)
+    console.log("🎉 Email enviado con éxito!")
     return result
   } catch (error) {
-    console.error("Error al enviar email:", error)
+    console.error("⚠️ Error en sendEmail:", error)
     throw error
   }
 }
 // Función específica para emails de verificación
 const sendVerificationEmail = async (to, verCode, userType = 'customer') => {
+  console.log(`🔐 Enviando código de verificación ${verCode} a ${to}`)
   const subject = userType === 'employee' 
     ? 'Verificación de cuenta de empleado' 
-    : 'Verificación de cuenta'
-  
-  const text = `Por favor, ingrese el siguiente código para verificar su cuenta: ${verCode}`
-  
+    : 'Verificación de cuenta'  
   const html = generateVerificationEmailHTML(verCode, userType)
   
-  return await sendEmail(to, subject, text, html, {
-    tags: [`verification-${userType}`, 'account-setup'],
-    headers: {
-      'X-Category': 'verification',
-      'X-User-Type': userType
-    }
+  return await sendEmail(to, subject, null, html, {
+    tags: [`verification-${userType}`],
+    headers: { 'X-Category': 'verification' }
   })
 }
 // Función para emails de recuperación
 const sendRecoveryEmail = async (to, code) => {
+  console.log(`🔑 Enviando código de recuperación ${code} a ${to}`)
   const subject = 'Recuperación de Contraseña - Pérgola Joyería'
-  const text = `Tu código de recuperación es: ${code}. Válido por 20 minutos.`
   const html = HTMLRecoveryEmail(code)
   
-  return await sendEmail(to, subject, text, html, {
-    tags: ['password-recovery', 'security'],
+  return await sendEmail(to, subject, null, html, {
+    tags: ['password-recovery'],
     headers: {
       'X-Category': 'password-recovery'
     }
@@ -479,3 +489,4 @@ const HTMLRecoveryEmail = (code) => {
     </html>
   `
 }
+export { sendEmail, sendVerificationEmail, sendRecoveryEmail }
