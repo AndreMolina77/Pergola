@@ -24,7 +24,7 @@ const sendEmail = async (to, subject, text, html, options = {}) => {
   }
 }
 // Función específica para emails de verificación
-const sendVerificationEmail = async (to, verCode, userType = 'customer') => {
+export const sendVerificationEmail = async (to, verCode, userType = 'customer') => {
   const subject = userType === 'employee' 
     ? 'Verificación de cuenta de empleado' 
     : 'Verificación de cuenta'
@@ -42,7 +42,7 @@ const sendVerificationEmail = async (to, verCode, userType = 'customer') => {
   })
 }
 // Función para emails de recuperación
-const sendRecoveryEmail = async (to, code) => {
+export const sendRecoveryEmail = async (to, code) => {
   const subject = 'Recuperación de Contraseña - Pérgola Joyería'
   const text = `Tu código de recuperación es: ${code}. Válido por 20 minutos.`
   const html = HTMLRecoveryEmail(code)
