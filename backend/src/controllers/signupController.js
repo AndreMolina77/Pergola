@@ -11,7 +11,7 @@ import { validateEmployee } from "../validators/validator.js"
 import { sendVerificationEmail } from "../utils/emailService.js"
 // POST (CREATE)
 signupController.registerEmployee = async (req, res) => {
-  const { name, lastName, username, email, phoneNumber, birthDate, DUI, password, hireDate } = req.body
+  const { name, lastName, username, email, phoneNumber, birthDate, DUI, password, hireDate, isVerified } = req.body
 
   try {
     // Verificacion de si el empleado ya existe
@@ -23,7 +23,7 @@ signupController.registerEmployee = async (req, res) => {
     // Encriptación de contraseña
     const hashedPassword = await bcryptjs.hash(password, 10)
     /* // Validar lo que venga en req.body
-    const validationError = validateEmployee({name, lastName, username, email, phoneNumber, birthDate, DUI, password: hashedPassword, hireDate});
+    const validationError = validateEmployee({name, lastName, username, email, phoneNumber, birthDate, DUI, password: hashedPassword, hireDate, isVerified});
     if (validationError) {
       return res.status(400).json({ message: validationError });
     } */
