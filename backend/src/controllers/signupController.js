@@ -2,7 +2,6 @@ const signupController = {}
 // Importo el modelo de empleados
 import employeesModel from "../models/Employees.js"
 import bcryptjs from "bcryptjs"
-import nodemailer from 'nodemailer'
 import crypto from 'crypto'
 import jsonwebtoken from "jsonwebtoken"
 import { config } from "../utils/config.js"
