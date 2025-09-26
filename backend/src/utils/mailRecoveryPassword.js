@@ -30,112 +30,394 @@ const HTMLRecoveryEmail = (code) => {
     return `
       <!DOCTYPE html>
       <html lang="es">
+
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Recuperación de Contraseña - Pérgola Joyería</title>
-        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
         <style>
           @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-          
+
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
+
           body {
             font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
           }
-          .elegant-shadow {
+
+          .main-container {
+            background-color: white;
+            border-radius: 1.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+            max-width: 42rem;
+            width: 100%;
+            overflow: hidden;
+          }
+
+          .header {
+            background: linear-gradient(to bottom right, #fdf2f8, #fef7f7);
+            padding: 3rem;
+            text-align: center;
+            border-bottom: 1px solid #fce7f3;
+          }
+
+          .logo-container {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 5rem;
+            height: 5rem;
+            background-color: white;
+            border-radius: 50%;
+            margin-bottom: 1.5rem;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
           }
-          .code-shadow {
+
+          .logo-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            color: #db2777;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+          }
+
+          .company-name {
+            font-size: 2.25rem;
+            font-weight: 300;
+            color: #1f2937;
+            margin-bottom: 0.75rem;
+            letter-spacing: 0.1em;
+          }
+
+          .company-subtitle {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #db2777;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            margin-bottom: 1rem;
+          }
+
+          .header-description {
+            color: #4b5563;
+            font-size: 1.125rem;
+            font-weight: 300;
+          }
+
+          .content {
+            padding: 3rem;
+            text-align: center;
+          }
+
+          .content-title {
+            font-size: 1.5rem;
+            font-weight: 300;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+          }
+
+          .content-description {
+            color: #4b5563;
+            font-size: 1.125rem;
+            line-height: 1.75;
+            margin-bottom: 2.5rem;
+            font-weight: 300;
+          }
+
+          .code-container {
+            position: relative;
+            margin-bottom: 2.5rem;
+            display: inline-block;
+          }
+
+          .code-box {
+            background-color: white;
+            border: 2px solid #fce7f3;
+            border-radius: 1rem;
+            padding: 2rem;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
           }
+
+          .verification-code {
+            font-size: 3rem;
+            font-family: monospace;
+            font-weight: bold;
+            color: #1f2937;
+            letter-spacing: 0.2em;
+            margin-bottom: 0.5rem;
+          }
+
+          .code-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 500;
+          }
+
+          .decorative-dot-1 {
+            position: absolute;
+            top: -0.75rem;
+            left: -0.75rem;
+            width: 1.5rem;
+            height: 1.5rem;
+            background-color: #fbcfe8;
+            border-radius: 50%;
+            opacity: 0.4;
+          }
+
+          .decorative-dot-2 {
+            position: absolute;
+            bottom: -0.75rem;
+            right: -0.75rem;
+            width: 1rem;
+            height: 1rem;
+            background-color: #fecaca;
+            border-radius: 50%;
+            opacity: 0.5;
+          }
+
+          .warning-box {
+            background-color: #fffbeb;
+            border: 1px solid #fcd34d;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+
+          .warning-icon {
+            width: 1.25rem;
+            height: 1.25rem;
+            color: #d97706;
+            margin-right: 0.75rem;
+            fill: currentColor;
+          }
+
+          .warning-text {
+            color: #92400e;
+            font-weight: 500;
+          }
+
+          .info-box {
+            background-color: #eff6ff;
+            border: 1px solid #93c5fd;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+          }
+
+          .info-icon {
+            width: 1.25rem;
+            height: 1.25rem;
+            color: #2563eb;
+            margin-right: 0.75rem;
+            margin-top: 0.125rem;
+            flex-shrink: 0;
+            fill: currentColor;
+          }
+
+          .info-text {
+            color: #1e40af;
+            font-size: 0.875rem;
+            line-height: 1.75;
+            font-weight: 300;
+          }
+
+          .slogan-section {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e5e7eb;
+          }
+
+          .slogan {
+            color: #db2777;
+            font-size: 1.125rem;
+            font-weight: 300;
+            font-style: italic;
+          }
+
+          .footer {
+            background-color: #f9fafb;
+            padding: 2rem 3rem;
+            border-top: 1px solid #e5e7eb;
+            text-align: center;
+          }
+
+          .footer-question {
+            color: #4b5563;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+            font-weight: 300;
+          }
+
+          .support-button {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            background-color: #db2777;
+            color: white;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-radius: 1.5rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+          }
+
+          .support-button:hover {
+            background-color: #be185d;
+            transform: scale(1.05);
+          }
+
+          .support-icon {
+            width: 1rem;
+            height: 1rem;
+            margin-right: 0.5rem;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+          }
+
+          .copyright {
+            color: #9ca3af;
+            font-size: 0.75rem;
+            margin-top: 1.5rem;
+            font-weight: 300;
+          }
+
+          /* Responsive styles */
           @media (max-width: 640px) {
-            .responsive-padding { padding: 1.5rem !important; }
-            .responsive-text { font-size: 0.875rem !important; }
-            .responsive-code { font-size: 2rem !important; }
+            .content {
+              padding: 1.5rem !important;
+            }
+
+            .content-description {
+              font-size: 0.875rem !important;
+            }
+
+            .verification-code {
+              font-size: 2rem !important;
+            }
+
+            .header {
+              padding: 2rem;
+            }
+
+            .footer {
+              padding: 1.5rem 2rem;
+            }
           }
         </style>
       </head>
-      <body class="bg-gray-50 font-sans">
-        <div class="min-h-screen flex items-center justify-center p-4">
-          <div class="bg-white rounded-3xl elegant-shadow max-w-2xl w-full overflow-hidden">
-            <!-- Header con logo y estilo minimalista -->
-            <div class="bg-gradient-to-br from-pink-50 to-rose-50 p-12 text-center border-b border-pink-100">
-              <div class="inline-flex items-center justify-center w-20 h-20 bg-white rounded-full mb-6 elegant-shadow">
-                <svg class="w-10 h-10 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+
+      <body>
+        <div class="main-container">
+          <!-- Header con logo y estilo minimalista -->
+          <div class="header">
+            <div class="logo-container">
+              <svg class="logo-icon" viewBox="0 0 24 24">
+                <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+                </path>
+              </svg>
+            </div>
+            <h1 class="company-name">Pérgola</h1>
+            <p class="company-subtitle">J O Y E R Í A</p>
+            <p class="header-description">Recuperación de contraseña</p>
+          </div>
+          
+          <!-- Contenido principal -->
+          <div class="content">
+            <div>
+              <h2 class="content-title">Restablece tu acceso</h2>
+              <p class="content-description">
+                Hola, recibimos una solicitud para restablecer tu contraseña.<br>
+                Usa el código de verificación a continuación:
+              </p>
+              
+              <!-- Código de verificación elegante -->
+              <div class="code-container">
+                <div class="code-box">
+                  <div class="verification-code">
+                    ${code}
+                  </div>
+                  <div class="code-label">CÓDIGO DE VERIFICACIÓN</div>
+                </div>
+                <!-- Elementos decorativos sutiles -->
+                <div class="decorative-dot-1"></div>
+                <div class="decorative-dot-2"></div>
+              </div>
+              
+              <!-- Información de tiempo -->
+              <div class="warning-box">
+                <svg class="warning-icon" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                    clip-rule="evenodd"></path>
                 </svg>
-              </div>
-              <h1 class="text-4xl font-light text-gray-800 mb-3 tracking-wide">Pérgola</h1>
-              <p class="text-sm font-medium text-pink-600 uppercase tracking-widest mb-4">J O Y E R Í A</p>
-              <p class="text-gray-600 text-lg font-light">Recuperación de contraseña</p>
-            </div>
-            <!-- Contenido principal -->
-            <div class="p-12 responsive-padding">
-              <div class="text-center">
-                <h2 class="text-2xl font-light text-gray-800 mb-2">Restablece tu acceso</h2>
-                <p class="text-gray-600 text-lg leading-relaxed mb-10 responsive-text font-light">
-                  Hola, recibimos una solicitud para restablecer tu contraseña.<br>
-                  Usa el código de verificación a continuación:
+                <p class="warning-text">
+                  Código válido por <span style="font-weight: bold;">20 minutos</span>
                 </p>
-                <!-- Código de verificación elegante -->
-                <div class="relative mb-10">
-                  <div class="inline-block bg-white border-2 border-pink-100 rounded-2xl p-8 code-shadow">
-                    <div class="text-5xl font-mono font-bold text-gray-800 tracking-widest responsive-code mb-2">
-                      ${code}
-                    </div>
-                    <div class="text-sm text-gray-500 uppercase tracking-wide font-medium">Código de verificación</div>
-                  </div>
-                  <!-- Elementos decorativos sutiles -->
-                  <div class="absolute -top-3 -left-3 w-6 h-6 bg-pink-200 rounded-full opacity-40"></div>
-                  <div class="absolute -bottom-3 -right-3 w-4 h-4 bg-rose-200 rounded-full opacity-50"></div>
-                </div>
-                <!-- Información de tiempo -->
-                <div class="bg-amber-50 border border-amber-200 rounded-xl p-6 mb-8">
-                  <div class="flex items-center justify-center">
-                    <svg class="w-5 h-5 text-amber-600 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
-                    </svg>
-                    <p class="text-amber-800 font-medium">
-                      Código válido por <span class="font-bold">20 minutos</span>
-                    </p>
-                  </div>
-                </div>
-                <!-- Nota de seguridad -->
-                <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-8">
-                  <div class="flex items-start justify-center">
-                    <svg class="w-5 h-5 text-blue-600 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-                    </svg>
-                    <p class="text-blue-800 text-sm leading-relaxed font-light">
-                      Si no solicitaste este correo, puedes ignorarlo de forma segura.<br>
-                      Tu cuenta permanecerá protegida.
-                    </p>
-                  </div>
-                </div>
-                <!-- Eslogan -->
-                <div class="mt-8 pt-6 border-t border-gray-100">
-                  <p class="text-pink-600 text-lg font-light italic">
-                    "Tu belleza merece cada pieza ✨"
-                  </p>
-                </div>
+              </div>
+              
+              <!-- Nota de seguridad -->
+              <div class="info-box">
+                <svg class="info-icon" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd"
+                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                    clip-rule="evenodd"></path>
+                </svg>
+                <p class="info-text">
+                  Si no solicitaste este correo, puedes ignorarlo de forma segura.<br>
+                  Tu cuenta permanecerá protegida.
+                </p>
+              </div>
+              
+              <!-- Eslogan -->
+              <div class="slogan-section">
+                <p class="slogan">
+                  "Tu belleza merece cada pieza ✨"
+                </p>
               </div>
             </div>
-            <!-- Footer -->
-            <div class="bg-gray-50 px-12 py-8 border-t border-gray-100">
-              <div class="text-center">
-                <p class="text-gray-600 text-sm mb-4 font-light">
-                  ¿Necesitas ayuda adicional?
-                </p>
-                <a href="mailto:soporte@pergola.com" 
-                   class="inline-flex items-center px-6 py-3 bg-pink-600 text-white text-sm font-medium rounded-full hover:bg-pink-700 transition-all duration-300 transform hover:scale-105">
-                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                  </svg>
-                  Contactar Soporte
-                </a>
-                <p class="text-gray-400 text-xs mt-6 font-light">
-                  © 2025 Pérgola Joyería. Todos los derechos reservados.
-                </p>
-              </div>
+          </div>
+          
+          <!-- Footer -->
+          <div class="footer">
+            <div>
+              <p class="footer-question">
+                ¿Necesitas ayuda adicional?
+              </p>
+              <a href="mailto:soporte@pergola.com" class="support-button">
+                <svg class="support-icon" viewBox="0 0 24 24">
+                  <path d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                  </path>
+                </svg>
+                Contactar Soporte
+              </a>
+              <p class="copyright">
+                © 2025 Pérgola Joyería. Todos los derechos reservados.
+              </p>
             </div>
           </div>
         </div>

@@ -8,6 +8,8 @@ import crypto from 'crypto'
 import { config } from "../utils/config.js"
 // Función helper para validar
 import { validateCustomer } from "../validators/validator.js"
+// Función para enviar correo con Brevo
+import { sendVerificationEmail } from "../utils/emailService.js"
 // POST (CREATE)
 signupCustomerController.registerCustomer = async (req, res) => {
   const { name, lastName, username, email, phoneNumber, birthDate, DUI, password, address, isVerified } = req.body
@@ -31,29 +33,29 @@ signupCustomerController.registerCustomer = async (req, res) => {
     // TOKEN
     const token = jsonwebtoken.sign({email, verCode}, config.JWT.secret, { expiresIn: "2h"})
     res.cookie("verificationToken", token, {maxAge: 2 * 60 * 60 * 1000})
-    // Enviar el correo electrónico con el código aleatorio
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: config.APPUSER.USER,
-        pass: config.APPUSER.PASS
-      }
-    })
-    const mailOptions = {
-      from: config.APPUSER.USER,
-      to: email,
-      subject: 'Verificación de cuenta',
-      text: `Por favor, ingrese el siguiente código para verificar su cuenta: ${verCode}`
-    } 
-    // Enviar el correo electrónico
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        return res.status(500).json({message: "Error al enviar el correo electrónico", error: error.message})
-      }
-      console.log("Correo electrónico enviado", info.response)
-      res.json({message: "Código de verificación enviado"}); 
-    })
-    res.json({message: "Cliente registrado, por favor verifica tu correo"})
+    // NUEVA IMPLEMENTACIÓN: Enviar email con Brevo API (sin SMTP)
+    try {
+      await sendVerificationEmail(newCustomer.email, verCode, 'customer')
+      
+      console.log("Email de verificación enviado exitosamente con Brevo API")
+      return res.status(201).json({ 
+        message: "Cliente registrado. Por favor verifica tu correo electrónico",
+        customer: {
+          id: newCustomer._id,
+          name: newCustomer.name,
+          lastName: newCustomer.lastName,
+          email: newCustomer.email,
+          phoneNumber: newCustomer.phoneNumber,
+          birthDate: newCustomer.birthDate,
+          DUI: newCustomer.DUI,
+          address: newCustomer.address,
+          isVerified: newCustomer.isVerified
+        }
+      })
+    } catch (emailError) {
+      console.error("Error al enviar el email con Brevo API:", emailError)
+      return res.status(500).json({message: "Usuario creado pero error al enviar email de verificación"})
+    }
   } catch (error) {
     console.log("error", error)
     res.status(500).json({message: "Error al registrar el cliente", error: error.message})

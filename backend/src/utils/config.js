@@ -19,7 +19,10 @@ export const config = {
   },
   APPUSER: {
     USER: process.env.APPUSER,
-    PASS: process.env.APPPASS
+    /* PASS: process.env.APPPASS */
+  },
+  BREVO: {
+    API_KEY: process.env.BREVO_API_KEY,
   },
   CLOUDINARY: {
     CLOUD_NAME: process.env.CLOUD_NAME,

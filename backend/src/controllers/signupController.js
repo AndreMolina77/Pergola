@@ -8,6 +8,8 @@ import jsonwebtoken from "jsonwebtoken"
 import { config } from "../utils/config.js"
 // Función helper para validar
 import { validateEmployee } from "../validators/validator.js"
+// Función para enviar correo con Brevo
+import { sendVerificationEmail } from "../utils/emailService.js"
 // POST (CREATE)
 signupController.registerEmployee = async (req, res) => {
   const { name, lastName, username, email, phoneNumber, birthDate, DUI, password, hireDate } = req.body
@@ -34,28 +36,11 @@ signupController.registerEmployee = async (req, res) => {
     // TOKEN de verificación
     const token = jsonwebtoken.sign({ email: newUser.email, verCode }, config.JWT.secret, { expiresIn: "2h" })
     res.cookie("verificationToken", token, {maxAge: 2 * 60 * 60 * 1000}) // 2 horas
-    // Configurar el transporte de email
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: config.APPUSER.USER,
-        pass: config.APPUSER.PASS
-      }
-    })
-    // Configurar el email
-    const mailOptions = {
-      from: config.APPUSER.USER,
-      to: newUser.email,
-      subject: 'Verificación de cuenta de empleado',
-      text: `Por favor, ingrese el siguiente código para verificar su cuenta: ${verCode}`
-    }
-    // Enviar el email
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error("Error al enviar el email:", error)
-        return res.status(500).json({message: "Error al enviar el email de verificación"})
-      }
-      console.log("Email de verificación enviado:", info.response)
+    // NUEVA IMPLEMENTACIÓN: Enviar email con Brevo API (sin SMTP)
+    try {
+      await sendVerificationEmail(newUser.email, verCode, 'employee')
+      
+      console.log("Email de verificación enviado exitosamente con Brevo API")
       return res.status(201).json({ 
         message: "Empleado registrado. Por favor verifica tu correo electrónico",
         employee: {
@@ -70,7 +55,10 @@ signupController.registerEmployee = async (req, res) => {
           isVerified: newUser.isVerified
         }
       })
-    })
+    } catch (emailError) {
+      console.error("Error al enviar el email con Brevo API:", emailError)
+      return res.status(500).json({message: "Usuario creado pero error al enviar email de verificación"})
+    }
   } catch (error) {
     console.log("error", error)
     res.status(500).json({ message: "Error interno del servidor", error: error.message })

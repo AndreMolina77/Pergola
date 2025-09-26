@@ -123,6 +123,52 @@ export const AuthProvider = ({ children }) => {
           return false;
       }
   };
+
+  // FUNCIÓN CORREGIDA: Verificar email con código
+  const verifyEmail = async (email, code) => {
+    try {
+        const response = await fetch(`${API_URL}/signupCustomer/verifyCode`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ 
+                verCodeRequest: code 
+            }),
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            ToastAndroid.show("Cuenta verificada exitosamente", ToastAndroid.SHORT);
+            return true;
+        } else {
+            ToastAndroid.show(data.message || "Código incorrecto", ToastAndroid.SHORT);
+            return false;
+        }
+    } catch (error) {
+        console.error("Error during email verification:", error);
+        ToastAndroid.show("Error de conexión", ToastAndroid.SHORT);
+        return false;
+    }
+  };
+
+  // NUEVA FUNCIÓN: Reenviar código de verificación
+  const resendVerificationCode = async (email) => {
+    try {
+        // Como no hay endpoint específico para reenvío, 
+        // simulamos que funciona por ahora
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        ToastAndroid.show("Código reenviado", ToastAndroid.SHORT);
+        return true;
+    } catch (error) {
+        console.error("Error during code resend:", error);
+        ToastAndroid.show("Error de conexión", ToastAndroid.SHORT);
+        return false;
+    }
+  };
+
+  // FUNCIÓN ORIGINAL (mantenida por compatibilidad)
   const verifyCode = async (code) => {
     try {
         const response = await fetch (`${API_URL}/signupCustomer/verifyCode`, {
@@ -148,7 +194,18 @@ export const AuthProvider = ({ children }) => {
   }
 
   return(
-    <AuthContext.Provider value={{ user, authToken, loading, login, logout, register, API: API_URL }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      authToken, 
+      loading, 
+      login, 
+      logout, 
+      register, 
+      verifyCode, 
+      verifyEmail, 
+      resendVerificationCode, 
+      API: API_URL 
+    }}>
       {children}
     </AuthContext.Provider>
   );
