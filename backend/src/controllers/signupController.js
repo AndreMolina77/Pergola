@@ -34,7 +34,7 @@ signupController.registerEmployee = async (req, res) => {
     const verCode = crypto.randomBytes(3).toString('hex')
     // TOKEN de verificación
     const token = jsonwebtoken.sign({ email: newUser.email, verCode }, config.JWT.secret, { expiresIn: "2h" })
-    res.cookie("verificationToken", token, {maxAge: 2 * 60 * 60 * 1000, httpOnly: true, sameSite: "lax"}) // 2 horas
+    res.cookie("verificationToken", token, {maxAge: 2 * 60 * 60 * 1000, httpOnly: false, secure: true, sameSite: "none"}) // 2 horas
     // NUEVA IMPLEMENTACIÓN: Enviar email con Brevo API (sin SMTP)
     try {
       await sendVerificationEmail(newUser.email, verCode, 'employee')
