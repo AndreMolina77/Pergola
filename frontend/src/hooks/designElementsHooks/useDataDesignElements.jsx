@@ -89,7 +89,7 @@ const useDataDesignElements = () => {
         // Realiza la petición PUT
         const response = await fetch(`${API}/designelements/${id}`, {
           method: "PUT",
-          headers, // No forzado
+          headers: headers, // No forzado
           credentials: "include",
           body
         })
