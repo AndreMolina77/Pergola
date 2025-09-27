@@ -114,7 +114,7 @@ collectionsController.putCollections = async (req, res) => {
       return res.status(400).json({ message: error }); // si hay error, corto aquí
     } */
     // Actualizar categoría
-    const updatedCollection = await Collections.findByIdAndUpdate( req.params.id, { updates }, { new: true });
+    const updatedCollection = await Collections.findByIdAndUpdate( req.params.id, updates, { new: true });
     // Validar que la categoría si exista
     if (!updatedCollection) {
       // ESTADO DE NO ENCONTRADO

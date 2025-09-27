@@ -104,7 +104,7 @@ reviewsController.putReviews = async (req, res) => {
     if (validationError) {
       return res.status(400).json({ message: validationError}) // si hay error, corto aquí
     } */
-    const updatedReview = await Reviews.findByIdAndUpdate(req.params.id, { updates }, { new: true });
+    const updatedReview = await Reviews.findByIdAndUpdate(req.params.id, updates, { new: true });
     // Validar que la reseña si exista
     if (!updatedReview) {
       // ESTADO DE NO ENCONTRADO

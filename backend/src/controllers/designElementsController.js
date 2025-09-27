@@ -108,7 +108,7 @@ designElementsController.putElements = async (req, res) => {
       return res.status(400).json({ message: validationError });
     } */
     // Actualizar elemento
-    const updated = await DesignElements.findByIdAndUpdate(req.params.id, { updates }, { new: true } );
+    const updated = await DesignElements.findByIdAndUpdate(req.params.id, updates, { new: true } );
     // Validar que el elemento si exista
     if (!updated) {
       // ESTADO DE NO ENCONTRADO

@@ -114,7 +114,7 @@ subcategoriesController.putSubcategories = async (req, res) => {
       return res.status(400).json({ message: validationError }); // si hay error, corto aquí
     } */
     // Actualizar subcategoría
-    const updatedSubcategory = await Subcategories.findByIdAndUpdate( req.params.id, { updates }, { new: true });
+    const updatedSubcategory = await Subcategories.findByIdAndUpdate( req.params.id, updates, { new: true });
     // Validar que la subcategoría si exista
     if (!updatedSubcategory) {
       // ESTADO DE NO ENCONTRADO

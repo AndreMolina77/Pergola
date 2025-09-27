@@ -114,7 +114,7 @@ categoriesController.putCategories = async (req, res) => {
       return res.status(400).json({ message: error }); // si hay error, corto aquí
     } */
     // Actualizar categoría
-    const updatedCategory = await Categories.findByIdAndUpdate( req.params.id, { updates }, { new: true });
+    const updatedCategory = await Categories.findByIdAndUpdate( req.params.id, updates, { new: true });
     // Validar que la categoría si exista
     if (!updatedCategory) {
       // ESTADO DE NO ENCONTRADO

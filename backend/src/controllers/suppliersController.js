@@ -59,7 +59,7 @@ suppliersController.putSuppliers = async (req, res) => {
       return res.status(400).json({ message: validationError }); // si hay error, corto aquí
     } */
     // Actualizar proveedor
-    const updatedSupplier = await Suppliers.findByIdAndUpdate( req.params.id, { updates }, { new: true });
+    const updatedSupplier = await Suppliers.findByIdAndUpdate( req.params.id, updates, { new: true });
     // Validar que la subcategoría si exista
     if (!updatedSupplier) {
       return res.status(404).json({ message: "Proveedor no encontrado" });
