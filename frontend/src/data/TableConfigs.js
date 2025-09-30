@@ -363,10 +363,10 @@ export const customDesignsConfig = {
       ]
     },
     // Referencias a DesignElements
-    { name: 'base', type: 'select', label: 'Base', required: true, options: 'designelements', filterType: 'base' },
-    { name: 'baseLength', type: 'text', label: 'Longitud de Base', required: true, placeholder: 'Ej: 18cm o 180mm', helperText: 'Formato: 1-3 dígitos seguidos de cm o mm (ej: 18cm, 180mm)', pattern: '^\\d{1,3}(cm|mm)$', patternMessage: 'La longitud no es válida. Use formato: 123cm o 123mm' },
-    { name: 'decoration', type: 'select-multiple', label: 'Decoración', required: true, options: 'designelements', filterType: 'decoration' },
-    { name: 'clasp', type: 'select', label: 'Cierre', required: true, options: 'designelements', filterType: 'clasp' },
+    { name: 'base', type: 'select', label: 'Base', required: true, options: 'designelements' },
+    { name: 'baseLength', type: 'text', label: 'Longitud de Base', required: true, placeholder: 'Ej: 18cm o 180mm', helperText: 'Formato: 1-3 dígitos seguidos de cm o mm (ej: 18cm, 180mm)', pattern: '^\\d{1,3}(cm|mm)?$', patternMessage: 'La longitud debe tener formato: 123cm o 123mm' },
+    { name: 'decoration', type: 'select-multiple', label: 'Decoración', required: true, options: 'designelements' },
+    { name: 'clasp', type: 'select', label: 'Cierre', required: true, options: 'designelements' },
     { name: 'customerComments', type: 'textarea', label: 'Comentarios del Cliente', required: true, placeholder: 'Comentarios adicionales del cliente...', rows: 3, maxLength: 300 }
   ]
 }

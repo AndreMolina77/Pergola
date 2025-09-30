@@ -126,6 +126,7 @@ const useDataDesignElements = () => {
   }
   // Retorna estados y funciones para usar en componentes
   return {
+    designElements: designelements, // Alias para consistencia
     designelements,
     loading,
     deleteDesignElement,
