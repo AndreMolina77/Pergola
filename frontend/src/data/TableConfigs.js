@@ -354,7 +354,7 @@ export const customDesignsConfig = {
     canView: true
   },
   formFields: [
-    { name: 'codeRequest', type: 'text', label: 'Código de Solicitud', required: true, placeholder: 'Ej: D-001' },
+    { name: 'codeRequest', type: 'text', label: 'Código de Solicitud', required: true, placeholder: 'Ej: D-001', minLength: 5 },
     { name: 'piece', type: 'select', label: 'Pieza', required: true, 
       options: [
         { value: 'Pulsera', label: 'Pulsera' },
@@ -362,11 +362,12 @@ export const customDesignsConfig = {
         { value: 'Tobillera', label: 'Tobillera' }
       ]
     },
-    { name: 'base', type: 'text', label: 'Base', required: true, placeholder: 'Ej: Cadena de eslabones' },
-    { name: 'baseLength', type: 'text', label: 'Longitud de Base', required: true, placeholder: 'Ej: 18cm' },
-    { name: 'decoration', type: 'textarea', label: 'Decoración', required: true, placeholder: 'Describe los elementos decorativos...', rows: 3 },
-    { name: 'clasp', type: 'text', label: 'Cierre', required: true, placeholder: 'Ej: Cierre mosquetón' },
-    { name: 'customerComments', type: 'textarea', label: 'Comentarios del Cliente', required: false, placeholder: 'Comentarios adicionales del cliente...', rows: 3, maxlength: 300 }
+    // Referencias a DesignElements
+    { name: 'base', type: 'select', label: 'Base', required: true, options: 'designelements', filterType: 'base' },
+    { name: 'baseLength', type: 'text', label: 'Longitud de Base', required: true, placeholder: 'Ej: 18cm o 180mm', helperText: 'Formato: 1-3 dígitos seguidos de cm o mm (ej: 18cm, 180mm)', pattern: '^\\d{1,3}(cm|mm)$', patternMessage: 'La longitud no es válida. Use formato: 123cm o 123mm' },
+    { name: 'decoration', type: 'select-multiple', label: 'Decoración', required: true, options: 'designelements', filterType: 'decoration' },
+    { name: 'clasp', type: 'select', label: 'Cierre', required: true, options: 'designelements', filterType: 'clasp' },
+    { name: 'customerComments', type: 'textarea', label: 'Comentarios del Cliente', required: true, placeholder: 'Comentarios adicionales del cliente...', rows: 3, maxLength: 300 }
   ]
 }
 // Configuración corregida para Elementos de Diseño
