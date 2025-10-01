@@ -30,7 +30,7 @@ loginController.login = async (req, res) => {
           })
       }
       */
-      console.log("LOGIN ADMIN EXITOSO (WEB)")
+      console.log("LOGIN ADMIN EXITOSO")
       try {
         // AGREGAR: Crear/obtener admin de BD
         const adminDataResponse = await fetch(`${API}/admin/profile/data`, {
