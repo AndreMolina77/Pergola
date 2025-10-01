@@ -154,8 +154,8 @@ loginController.login = async (req, res) => {
       }
       res.cookie("authToken", token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        secure: true, // Siempre true para HTTPS
+        sameSite: 'none', // Siempre none para cross-origin
         maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000,
         path: '/'
       })

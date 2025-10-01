@@ -9,13 +9,13 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true)
 
   // Función para iniciar sesión
-  const Login = async (email, password, rememberMe = false) => {
+  const Login = async (email, password, rememberMe= false, platform= "web") => {
     try {      
       // Llama al endpoint de login
       const response = await fetch(`${API}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, rememberMe }),
+        body: JSON.stringify({ email, password, rememberMe, platform }),
         credentials: "include"
       })
       const data = await response.json()

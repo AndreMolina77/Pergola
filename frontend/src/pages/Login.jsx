@@ -45,7 +45,7 @@ const Login = () => {
     setIsLoading(true)
     try {
       console.log("🔄 Iniciando proceso de login desde componente...")
-      const result = await authLogin(email, password, rememberMe)
+      const result = await authLogin(email, password, rememberMe, "web")
       console.log("📋 Resultado del login:", result)
     
       if (result.success) {

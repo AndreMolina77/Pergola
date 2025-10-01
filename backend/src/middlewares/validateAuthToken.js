@@ -4,15 +4,17 @@ import { config } from "../utils/config.js"
 export const validateAuthToken = (allowedUserTypes = []) => {
   return (req, res, next) => {
     try {
-      console.log("=== VALIDATE AUTH TOKEN ROUTE ===");
+      console.log("=== VALIDATE AUTH TOKEN DEBUG ===");
       console.log("All cookies:", req.cookies);
+      console.log("Raw cookie header:", req.headers.cookie);
       console.log("Headers:", req.headers);
       console.log("Origin:", req.headers.origin);
+      console.log("User-Agent:", req.headers['user-agent']);
       console.log("VALIDATE AUTH TOKEN MIDDLEWARE")
       console.log("Allowed user types:", allowedUserTypes)
       const { authToken } = req.cookies
       console.log("Auth token present:", !!authToken)
-      console.log("Auth token length:", authToken?.length); 
+      console.log("Auth token value:", authToken?.substring(0, 50) + "...");
       if (!authToken) {
         console.log("❌ No token found in cookies");
         return res.status(401).json({ 
@@ -20,7 +22,8 @@ export const validateAuthToken = (allowedUserTypes = []) => {
           success: false,
           debug: {
             cookiesReceived: Object.keys(req.cookies),
-            allCookies: req.cookies
+            allCookies: req.cookies,
+            rawCookieHeader: req.headers.cookie
           }
         });
       }
