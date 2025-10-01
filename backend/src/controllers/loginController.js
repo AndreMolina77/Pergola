@@ -16,17 +16,20 @@ loginController.login = async (req, res) => {
     console.log("=== INICIO LOGIN ===")
     console.log("Email recibido:", email)
     console.log("Password recibido:", password ? "[PRESENTE]" : "[AUSENTE]")
+    console.log("Body completo:", req.body)
     console.log("Platform:", platform) // Log para debugging
     // Tipos de usuario: admin, colaborador, clientes
     if (email === config.CREDENTIALS.email && password === config.CREDENTIALS.password) {
       console.log("LOGIN ADMIN DETECTADO")  
-      // RESTRICCIÓN: Admin solo puede acceder desde web
+      // COMENTAR TEMPORALMENTE ESTA VALIDACIÓN
+      /*
       if (platform === "mobile") {
           console.log("Intento de login admin desde móvil - BLOQUEADO")
           return res.status(403).json({
             message: "Los administradores deben usar la versión web"
           })
       }
+      */
       console.log("LOGIN ADMIN EXITOSO (WEB)")
       try {
         // AGREGAR: Crear/obtener admin de BD

@@ -1,187 +1,199 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TextInput,
-  TouchableOpacity,
-  Image,
-  StyleSheet,
-  SafeAreaView,
-  StatusBar,
-} from 'react-native';
-import SearchModal from './SearchModal.js'; // Importa el componente de búsqueda
+import { useState, useContext, useRef } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView, StatusBar, useWindowDimensions, Alert, Animated, TouchableWithoutFeedback } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Icon from 'react-native-vector-icons/Ionicons'; 
+import { useFonts } from 'expo-font';
+import AppLoading from 'expo-app-loading';
+import { useNavigation } from '@react-navigation/native';
 
-const JewelryScreen = () => {
+import SearchModal from '../components/SearchModal.js';
+import ColeccionesPergola from '../components/ColeccionesPergola.js';
+import CatalogoExclusivo from '../components/CatalogoExclusivo.js';
+import { AuthContext } from '../context/AuthContext';
+
+const HomeScreen = () => {
+  // Load fonts from the local assets directory
+  const [fontsLoaded] = useFonts({
+    'CormorantGaramond-Bold': require('../../assets/fonts/CormorantGaramond-Bold.ttf'),
+    'Nunito-Black': require('../../assets/fonts/Nunito-Black.ttf'),
+    'Quicksand': require('../../assets/fonts/Quicksand-Regular.ttf'),
+    'Quicksand-Bold': require('../../assets/fonts/Quicksand-Bold.ttf'),
+    'Quicksand-BoldItalic': require('../../assets/fonts/Quicksand-BoldItalic.ttf'),
+  });
   const [searchModalVisible, setSearchModalVisible] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [animation] = useState(new Animated.Value(0));
 
-  const creacionesPropias = [
-    {
-      id: 1,
-      title: 'Crear bohemio',
-      image: 'https://via.placeholder.com/80x80/E8E8E8/999999?text=💍',
-    },
-    {
-      id: 2,
-      title: 'Ejercicios ligeros',
-      image: 'https://via.placeholder.com/80x80/E8E8E8/999999?text=💎',
-    },
-    {
-      id: 3,
-      title: 'Plantas recicl.',
-      image: 'https://via.placeholder.com/80x80/E8E8E8/999999?text=🌿',
-    },
-  ];
+  const navigation = useNavigation();
+  const { user, authToken } = useContext(AuthContext);
+  const greeting = user?.name ? `Hi, ${user.name.split(' ')[0]}` : 'Hola, \nusuario';
 
-  const seleccionExclusiva = [
-    {
-      id: 1,
-      title: 'Pulseras',
-      image: 'https://via.placeholder.com/100x100/4A90E2/FFFFFF?text=🔵',
-      price: '$45.00',
-    },
-    {
-      id: 2,
-      title: 'Anillos',
-      image: 'https://via.placeholder.com/100x100/F5F5F5/999999?text=💖',
-      price: '$65.00',
-    },
-    {
-      id: 3,
-      title: 'Collares',
-      image: 'https://via.placeholder.com/100x100/E8E8E8/999999?text=📿',
-      price: '$85.00',
-    },
-  ];
+  const insets = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
 
-  const disenosUnicos = [
-    'https://via.placeholder.com/100x100/FFB6C1/FFFFFF?text=💕',
-    'https://via.placeholder.com/100x100/98FB98/FFFFFF?text=🌸',
-    'https://via.placeholder.com/100x100/F0E68C/FFFFFF?text=✨',
-    'https://via.placeholder.com/100x100/DDA0DD/FFFFFF?text=🦋',
-    'https://via.placeholder.com/100x100/87CEEB/FFFFFF?text=🌊',
-    'https://via.placeholder.com/100x100/F4A460/FFFFFF?text=🍯',
-  ];
+  const toggleDropdown = () => {
+    if (menuOpen) {
+      Animated.timing(animation, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: false,
+      }).start(() => setMenuOpen(false));
+    } else {
+      setMenuOpen(true);
+      Animated.timing(animation, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: false,
+      }).start();
+    }
+  };
+
+  const dropdownHeight = animation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 45], // Altura para 1 item
+  });
+
+  const opacity = animation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 1],
+  });
+
+  // Mostrar un indicador de carga hasta que las fuentes estén disponibles
+  if (!fontsLoaded) {
+    return <AppLoading />;
+  }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F8F3F0" />
+    <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
+      <StatusBar barStyle="dark-content" backgroundColor="#e3c6b8" />
       
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity>
-          <Text style={styles.menuIcon}>👤</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Explorar productos ⌄</Text>
-        <View style={styles.cartBadge}>
-          <Text style={styles.cartIcon}>🛍️</Text>
+        <Text style={styles.greetingText}>{greeting}</Text>
+        
+        {/* Dropdown Container */}
+        <View style={styles.dropdownContainer}>
+          <TouchableOpacity  
+            onPress={toggleDropdown} 
+            style={[
+              styles.dropdownButton,
+              menuOpen && styles.dropdownButtonOpen
+            ]}
+          >
+            <Text style={styles.dropdownButtonText}>Explorar productos</Text>
+            <Icon 
+              name={menuOpen ? "chevron-up" : "chevron-down"} 
+              size={16} 
+              color="#3d1609" 
+              style={styles.dropdownIcon}
+            />
+          </TouchableOpacity>
+
+          {menuOpen && (
+            <Animated.View 
+              style={[
+                styles.dropdownContent,
+                {
+                  height: dropdownHeight,
+                  opacity: opacity,
+                }
+              ]}
+            >
+              <TouchableOpacity 
+                style={styles.dropdownItem}
+                onPress={() => {
+                  setMenuOpen(false);
+                  if (!authToken) {
+                    navigation.navigate('Login');
+                  } else {
+                    Alert.alert('Encuesta', 'Funcionalidad próximamente.');
+                  }
+                }}
+              >
+                <Text style={styles.itemText}>Realizar Encuesta</Text>
+              </TouchableOpacity>
+            </Animated.View>
+          )}
+        </View>
+
+        <View>
+          <TouchableOpacity onPress={() => { Alert.alert('Notificaciones', 'No hay notificaciones nuevas.'); }}>
+            <Icon name="notifications" size={32} style={styles.notiIcon} />
+          </TouchableOpacity>
           <View style={styles.badge}>
             <Text style={styles.badgeText}>3</Text>
           </View>
         </View>
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.content}
+        contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Search Bar */}
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.searchContainer}
           onPress={() => setSearchModalVisible(true)}
         >
-          <Text style={styles.searchIcon}>🔍</Text>
+          <Icon name="search" size={20} style={styles.searchIcon}/>
           <Text style={styles.searchPlaceholder}>Buscar</Text>
         </TouchableOpacity>
 
-        {/* Creaciones Propias */}
+        {/* Sección A: Creaciones Pérgola */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Creaciones propias</Text>
+            <Text style={styles.sectionTitle}>Creaciones Pérgola</Text>
             <TouchableOpacity>
               <Text style={styles.seeAll}>Ver todo</Text>
             </TouchableOpacity>
           </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
-            {creacionesPropias.map((item) => (
-              <TouchableOpacity key={item.id} style={styles.creacionItem}>
-                <View style={styles.creacionImage}>
-                  <Text style={styles.creacionIcon}>
-                    {item.id === 1 ? '💍' : item.id === 2 ? '💎' : '🌿'}
-                  </Text>
-                </View>
-                <Text style={styles.creacionText}>{item.title}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+          <ColeccionesPergola />
         </View>
 
-        {/* Selección Exclusiva */}
+        {/* Sección B: Selección Exclusiva */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Selección exclusiva</Text>
+            <Text style={styles.sectionTitle}>Selección Exclusiva</Text>
             <TouchableOpacity>
               <Text style={styles.seeAll}>Ver todo</Text>
             </TouchableOpacity>
           </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
-            {seleccionExclusiva.map((item) => (
-              <TouchableOpacity key={item.id} style={styles.exclusivaItem}>
-                <TouchableOpacity style={styles.heartIcon}>
-                  <Text>🤍</Text>
-                </TouchableOpacity>
-                <View style={styles.exclusivaImage}>
-                  <Text style={styles.exclusivaEmoji}>
-                    {item.id === 1 ? '🔵' : item.id === 2 ? '💖' : '📿'}
-                  </Text>
-                </View>
-                <Text style={styles.exclusivaTitle}>{item.title}</Text>
-                <Text style={styles.exclusivaPrice}>{item.price}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+          <CatalogoExclusivo />
         </View>
 
-        {/* Diseños únicos */}
+        {/* Sección C: Espacio Promocional para Diseños Únicos */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Diseños únicos</Text>
-            <TouchableOpacity>
-              <Text style={styles.seeAll}>Empacar</Text>
-            </TouchableOpacity>
+            <Text style={styles.sectionTitle}>Diseños Únicos</Text>
           </View>
-          <View style={styles.gridContainer}>
-            {disenosUnicos.map((item, index) => (
-              <TouchableOpacity key={index} style={styles.gridItem}>
-                <Text style={styles.gridEmoji}>
-                  {index === 0 ? '💕' : index === 1 ? '🌸' : index === 2 ? '✨' : 
-                   index === 3 ? '🦋' : index === 4 ? '🌊' : '🍯'}
-                </Text>
-              </TouchableOpacity>
-            ))}
+          <View style={styles.promocionalContainer}>
+            <Text style={styles.promocionalText}>
+              ¡Crea tu diseño personalizado en 4 sencillos pasos!
+            </Text>
+            <TouchableOpacity
+              style={styles.promocionalButton}
+              onPress={() => {
+                // Navega a la pantalla de diseño personalizado
+                navigation.navigate('CustomDesign')
+              }}
+            >
+              <Text style={styles.promocionalButtonText}>Comenzar diseño único</Text>
+            </TouchableOpacity>
+            <View style={styles.pasosContainer}>
+              <Text style={styles.paso}>Paso 1: Elige la pieza</Text>
+              <Text style={styles.paso}>Paso 2: Elige la base</Text>
+              <Text style={styles.paso}>Paso 3: Elige la decoración</Text>
+              <Text style={styles.paso}>Paso 4: Elige el cierre</Text>
+            </View>
           </View>
         </View>
       </ScrollView>
 
-      {/* Bottom Navigation */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem}>
-          <Text style={styles.navIcon}>🏠</Text>
-          <Text style={styles.navText}>$43.99</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Text style={styles.navIcon}>🛍️</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Text style={styles.navIcon}>💬</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Text style={styles.navIcon}>👤</Text>
-          <Text style={styles.navText}>$35.99</Text>
-        </TouchableOpacity>
-      </View>
-
       {/* Search Modal */}
-      <SearchModal 
-        visible={searchModalVisible} 
-        onClose={() => setSearchModalVisible(false)} 
+      <SearchModal
+        visible={searchModalVisible}
+        onClose={() => setSearchModalVisible(false)}
       />
     </SafeAreaView>
   );
@@ -190,7 +202,7 @@ const JewelryScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F3F0',
+    backgroundColor: '#e3c6b8',
   },
   header: {
     flexDirection: 'row',
@@ -198,22 +210,74 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 15,
-    backgroundColor: '#F8F3F0',
+    backgroundColor: '#e3c6b8',
+    position: 'relative',
+    zIndex: 100,
   },
-  menuIcon: {
-    fontSize: 20,
-    color: '#333',
+  dropdownContainer: {
+    position: 'relative',
   },
-  headerTitle: {
-    fontSize: 16,
+  dropdownButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#e8e1d8',
+    borderRadius: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 16
+  },
+  dropdownButtonOpen: {
+    borderBottomLeftRadius: 0, // CAMBIAR a 0
+    borderBottomRightRadius: 0, // CAMBIAR a 0
+    borderBottomWidth: 0,
+  },
+  dropdownButtonText: {
+    fontSize: 14,
+    fontFamily: "Quicksand-Bold",
     fontWeight: '600',
-    color: '#333',
+    color: '#3d1609',
+    marginRight: 4,
+  },
+  dropdownIcon: {
+    marginLeft: 2,
+  },
+  dropdownContent: {
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    right: 0,
+    backgroundColor: '#e8e1d8',
+    borderBottomLeftRadius: 20, // AÑADIR
+    borderBottomRightRadius: 20, // AÑADIR
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 5,
+    zIndex: 1000,
+  },
+  dropdownItem: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: '#e8e1d8'
+  },
+  itemText: {
+    fontSize: 14,
+    fontFamily: "Quicksand-Medium",
+    color: '#3d1609',
+  },
+  greetingText: {
+    fontSize: 16,
+    fontFamily: 'Nunito-Black',
+    color: '#3d1609',
+    maxWidth: 100, // LIMITAR ancho máximo
+    numberOfLines: 1, // LIMITAR a una línea
   },
   cartBadge: {
     position: 'relative',
-  },
-  cartIcon: {
-    fontSize: 20,
   },
   badge: {
     position: 'absolute',
@@ -228,12 +292,16 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     color: 'white',
+    fontFamily: "Quicksand-Bold",
     fontSize: 10,
     fontWeight: 'bold',
   },
   content: {
     flex: 1,
     paddingHorizontal: 20,
+  },
+  contentContainer: {
+    flexGrow: 1,
   },
   searchContainer: {
     flexDirection: 'row',
@@ -249,8 +317,11 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
   },
   searchIcon: {
-    fontSize: 16,
     marginRight: 10,
+    color: "#3d1609"
+  },
+  notiIcon: {
+    color: "#3d1609"
   },
   searchInput: {
     flex: 1,
@@ -262,9 +333,10 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 45,
     fontSize: 16,
-    color: '#999',
+    color: '#3d1609',
     lineHeight: 45,
     textAlignVertical: 'center',
+    fontFamily: "Quicksand-Bold",
   },
   section: {
     marginBottom: 30,
@@ -276,13 +348,14 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   sectionTitle: {
+    fontFamily: "Quicksand-Bold",
     fontSize: 18,
-    fontWeight: '700',
-    color: '#333',
+    color: '#3d1609',
   },
   seeAll: {
+    fontFamily: "Quicksand",
     fontSize: 14,
-    color: '#666',
+    color: '#3d1609',
     textDecorationLine: 'underline',
   },
   horizontalScroll: {
@@ -355,49 +428,43 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#FF4757',
   },
-  gridContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  gridItem: {
-    width: '31%',
-    aspectRatio: 1,
-    backgroundColor: 'white',
-    borderRadius: 10,
-    justifyContent: 'center',
+  promocionalContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 20,
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 20,
     elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
   },
-  gridEmoji: {
-    fontSize: 30,
+  promocionalText: {
+    fontSize: 16,
+    fontFamily: "Quicksand-Bold",
+    color: '#a73249',
+    marginBottom: 10,
+    textAlign: 'center',
   },
-  bottomNav: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: 'white',
-    paddingVertical: 15,
-    borderTopWidth: 1,
-    borderTopColor: '#E8E8E8',
+  promocionalButton: {
+    backgroundColor: '#a73249',
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 25,
+    marginBottom: 15,
   },
-  navItem: {
-    alignItems: 'center',
+  promocionalButtonText: {
+    color: '#fff',
+    fontSize: 15,
+    fontFamily: "Quicksand-Bold",
   },
-  navIcon: {
-    fontSize: 20,
-    marginBottom: 2,
+  pasosContainer: {
+    alignItems: 'flex-start',
+    width: '100%',
   },
-  navText: {
-    fontSize: 12,
-    color: '#666',
-    fontWeight: '600',
+  paso: {
+    fontSize: 13,
+    color: '#3d1609',
+    marginBottom: 4,
+    fontFamily: "Quicksand-Bold",
   },
 });
 
-export default JewelryScreen;
+export default HomeScreen;

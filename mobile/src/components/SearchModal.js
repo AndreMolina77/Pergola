@@ -1,4 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import AppLoading from 'expo-app-loading';
+import { useFonts } from 'expo-font';
+import { SearchSlash } from 'lucide-react-native';
+import { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,6 +14,7 @@ import {
   Dimensions,
   Animated,
 } from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons'; 
 
 const { width, height } = Dimensions.get('window');
 
@@ -26,6 +31,14 @@ const SearchModal = ({ visible, onClose }) => {
   const slideAnim = useRef(new Animated.Value(height)).current;
   const searchInputRef = useRef(null);
 
+  const [fontsLoaded] = useFonts({
+      'CormorantGaramond-Bold': require('../../assets/fonts/CormorantGaramond-Bold.ttf'),
+      'Nunito-Black': require('../../assets/fonts/Nunito-Black.ttf'),
+      'Nunito-Bold': require('../../assets/fonts/Nunito-Bold.ttf'),
+      'Nunito-Regular': require('../../assets/fonts/Nunito-Regular.ttf'),
+      'Quicksand-Medium': require('../../assets/fonts/Quicksand-Medium.ttf'),
+      'Quicksand-Bold': require('../../assets/fonts/Quicksand-Bold.ttf'),
+    });
   // Datos de productos de ejemplo
   const allProducts = [
     { id: 1, name: 'Anillo de Plata Bohemio', category: 'Anillos', price: '$45.00', emoji: '💍' },
@@ -65,6 +78,11 @@ const SearchModal = ({ visible, onClose }) => {
       }).start();
     }
   }, [visible]);
+
+  // Mostrar un indicador de carga hasta que las fuentes estén disponibles
+  if (!fontsLoaded) {
+    return <AppLoading />;
+  }
 
   const handleSearch = (query) => {
     setSearchQuery(query);
@@ -164,18 +182,15 @@ const SearchModal = ({ visible, onClose }) => {
         >
           {/* Header */}
           <View style={styles.searchHeader}>
-            <TouchableOpacity 
-              style={styles.backButton}
-              onPress={onClose}
-            >
-              <Text style={styles.backIcon}>←</Text>
+            <TouchableOpacity style={styles.backButton} onPress={onClose}>
+               <Ionicons name="chevron-back" size={26} color="#000" />
             </TouchableOpacity>
             <View style={styles.searchInputContainer}>
-              <Text style={styles.searchIcon}>🔍</Text>
+              <Icon name="search" size={20} style={styles.searchIcon}/>
               <TextInput
                 ref={searchInputRef}
                 style={styles.searchInput}
-                placeholder="Buscar joyas..."
+                placeholder="Buscar..."
                 value={searchQuery}
                 onChangeText={handleSearch}
                 onSubmitEditing={handleSubmitSearch}
@@ -213,7 +228,7 @@ const SearchModal = ({ visible, onClose }) => {
               />
             ) : searchQuery.length > 0 ? (
               <View style={styles.noResultsContainer}>
-                <Text style={styles.noResultsEmoji}>🔍</Text>
+                <SearchSlash style={styles.noResultsIcon} size={60}/>
                 <Text style={styles.noResultsText}>No se encontraron resultados</Text>
                 <Text style={styles.noResultsSubtext}>
                   Intenta con otros términos de búsqueda
@@ -279,7 +294,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#E8E8E8',
-    backgroundColor: 'white',
+    backgroundColor: '#E8E1d8',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
   },
@@ -299,13 +314,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
   },
   searchIcon: {
-    fontSize: 16,
     marginRight: 10,
-    color: '#666',
+    color: '#3d1609',
   },
   searchInput: {
     flex: 1,
     height: 45,
+    fontFamily: "Quicksand-Medium",
     fontSize: 16,
     color: '#333',
   },
@@ -326,8 +341,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
+    fontFamily: 'Quicksand-Medium',
     fontSize: 16,
-    color: '#666',
+    color: '#333',
   },
   resultsContainer: {
     padding: 20,
@@ -362,17 +378,18 @@ const styles = StyleSheet.create({
   },
   resultName: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: 'Quicksand-Bold',
     color: '#333',
     marginBottom: 2,
   },
   resultCategory: {
     fontSize: 14,
+    fontFamily: 'Nunito-Regular',
     color: '#666',
   },
   resultPrice: {
     fontSize: 16,
-    fontWeight: '700',
+    fontFamily: 'Quicksand-Bold',
     color: '#FF4757',
   },
   noResultsContainer: {
@@ -381,20 +398,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 40,
   },
-  noResultsEmoji: {
-    fontSize: 60,
+  noResultsIcon: {
     marginBottom: 20,
   },
   noResultsText: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
+    fontFamily: "Quicksand-Bold",
+    color: '#000',
     marginBottom: 8,
     textAlign: 'center',
   },
   noResultsSubtext: {
     fontSize: 14,
     color: '#666',
+    fontFamily: "Nunito-Regular",
     textAlign: 'center',
   },
   section: {
@@ -403,8 +420,8 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '700',
-    color: '#333',
+    fontFamily: 'Nunito-Bold',
+    color: '#000',
     marginBottom: 15,
   },
   categoriesContainer: {
@@ -429,7 +446,7 @@ const styles = StyleSheet.create({
   },
   categoryName: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: 'Quicksand-Medium',
     color: '#333',
   },
   recentHeader: {
@@ -440,8 +457,8 @@ const styles = StyleSheet.create({
   },
   clearRecentText: {
     fontSize: 14,
+    fontFamily: 'Nunito-Regular',
     color: '#FF4757',
-    fontWeight: '600',
   },
   recentItem: {
     flexDirection: 'row',
@@ -463,6 +480,7 @@ const styles = StyleSheet.create({
   },
   recentText: {
     fontSize: 16,
+    fontFamily: 'Quicksand-Medium',
     color: '#333',
   },
 });

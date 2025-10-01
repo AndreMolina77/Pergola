@@ -30,7 +30,7 @@ export default function App() {
 
   return (
     <AuthProvider>
-      <StatusBar style="auto" />
+      <StatusBar />
       <AppNavigator />
     </AuthProvider>
   );

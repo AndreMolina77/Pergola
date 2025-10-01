@@ -66,7 +66,7 @@ recoveryPasswordController.verifyCode = async (req, res) => {
     // TOKEN
     const newToken = jsonwebtoken.sign({email: decoded.email, code: decoded.code, userType: decoded.userType, verified: true}, config.JWT.secret, { expiresIn: "20m"})
     // El token se almacenará en una cookie
-    res.cookie("tokenRecoveryCode", token, { maxAge: 20 * 60 * 1000, httpOnly: true, secure: true, sameSite: "none", path: "/" })
+    res.cookie("tokenRecoveryCode", newToken, { maxAge: 20 * 60 * 1000, httpOnly: true, secure: true, sameSite: "none", path: "/" })
     res.status(200).json({message: "Código de recuperación verificado"})
   } catch (error) {
     console.log("error: ", error)

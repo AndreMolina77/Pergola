@@ -206,19 +206,6 @@ const EmailVerificationScreen = ({ navigation, route }) => {
           </TouchableOpacity>
         </View>
       </ScrollView>
-
-      {/* Footer */}
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>
-          ¿Problemas con la verificación?{" "}
-          <Text 
-            style={styles.footerLink} 
-            onPress={() => Alert.alert("Soporte", "Contacta con nuestro equipo de soporte")}
-          >
-            Obtener ayuda
-          </Text>
-        </Text>
-      </View>
     </KeyboardAvoidingView>
   );
 };
@@ -384,25 +371,5 @@ const styles = StyleSheet.create({
     fontFamily: "Quicksand-Bold",
     fontSize: 18,
     letterSpacing: 0.5,
-  },
-  footer: {
-    paddingVertical: 20,
-    paddingHorizontal: 25,
-    borderTopWidth: 1,
-    borderTopColor: "#D0C4B8",
-    alignItems: "center",
-    backgroundColor: "#E3C6B8",
-  },
-  footerText: {
-    textAlign: "center",
-    color: "#3D1609",
-    fontSize: 15,
-    fontFamily: "Nunito-Regular",
-    lineHeight: 20,
-  },
-  footerLink: {
-    color: "#A73249",
-    fontFamily: "Nunito-Bold",
-    textDecorationLine: "underline",
-  },
+  }
 });
