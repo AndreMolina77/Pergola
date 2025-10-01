@@ -77,7 +77,7 @@ const PergolaOnboarding = () => {
               MERECE CADA
             </h4>
             <p className="text-lg sm:text-xl lg:text-2xl font-[Quicksand] font-semibold flex items-center justify-center" style={{ color: '#A73249' }}>
-              PIEZA <span className="ml-2">✨</span>
+              PIEZA
             </p>
           </div>
         </div>
