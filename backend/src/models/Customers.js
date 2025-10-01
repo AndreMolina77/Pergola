@@ -62,12 +62,10 @@ const customersSchema = new Schema({
   },
   birthDate: {
     type: Date,
+    // Elimina el primer validador ya que es redundante con el segundo
     validate: {
-      validator: v => v <= new Date(),
-      message: "La fecha de nacimiento debe ser anterior a la fecha actual"
-    },
-    validate: {
-      validator: v => v instanceof Date && !isNaN(v),
+      // Permitir que null pase la validación (cuando no es requerido y está vacío)
+      validator: v => v == null || (v instanceof Date && !isNaN(v)), 
       message: "La fecha de nacimiento debe ser válida"
     }
   },
@@ -76,7 +74,10 @@ const customersSchema = new Schema({
     trim: true,
     validate: {
       validator: function(v) {
-        return v.trim() !== '' && /^\d{8}-\d$/.test(v);
+        // PERMITIR null o cadena vacía (el trim() de mongoose se ejecuta antes)
+        if (v == null || v.trim() === '') return true; 
+        // Solo aplica el regex si hay valor
+        return /^\d{8}-\d$/.test(v); 
       },
       message: "El DUI no puede estar vacío y debe tener formato 12345678-9"
     }
@@ -107,11 +108,10 @@ const customersSchema = new Schema({
   address: {
     type: String,
     trim: true,
-    minlength: [5, "La dirección debe tener al menos 5 caracteres"],
     maxlength: [200, "La dirección no puede exceder los 200 caracteres"],
     validate: {
-      validator: v => v.trim() !== '', // Asegurarse de que no sea una cadena vacía
-      message: "La dirección no puede estar vacía"
+      validator: v => v == null || v.trim() === '' || v.trim().length >= 5, // Permitir vacío o 5+ caracteres
+      message: "La dirección debe tener al menos 5 caracteres" // El mensaje de error solo se activa si no está vacío pero es corto
     },
   },
   isVerified: { type: Boolean, default: false },
