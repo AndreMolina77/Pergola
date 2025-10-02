@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useRef, useEffect, useContext } from "react";
 import {
   View,
   Text,
@@ -25,6 +25,8 @@ const EmailVerificationScreen = ({ navigation, route }) => {
   const [timer, setTimer] = useState(60);
   const [canResend, setCanResend] = useState(false);
 
+  const inputsRef = useRef([]);
+
   const [fontsLoaded] = useFonts({
     'Quicksand-Bold': require('../../assets/fonts/Quicksand-Bold.ttf'),
     'Quicksand-Medium': require('../../assets/fonts/Quicksand-Medium.ttf'),
@@ -46,15 +48,21 @@ const EmailVerificationScreen = ({ navigation, route }) => {
   }, [timer]);
 
   const handleCodeChange = (value, index) => {
-    if (value.length <= 1 && /^[0-9]*$/.test(value)) {
+    if (value.length <= 1 && /^[a-zA-Z0-9]*$/.test(value)) {
       const newCode = [...verificationCode];
-      newCode[index] = value;
+      newCode[index] = value.toLowerCase(); // Convertimos a minúscula
       setVerificationCode(newCode);
 
       // Auto focus next input
       if (value && index < 5) {
-        // Focus next input logic would go here
+        inputsRef.current[index + 1].focus();
       }
+    }
+  };
+
+  const handleKeyPress = ({ nativeEvent }, index) => {
+    if (nativeEvent.key === "Backspace" && !verificationCode[index] && index > 0) {
+      inputsRef.current[index - 1].focus();
     }
   };
 
@@ -161,10 +169,13 @@ const EmailVerificationScreen = ({ navigation, route }) => {
             {verificationCode.map((digit, index) => (
               <TextInput
                 key={index}
+                ref={(el) => (inputsRef.current[index] = el)}
                 style={styles.codeInput}
                 value={digit}
                 onChangeText={(value) => handleCodeChange(value, index)}
-                keyboardType="numeric"
+                onKeyPress={(e) => handleKeyPress(e, index)}
+                keyboardType="default"
+                autoCapitalize="none"
                 maxLength={1}
                 textAlign="center"
                 editable={!loading}

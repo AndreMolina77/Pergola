@@ -50,54 +50,48 @@ export const AuthProvider = ({ children }) => {
   }, [API_URL]);
 
   const login = async (email, password) => {
-      try {
-          const response = await fetch(`${API_URL}/login`, {
-              method: "POST",
-              headers: {
-                  "Content-Type": "application/json", 
-              },
-              body: JSON.stringify({ 
-                  email, 
-                  password,
-                  platform: "mobile" // Indicar que es desde móvil
-              }),
-          });
+    try {
+      const response = await fetch(`${API_URL}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", },
+        body: JSON.stringify({ email, password, platform: "mobile" /* Indicar que es desde móvil */ }),
+      });
+    
+      const data = await response.json();
+      console.log("Response data:", data);
+
+      if (response.ok) {
+        // RESTRICCIÓN: Solo permitir clientes en la app móvil
+        if (data.user && data.user.userType !== "customer") {
+            ToastAndroid.show("Esta aplicación es solo para clientes", ToastAndroid.LONG);
+            return false;
+        }
+
+        // Guardar sesión del usuario (solo clientes)
+        const userSession = {
+            id: data.user.id,
+            email: data.user.email,
+            name: data.user.name,
+            lastName: data.user.lastName,
+            userType: data.user.userType,
+            loginTime: Date.now()
+        };
         
-          const data = await response.json();
-          console.log("Response data:", data);
-
-          if (response.ok) {
-              // RESTRICCIÓN: Solo permitir clientes en la app móvil
-              if (data.user && data.user.userType !== "customer") {
-                  ToastAndroid.show("Esta aplicación es solo para clientes", ToastAndroid.LONG);
-                  return false;
-              }
-
-              // Guardar sesión del usuario (solo clientes)
-              const userSession = {
-                  id: data.user.id,
-                  email: data.user.email,
-                  name: data.user.name,
-                  lastName: data.user.lastName,
-                  userType: data.user.userType,
-                  loginTime: Date.now()
-              };
-              
-              await AsyncStorage.setItem("userSession", JSON.stringify(userSession));
-              setUser(userSession);
-              setAuthToken("authenticated");
-              
-              ToastAndroid.show("Inicio de sesión exitoso", ToastAndroid.SHORT);
-              return true;
-          } else {
-              ToastAndroid.show(data.message || "Error al iniciar sesión", ToastAndroid.SHORT);
-              return false;
-          }
-      } catch (error) {
-          console.error("Error during login:", error);
-          ToastAndroid.show("Error de conexión", ToastAndroid.SHORT);
-          return false;
+        await AsyncStorage.setItem("userSession", JSON.stringify(userSession));
+        setUser(userSession);
+        setAuthToken("authenticated");
+        
+        ToastAndroid.show("Inicio de sesión exitoso", ToastAndroid.SHORT);
+        return true;
+      } else {
+        ToastAndroid.show(data.message || "Error al iniciar sesión", ToastAndroid.SHORT);
+        return false;
       }
+    } catch (error) {
+      console.error("Error during login:", error);
+      ToastAndroid.show("Error de conexión", ToastAndroid.SHORT);
+      return false;
+    }
   };
 
   const register = async (userData) => {

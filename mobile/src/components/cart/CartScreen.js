@@ -9,7 +9,7 @@ import {
   Image,
 } from "react-native";
 
-export default function CartScreen({ navigation }) {
+const CartScreen = ({ navigation }) => {
   // Datos de prueba (después conectamos con contexto o API)
   const [cartItems, setCartItems] = useState([
     {
@@ -233,3 +233,4 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 });
+export default CartScreen

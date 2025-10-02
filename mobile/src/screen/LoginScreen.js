@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect } from "react";
 import {
   View,
   Text,
@@ -24,6 +24,9 @@ const LoginScreen = ({ navigation }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [remainingTime, setRemainingTime] = useState(0);
 
   const [fontsLoaded] = useFonts({
     'Quicksand-Bold': require('../../assets/fonts/Quicksand-Bold.ttf'),
@@ -40,7 +43,44 @@ const LoginScreen = ({ navigation }) => {
     }
   }, [authToken]);
 
+  // Timer para el bloqueo
+  useEffect(() => {
+    let interval;
+    if (isBlocked && remainingTime > 0) {
+      interval = setInterval(() => {
+        setRemainingTime(prev => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            setIsBlocked(false);
+            setLoginAttempts(0);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isBlocked, remainingTime]);
+
+  const formatTime = (minutes) => {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    
+    if (hours > 0) {
+      return `${hours}h ${mins}m`;
+    }
+    return `${mins}m`;
+  };
+
   const handleLogin = async () => {
+    if (isBlocked) {
+      Alert.alert(
+        "Cuenta Bloqueada", 
+        `Demasiados intentos fallidos. Por favor espera ${formatTime(remainingTime)} antes de intentar nuevamente.`
+      );
+      return;
+    }
+
     if (!email || !password) {
       Alert.alert("Error", "Por favor completa todos los campos");
       return;
@@ -49,11 +89,32 @@ const LoginScreen = ({ navigation }) => {
     setLoading(true);
     
     try {
-      const success = await login(email, password);
-      if (success) {
+      const result = await login(email, password);
+      
+      if (result.success) {
+        setLoginAttempts(0);
+        setIsBlocked(false);
         navigation.replace("TabNavigator");
       } else {
-        Alert.alert("Error", "Credenciales incorrectas");
+        const newAttempts = loginAttempts + 1;
+        setLoginAttempts(newAttempts);
+        
+        if (result.blocked) {
+          const minutes = result.remainingMinutes || 1440; // 24 horas por defecto
+          setIsBlocked(true);
+          setRemainingTime(minutes);
+          Alert.alert(
+            "Cuenta Bloqueada", 
+            `Demasiados intentos fallidos. Tu cuenta ha sido bloqueada por ${formatTime(minutes)}.`
+          );
+        } else if (newAttempts >= 3) {
+          Alert.alert(
+            "Advertencia", 
+            `Contraseña incorrecta. Te quedan ${3 - newAttempts} intentos antes del bloqueo.`
+          );
+        } else {
+          Alert.alert("Error", result.message || "Credenciales incorrectas");
+        }
       }
     } catch (error) {
       Alert.alert("Error", "No se pudo iniciar sesión");
@@ -92,18 +153,38 @@ const LoginScreen = ({ navigation }) => {
         <View style={styles.loginCard}>
           <Text style={styles.loginTitle}>Iniciar Sesión</Text>
           
+          {/* Indicador de intentos fallidos */}
+          {loginAttempts > 0 && !isBlocked && (
+            <View style={styles.attemptsWarning}>
+              <Ionicons name="warning-outline" size={20} color="#FF6B35" />
+              <Text style={styles.attemptsText}>
+                Intentos fallidos: {loginAttempts}/3
+              </Text>
+            </View>
+          )}
+
+          {/* Indicador de bloqueo */}
+          {isBlocked && (
+            <View style={styles.blockedWarning}>
+              <Ionicons name="lock-closed-outline" size={24} color="#A73249" />
+              <Text style={styles.blockedText}>
+                Cuenta bloqueada. Tiempo restante: {formatTime(remainingTime)}
+              </Text>
+            </View>
+          )}
+          
           {/* Campos del Formulario */}
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Correo electrónico</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, isBlocked && styles.inputDisabled]}
               placeholder="tu@email.com"
               placeholderTextColor="#A73249AA"
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
               autoCapitalize="none"
-              editable={!loading}
+              editable={!loading && !isBlocked}
             />
           </View>
           
@@ -111,23 +192,24 @@ const LoginScreen = ({ navigation }) => {
             <Text style={styles.label}>Contraseña</Text>
             <View style={styles.passwordContainer}>
               <TextInput
-                style={styles.inputPassword}
+                style={[styles.inputPassword, isBlocked && styles.inputDisabled]}
                 placeholder="Ingresa tu contraseña"
                 placeholderTextColor="#A73249AA"
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
-                editable={!loading}
+                editable={!loading && !isBlocked}
               />
               <TouchableOpacity
                 onPress={() => setShowPassword(!showPassword)}
                 style={styles.eyeIconContainer}
                 activeOpacity={0.7}
+                disabled={loading || isBlocked}
               >
                 <Ionicons 
                   name={showPassword ? "eye-off" : "eye"} 
                   size={24} 
-                  color="#3D1609" 
+                  color={isBlocked ? "#A7324980" : "#3D1609"} 
                 />
               </TouchableOpacity>
             </View>
@@ -139,34 +221,45 @@ const LoginScreen = ({ navigation }) => {
               style={styles.rememberContainer}
               onPress={() => setRememberMe(!rememberMe)}
               activeOpacity={0.7}
+              disabled={loading || isBlocked}
             >
               <Checkbox
                 value={rememberMe}
                 onValueChange={setRememberMe}
                 color={rememberMe ? "#A73249" : undefined}
-                disabled={loading}
+                disabled={loading || isBlocked}
                 style={styles.checkbox}
               />
-              <Text style={styles.rememberText}>Recuérdame</Text>
+              <Text style={[styles.rememberText, isBlocked && styles.textDisabled]}>
+                Recuérdame
+              </Text>
             </TouchableOpacity>
             
             <TouchableOpacity 
               onPress={() => navigation.navigate("RecoverPassword")}
               activeOpacity={0.7}
+              disabled={loading || isBlocked}
             >
-              <Text style={styles.forgotText}>¿Olvidaste tu contraseña?</Text>
+              <Text style={[styles.forgotText, isBlocked && styles.textDisabled]}>
+                ¿Olvidaste tu contraseña?
+              </Text>
             </TouchableOpacity>
           </View>
 
           {/* Botón de Login */}
           <TouchableOpacity 
-            style={[styles.loginButton, loading && styles.buttonDisabled]} 
+            style={[
+              styles.loginButton, 
+              (loading || isBlocked) && styles.buttonDisabled
+            ]} 
             onPress={handleLogin}
-            disabled={loading}
+            disabled={loading || isBlocked}
             activeOpacity={0.8}
           >
             {loading ? (
               <ActivityIndicator color="#fff" size="small" />
+            ) : isBlocked ? (
+              <Text style={styles.loginButtonText}>Cuenta Bloqueada</Text>
             ) : (
               <Text style={styles.loginButtonText}>Continuar</Text>
             )}
@@ -179,8 +272,8 @@ const LoginScreen = ({ navigation }) => {
         <Text style={styles.footerText}>
           ¿No tienes una cuenta?{" "}
           <Text 
-            style={styles.footerLink} 
-            onPress={() => navigation.navigate("Register")}
+            style={[styles.footerLink, isBlocked && styles.textDisabled]} 
+            onPress={() => !isBlocked && navigation.navigate("Register")}
           >
             Crea una
           </Text>
@@ -207,7 +300,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: 25,
     paddingTop: Platform.OS === 'ios' ? 60 : 40,
-    paddingBottom: 20, // Espacio para el footer
+    paddingBottom: 20,
   },
   welcomeSection: {
     alignItems: "center",
@@ -235,7 +328,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F5EDE8",
     borderRadius: 20,
     padding: 25,
-    marginBottom: 20, // Espacio antes del footer
+    marginBottom: 20,
     shadowColor: "#3D1609",
     shadowOffset: {
       width: 0,
@@ -253,6 +346,42 @@ const styles = StyleSheet.create({
     color: "#3D1609",
     textAlign: "center",
     marginBottom: 30,
+  },
+  // Estilos para advertencias
+  attemptsWarning: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFF3E0',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 15,
+    borderLeftWidth: 4,
+    borderLeftColor: '#FF6B35',
+  },
+  attemptsText: {
+    fontFamily: "Nunito-SemiBold",
+    color: "#FF6B35",
+    fontSize: 14,
+    marginLeft: 8,
+  },
+  blockedWarning: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFE8E8',
+    padding: 15,
+    borderRadius: 8,
+    marginBottom: 15,
+    borderLeftWidth: 4,
+    borderLeftColor: '#A73249',
+  },
+  blockedText: {
+    fontFamily: "Nunito-Bold",
+    color: "#A73249",
+    fontSize: 14,
+    marginLeft: 8,
+    textAlign: 'center',
   },
   inputContainer: {
     marginBottom: 20,
@@ -276,6 +405,11 @@ const styles = StyleSheet.create({
     borderColor: "#E8E1D8",
     color: "#3D1609",
   },
+  inputDisabled: {
+    backgroundColor: "#F5F5F5",
+    borderColor: "#E0E0E0",
+    color: "#9E9E9E",
+  },
   passwordContainer: {
     position: "relative",
     width: "100%",
@@ -291,7 +425,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#E8E1D8",
     color: "#3D1609",
-    paddingRight: 60, // Más espacio para el ícono
+    paddingRight: 60,
   },
   eyeIconContainer: {
     position: "absolute",
@@ -309,7 +443,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 25,
     marginTop: 5,
-    flexWrap: "wrap", // Por si el texto es muy largo
+    flexWrap: "wrap",
   },
   rememberContainer: {
     flexDirection: "row",
@@ -329,12 +463,15 @@ const styles = StyleSheet.create({
     fontSize: 14,
     flex: 1,
   },
+  textDisabled: {
+    color: "#9E9E9E",
+  },
   forgotText: {
     color: "#A73249",
     fontFamily: "Nunito-SemiBold",
     fontSize: 14,
     textDecorationLine: "underline",
-    flexShrink: 0, // No se encoge
+    flexShrink: 0,
   },
   loginButton: {
     width: "100%",
@@ -369,7 +506,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: "#D0C4B8",
     alignItems: "center",
-    backgroundColor: "#E3C6B8", // Asegurar color de fondo
+    backgroundColor: "#E3C6B8",
   },
   footerText: {
     textAlign: "center",

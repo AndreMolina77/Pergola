@@ -89,7 +89,7 @@ customersController.getPublicCustomers = async (req, res) => {
 customersController.getCustomer = async (req, res) => {
   try {
     // Buscar un solo cliente
-    const customer = await Customers.findById(req.params.id).select('-password');
+    const customer = await Customers.findById(req.params.id);
     // Validar que el cliente si exista
     if (!customer) {
       // ESTADO DE NO ENCONTRADO

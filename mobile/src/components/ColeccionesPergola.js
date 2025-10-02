@@ -1,41 +1,162 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, Image, StyleSheet, ActivityIndicator, ScrollView } from 'react-native';
+import { useState, useEffect } from 'react';
 
 const ColeccionesPergola = () => {
-  // Ejemplo de colecciones
-  const colecciones = [
-    { id: 1, nombre: 'Colección Cristal Bohemio' },
-    { id: 2, nombre: 'Colección Esencias Ligeras' },
-    { id: 3, nombre: 'Colección Perlas Rococó' },
-  ];
+  const [colecciones, setColecciones] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchColecciones = async () => {
+      try {
+        const response = await fetch('https://pergola-production.up.railway.app/api/public/collections');
+        
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        setColecciones(data);
+      } catch (error) {
+        setError(error.message);
+        console.error('Error fetching collections:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchColecciones();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color="#3d1609" />
+        <Text style={styles.loadingText}>Cargando colecciones...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.errorText}>Error: {error}</Text>
+      </View>
+    );
+  }
+
+  if (colecciones.length === 0) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.noDataText}>No hay colecciones disponibles</Text>
+      </View>
+    );
+  }
 
   return (
-    <View style={styles.container}>
+    <ScrollView 
+      horizontal 
+      showsHorizontalScrollIndicator={false}
+      style={styles.horizontalScroll}
+      contentContainerStyle={styles.scrollContent}
+    >
       {colecciones.map((col) => (
-        <View key={col.id} style={styles.item}>
-          <Text style={styles.text}>{col.nombre}</Text>
+        <View key={col._id || col.id} style={styles.creacionItem}>
+          <View style={styles.creacionImage}>
+            {col.image ? (
+              <Image 
+                source={{ uri: col.image }} 
+                style={styles.circleImage}
+                resizeMode="cover"
+              />
+            ) : (
+              <View style={styles.placeholderImage}>
+                <Text style={styles.placeholderText}>Sin imagen</Text>
+              </View>
+            )}
+          </View>
+          <Text style={styles.creacionText}>{col.name}</Text>
         </View>
       ))}
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  horizontalScroll: {
+    marginHorizontal: -5,
   },
-  item: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 12,
-    marginRight: 10,
+  scrollContent: {
+    paddingHorizontal: 5,
+  },
+  creacionItem: {
+    alignItems: 'center',
+    marginHorizontal: 15,
+    width: 80,
+  },
+  creacionImage: {
+    width: 70,
+    height: 70,
+    backgroundColor: 'white',
+    borderRadius: 35,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
     elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    overflow: 'hidden',
   },
-  text: {
-    fontSize: 13,
+  circleImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 35,
+  },
+  placeholderImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 35,
+    backgroundColor: '#f0f0f0',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  placeholderText: {
+    fontSize: 10,
+    color: '#666',
+    fontFamily: "Quicksand",
+  },
+  creacionText: {
+    fontSize: 12,
     color: '#3d1609',
-    fontWeight: '600',
+    textAlign: 'center',
+    lineHeight: 16,
+    fontFamily: "Quicksand-Bold",
+  },
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  loadingText: {
+    fontSize: 14,
+    color: '#3d1609',
+    fontFamily: "Quicksand",
+    marginTop: 10,
+  },
+  errorText: {
+    fontSize: 14,
+    color: '#FF4757',
+    fontFamily: "Quicksand-Bold",
+    textAlign: 'center',
+  },
+  noDataText: {
+    fontSize: 14,
+    color: '#3d1609',
+    fontFamily: "Quicksand",
+    textAlign: 'center',
   },
 });
 

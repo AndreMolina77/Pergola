@@ -14,6 +14,11 @@ import ProgressScreen from '../screen/ProgressScreen';
 import CustomDesignsScreen from '../screen/CustomDesignsScreen';
 import EmailVerificationScreen from '../screen/EmailVerification';
 import VerificationSuccessScreen from '../screen/VerificationSucess';
+import ProfileScreen from '../screen/ProfileScreen';
+import AuthGuardProfile from '../components/AuthGuardProfile';
+import SurveyScreen from '../screen/SurveyScreen';
+import ProductsScreen from '../screen/catalog/ProductsScreen';
+import CartScreen from '../components/cart/CartScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -56,9 +61,9 @@ function MainTabs() {
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: 'Inicio' }} />
-      <Tab.Screen name="ProductLines" component={ProgressScreen} options={{ tabBarLabel: 'Líneas de productos', tabBarItemStyle: { minWidth: 85 } }} />
-      <Tab.Screen name="Cart" component={ProgressScreen} options={{ tabBarLabel: 'Carrito' }} />
-      <Tab.Screen name="Profile" component={ProgressScreen} options={{ tabBarLabel: 'Perfil' }} />
+      <Tab.Screen name="ProductLines" component={ProductsScreen} options={{ tabBarLabel: 'Líneas de productos', tabBarItemStyle: { minWidth: 85 } }} />
+      <Tab.Screen name="Cart" component={CartScreen} options={{ tabBarLabel: 'Carrito' }} />
+      <Tab.Screen name="Profile" component={AuthGuardProfile} options={{ tabBarLabel: 'Perfil' }} />
     </Tab.Navigator>
   );
 }
@@ -97,7 +102,6 @@ export default function AppNavigator() {
           component={VerificationSuccessScreen}
           options={{ headerShown: false }}
         />
-        {/* Reemplaza HomeScreen por el Bottom Tab Navigator */}
         <Stack.Screen
           name="Home"
           component={MainTabs}
@@ -106,6 +110,11 @@ export default function AppNavigator() {
         <Stack.Screen
           name="CustomDesign"
           component={CustomDesignsScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Survey"
+          component={SurveyScreen}
           options={{ headerShown: false }}
         />
         </Stack.Navigator>

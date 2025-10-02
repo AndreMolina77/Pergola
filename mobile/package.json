@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
+    "@kolking/react-native-avatar": "^2.1.6",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-navigation/bottom-tabs": "^7.4.7",
     "@react-navigation/native": "^7.1.17",
@@ -18,6 +19,7 @@
     "expo-app-loading": "^2.1.1",
     "expo-checkbox": "~5.0.7",
     "expo-font": "~14.0.8",
+    "expo-image-picker": "^17.0.8",
     "expo-linear-gradient": "~15.0.7",
     "expo-splash-screen": "~31.0.10",
     "expo-status-bar": "~3.0.8",

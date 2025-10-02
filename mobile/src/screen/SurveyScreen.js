@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-nati
 import TextInputField from "../components/TextInputField";
 import SizeSelector from "../components/SizeSelector";
 
-export default function SurveyScreen({ navigation }) {
+const SurveyScreen = ({ navigation }) => {
   const [allergy, setAllergy] = useState("");
   const [budget, setBudget] = useState("");
 
@@ -41,6 +41,7 @@ export default function SurveyScreen({ navigation }) {
     </ScrollView>
   );
 }
+export default SurveyScreen
 
 const styles = StyleSheet.create({
   container: {
