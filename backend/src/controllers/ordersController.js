@@ -125,7 +125,7 @@ ordersController.putOrders = async (req, res) => {
       return res.status(404).json({ message: "Pedido no encontrado" });
     }
     // ESTADO DE OK
-    res.status(200).json({ message: "Pedido actualizado con éxito", data: updatedCustomer });
+    res.status(200).json({ message: "Pedido actualizado con éxito", data: updatedOrder });
   } catch (error) {
     // ESTADO DE ERROR EN INPUT DEL CLIENTE
     res.status(400).json({ message: "Error al actualizar pedido", error: error.message });
