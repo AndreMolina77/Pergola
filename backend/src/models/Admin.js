@@ -26,7 +26,11 @@ adminSchema.pre("save", async function(next) {
 
 // Método para comparar contraseñas
 adminSchema.methods.comparePassword = async function(password) {
-  return await bcryptjs.compare(password, this.password)
+  if (!this.password) {
+    // Fallback: devolver false si no hay password guardada
+    return false
+  }
+  return await bcrypt.compare(password, this.password)
 }
 // El tercer argumento sirve para indicar el nombre de la colección en MongoDB
 export default model("Admin", adminSchema, "Admin")
