@@ -45,6 +45,7 @@ loginController.login = async (req, res) => {
       let isMatch = false
       if (adminUser.password) {
         isMatch = await bcryptjs.compare(password, adminUser.password)
+        console.log("Match?", isMatch)
       } else {
         // Fallback solo para compatibilidad inicial
         isMatch = password === config.CREDENTIALS.password
