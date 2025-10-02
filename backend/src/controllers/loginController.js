@@ -29,14 +29,31 @@ loginController.login = async (req, res) => {
 
       // Si no existe, crear uno con password de config como fallback
       if (!adminUser) {
-        return res.status(404).json({ message: "Admin no encontrado" })
+        const salt = await bcryptjs.genSalt(10)
+        const hashedPassword = await bcryptjs.hash(config.CREDENTIALS.password, salt)
+        adminUser = new adminModel({
+          name: "Admin",
+          lastName: "Pergola",
+          email: config.CREDENTIALS.email,
+          password: hashedPassword,
+          profilePic: ""
+        })
+        await adminUser.save()
+        console.log("Admin creado en DB con password de config")
       }
       // Verificar contraseña
-      const isMatch = await bcryptjs.compare(password, adminUser.password)
+      let isMatch = false
+      if (adminUser.password) {
+        isMatch = await bcryptjs.compare(password, adminUser.password)
+        console.log("Match?", isMatch)
+      } else {
+        // Fallback solo para compatibilidad inicial
+        isMatch = password === config.CREDENTIALS.password
+      }
       if (!isMatch) {
+        console.log("Contraseña de admin incorrecta")
         return res.status(400).json({ message: "Contraseña incorrecta" })
       }
-
       // COMENTAR TEMPORALMENTE ESTA VALIDACIÓN
       /*
       if (platform === "mobile") {
