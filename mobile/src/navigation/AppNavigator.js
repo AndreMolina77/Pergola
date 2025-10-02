@@ -119,9 +119,7 @@ export default function AppNavigator() {
           component={SurveyScreen}
           options={{ headerShown: false }}
         />
-        </Stack.Navigator>
-
-        <Stack.Screen
+                <Stack.Screen
           name="CollectionDetail"
           component={CollectionDetailScreen}
           options={{ headerShown: false }}
@@ -129,9 +127,11 @@ export default function AppNavigator() {
 
         <Stack.Screen
           name="SubcategoryDetail"
+          params
           component={SubcategoryDetailScreen}
           options={{ headerShown: false }}
         />
+        </Stack.Navigator>
     </NavigationContainer>
   );
 }
