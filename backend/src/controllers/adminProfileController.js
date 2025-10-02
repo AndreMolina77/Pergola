@@ -2,9 +2,8 @@
 const adminProfileController = {}
 // Importo el modelo de admin
 import adminModel from "../models/Admin.js"
-// Importación de librerías para interactuar con archivos, directorios, cloudinary y archivo config
-import fs from 'fs'
-import path from 'path'
+// Importación de librerías para encriptar, cloudinary y archivo config
+import bcryptjs from "bcryptjs"
 import { config } from "../utils/config.js"
 import { v2 as cloudinary } from 'cloudinary'
 
@@ -86,32 +85,28 @@ adminProfileController.updateProfile = async (req, res) => {
 adminProfileController.changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body
-    // Verificar contraseña actual
-    if (currentPassword !== config.CREDENTIALS.password) {
-      // ESTADO DE ERROR DE INPUT DEL CLIENTE
-      return res.status(400).json({ message: "Contraseña actual incorrecta" })
+    const adminUser = await adminModel.findOne({ email: config.CREDENTIALS.email })
+
+    if (!adminUser) {
+      return res.status(404).json({ message: "Administrador no encontrado" })
     }
-    // Leer el archivo .env
-    const envPath = path.resolve('.env')
-    let envContent = fs.readFileSync(envPath, 'utf8')
-    // Reemplazar la línea de ADMIN_PASSWORD
-    const lines = envContent.split('\n')
-    const updatedLines = lines.map(line => {
-      if (line.startsWith('ADMIN_PASSWORD=')) {
-        return `ADMIN_PASSWORD="${newPassword}"` }
-      return line
-    })
-    // Escribir el archivo actualizado
-    fs.writeFileSync(envPath, updatedLines.join('\n'))
-    // Actualizar la configuración en memoria
-    process.env.ADMIN_PASSWORD = newPassword
-    config.CREDENTIALS.password = newPassword
-    console.log("Contraseña de admin actualizada correctamente")
-    // ESTADO DE OK
+    const isMatch = await adminUser.comparePassword(currentPassword)
+    if (!isMatch) {
+      // Fallback inicial si quieres usar config.CREDENTIALS.password
+      if (currentPassword === config.CREDENTIALS.password) {
+        // OK, primera vez usando la contraseña de config
+      } else {
+        return res.status(400).json({ message: "Contraseña actual incorrecta" })
+      }
+    }
+    // Hashear nueva contraseña y guardar
+    const salt = await bcryptjs.genSalt(10)
+    adminUser.password = await bcryptjs.hash(newPassword, salt)
+    await adminUser.save()
+
     res.status(200).json({ message: "Contraseña actualizada correctamente" })
   } catch (error) {
     console.error("Error:", error)
-    // ESTADO DE ERROR DEL SERVIDOR
     res.status(500).json({ message: "Error del servidor al cambiar contraseña" })
   }
 }

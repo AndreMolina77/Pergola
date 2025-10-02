@@ -3,10 +3,10 @@ const loginController = {}
 import loginModel from "../models/Employees.js"
 // Importo el modelo de clientes
 import customersModel from "../models/Customers.js"
+import adminModel from "../models/Admin.js"
 import bcryptjs from "bcryptjs"
 import jsonwebtoken from "jsonwebtoken"
 import { config } from "../utils/config.js"
-import { API } from "../utils/api.js"
 //POST (CREATE)
 loginController.login = async (req, res) => {
   const { email, password, rememberMe, platform } = req.body // Platform agregado
@@ -19,8 +19,36 @@ loginController.login = async (req, res) => {
     console.log("Body completo:", req.body)
     console.log("Platform:", platform) // Log para debugging
     // Tipos de usuario: admin, colaborador, clientes
-    if (email === config.CREDENTIALS.email && password === config.CREDENTIALS.password) {
+    if (email === config.CREDENTIALS.email) {
       console.log("LOGIN ADMIN DETECTADO")  
+      // Intentar buscar admin en la DB
+      let adminUser = await adminModel.findOne({ email })
+      // Si no existe, crear uno con password de config como fallback
+      if (!adminUser) {
+        const salt = await bcryptjs.genSalt(10)
+        const hashedPassword = await bcryptjs.hash(config.CREDENTIALS.password, salt)
+        adminUser = new adminModel({
+          name: "Admin",
+          lastName: "Pergola",
+          email: config.CREDENTIALS.email,
+          password: hashedPassword,
+          profilePic: ""
+        })
+        await adminUser.save()
+        console.log("Admin creado en DB con password de config")
+      }
+      // Verificar contraseña
+      let isMatch = false
+      if (adminUser.password) {
+        isMatch = await bcryptjs.compare(password, adminUser.password)
+      } else {
+        // Fallback solo para compatibilidad inicial
+        isMatch = password === config.CREDENTIALS.password
+      }
+      if (!isMatch) {
+        console.log("Contraseña de admin incorrecta")
+        return res.status(400).json({ message: "Contraseña incorrecta" })
+      }
       // COMENTAR TEMPORALMENTE ESTA VALIDACIÓN
       /*
       if (platform === "mobile") {
@@ -30,29 +58,12 @@ loginController.login = async (req, res) => {
           })
       }
       */
-      console.log("LOGIN ADMIN EXITOSO (WEB)")
+      console.log("LOGIN ADMIN EXITOSO")
       try {
-        // AGREGAR: Crear/obtener admin de BD
-        const adminDataResponse = await fetch(`${API}/admin/profile/data`, {
-          method: 'GET',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' }
-        })
-        let adminData = { name: "Admin", lastName: "Pergola", profilePic: "" }
-            
-        if (adminDataResponse.ok) {
-          const adminInfo = await adminDataResponse.json()
-          adminData = {
-            name: adminInfo.name || "Admin",
-            lastName: adminInfo.lastName || "Pergola", 
-            profilePic: adminInfo.profilePic || ""
-          }
-          console.log("Admin data from BD:", adminData)
-        }
         userType = "admin"
-        userFound = { _id: "admin", email: config.CREDENTIALS.email, ...adminData }
+        userFound = { _id: adminUser._id, email: adminUser.email, name: adminUser.name, lastName: adminUser.lastName, profilePic: adminUser.profilePic }
         // TOKEN para admin
-        jsonwebtoken.sign({ id: "admin", userType, email: config.CREDENTIALS.email, ...adminData }, config.JWT.secret, { expiresIn: rememberMe ? "30d" : config.JWT.expiresIn }, (err, token) => {
+        jsonwebtoken.sign({ id: adminUser._id, userType, email: adminUser.email, ...userFound  }, config.JWT.secret, { expiresIn: rememberMe ? "30d" : config.JWT.expiresIn }, (err, token) => {
           if(err) {
             console.log("Error generando token:", err)
             return res.status(500).json({message: "Error interno del servidor"})
@@ -67,12 +78,7 @@ loginController.login = async (req, res) => {
           console.log("Token generado y cookie establecida para admin")
           res.json({
             message: "Inicio de sesión exitoso",
-            user: {
-              id: "admin",
-              email: config.CREDENTIALS.email,
-              userType: "admin",
-              ...adminData
-            }
+            user: { id: adminUser._id, email: adminUser.email, userType, ...userFound }
           })
         })
         return
