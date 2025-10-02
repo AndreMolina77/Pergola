@@ -1,6 +1,6 @@
 // Solo para manejar cambios y ajustes en el perfil en el frontend privado
 import { Schema, model } from "mongoose"
-import bcrypt from "bcrypt"
+import bcryptjs from "bcryptjs"
 // Definir el schema para el admin
 const adminSchema = new Schema({
   name: { type: String, required: true },
@@ -19,14 +19,14 @@ const adminSchema = new Schema({
 // Hook para hashear la contraseña antes de guardar
 adminSchema.pre("save", async function(next) {
   if (!this.isModified("password")) return next()
-  const salt = await bcrypt.genSalt(10)
-  this.password = await bcrypt.hash(this.password, salt)
+  const salt = await bcryptjs.genSalt(10)
+  this.password = await bcryptjs.hash(this.password, salt)
   next()
 })
 
 // Método para comparar contraseñas
 adminSchema.methods.comparePassword = async function(password) {
-  return await bcrypt.compare(password, this.password)
+  return await bcryptjs.compare(password, this.password)
 }
 // El tercer argumento sirve para indicar el nombre de la colección en MongoDB
 export default model("Admin", adminSchema, "Admin")
