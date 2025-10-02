@@ -1,10 +1,23 @@
-import { View, Text, Image, StyleSheet, ActivityIndicator, ScrollView } from 'react-native';
+import { View, Text, Image, StyleSheet, ActivityIndicator, ScrollView, TouchableOpacity } from 'react-native';
 import { useState, useEffect } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import { useFonts } from 'expo-font';
+
 
 const ColeccionesPergola = () => {
   const [colecciones, setColecciones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const navigation = useNavigation();
+
+  const [fontsLoaded] = useFonts({
+    'CormorantGaramond-Bold': require('../../assets/fonts/CormorantGaramond-Bold.ttf'),
+    'Nunito-Black': require('../../assets/fonts/Nunito-Black.ttf'),
+    'Quicksand': require('../../assets/fonts/Quicksand-Regular.ttf'),
+    'Quicksand-Bold': require('../../assets/fonts/Quicksand-Bold.ttf'),
+    'Quicksand-BoldItalic': require('../../assets/fonts/Quicksand-BoldItalic.ttf'),
+  });
 
   useEffect(() => {
     const fetchColecciones = async () => {
@@ -27,6 +40,16 @@ const ColeccionesPergola = () => {
 
     fetchColecciones();
   }, []);
+
+  // Función de manejo de la pulsación para navegar
+  const handleCollectionPress = (collectionId, collectionName, collectionImage) => {
++   navigation.navigate('CollectionDetail', {
+      collectionId: collectionId,
+      collectionName: collectionName,
+      collectionImage: collectionImage
+    });
+    console.log(`Navegando a: ${collectionName} (${collectionId})`);
+  };
 
   if (loading) {
     return (
@@ -61,7 +84,12 @@ const ColeccionesPergola = () => {
       contentContainerStyle={styles.scrollContent}
     >
       {colecciones.map((col) => (
-        <View key={col._id || col.id} style={styles.creacionItem}>
+        // Uso de TouchableOpacity para hacer el elemento pulsable
+        <TouchableOpacity 
+          key={col._id || col.id} 
+          style={styles.creacionItem}
+          onPress={() => handleCollectionPress(col._id || col.id, col.name)}
+        >
           <View style={styles.creacionImage}>
             {col.image ? (
               <Image 
@@ -76,7 +104,7 @@ const ColeccionesPergola = () => {
             )}
           </View>
           <Text style={styles.creacionText}>{col.name}</Text>
-        </View>
+        </TouchableOpacity>
       ))}
     </ScrollView>
   );

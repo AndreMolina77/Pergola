@@ -122,7 +122,6 @@ const LoginScreen = ({ navigation }) => {
       setLoading(false);
     }
   };
-
   if (!fontsLoaded) {
     return (
       <View style={styles.loadingContainer}>

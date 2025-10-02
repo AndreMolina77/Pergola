@@ -19,6 +19,8 @@ import AuthGuardProfile from '../components/AuthGuardProfile';
 import SurveyScreen from '../screen/SurveyScreen';
 import ProductsScreen from '../screen/catalog/ProductsScreen';
 import CartScreen from '../components/cart/CartScreen';
+import SubcategoryDetailScreen from '../components/CatalogoExclusivo';
+import CollectionDetailScreen from '../screen/CollectionScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -118,6 +120,18 @@ export default function AppNavigator() {
           options={{ headerShown: false }}
         />
         </Stack.Navigator>
+
+        <Stack.Screen
+          name="CollectionDetail"
+          component={CollectionDetailScreen}
+          options={{ headerShown: false }}
+        />  
+
+        <Stack.Screen
+          name="SubcategoryDetail"
+          component={SubcategoryDetailScreen}
+          options={{ headerShown: false }}
+        />
     </NavigationContainer>
   );
 }

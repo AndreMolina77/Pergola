@@ -32,7 +32,7 @@ export default function ProfileScreen() {
   // Cargar pedidos (API) y wishlist (local) al montar
   useEffect(() => {
     if (user?.id) {
-      fetch(`${API}/customers/${user.id}`)
+      fetch(`${API}/public/orders`)
         .then(res => res.json())
         .then(data => {
           setOrders(Array.isArray(data) ? data : []);

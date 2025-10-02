@@ -16,42 +16,42 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
 import AppLoading from 'expo-app-loading';
 
-// Mock data para subcategorías
-const MOCK_SUBCATEGORIES = [
+// Mock data para colecciones
+const MOCK_COLLECTIONS = [
   {
     _id: '1',
-    name: 'Anillos de Compromiso',
-    image: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=400',
-    description: 'Anillos que simbolizan amor eterno y compromiso. Diseños únicos para el momento más especial.'
+    name: 'Colección Primavera',
+    image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400',
+    description: 'Una colección inspirada en la renovación y frescura de la primavera. Piezas únicas que capturan la esencia de la naturaleza en flor.'
   },
   {
-    _id: '2',
-    name: 'Collares Elegantes',
-    image: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=400',
-    description: 'Collares que realzan tu elegancia natural. Piezas perfectas para cualquier ocasión.'
+    _id: '2', 
+    name: 'Esencia Bohemia',
+    image: 'https://images.unsplash.com/photo-1506630448388-4e683c67ddb0?w=400',
+    description: 'Joyas con espíritu libre y despreocupado. Diseños orgánicos que reflejan la belleza natural y la autenticidad.'
   },
   {
     _id: '3',
-    name: 'Pulseras Artesanales',
-    image: 'https://images.unsplash.com/photo-1588444650700-6c7f0c89d36b?w=400',
-    description: 'Pulseras elaboradas a mano con atención a cada detalle. Estilo y artesanía en perfecta armonía.'
+    name: 'Clásicos Eternos',
+    image: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=400',
+    description: 'Piezas atemporales que trascienden las tendencias. Elegancia y sofisticación en cada diseño.'
   },
   {
     _id: '4',
-    name: 'Aretes Modernos',
-    image: 'https://images.unsplash.com/photo-1506630448388-4e683c67ddb0?w=400',
-    description: 'Aretes contemporáneos que complementan tu estilo único. Diseños vanguardistas y atemporales.'
+    name: 'Modern Luxe',
+    image: 'https://images.unsplash.com/photo-1588444650700-6c7f0c89d36b?w=400',
+    description: 'Donde lo contemporáneo se encuentra con el lujo. Diseños vanguardistas para el estilo de vida moderno.'
   }
 ];
 
-const SubcategoryDetailScreen = () => {
+const CollectionDetailScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const insets = useSafeAreaInsets();
   
-  const { itemId, itemName, itemImage } = route.params;
+  const { collectionId, collectionName, collectionImage } = route.params;
   
-  const [subcategory, setSubcategory] = useState(null);
+  const [collection, setCollection] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const [fontsLoaded] = useFonts({
@@ -65,22 +65,22 @@ const SubcategoryDetailScreen = () => {
 
   useEffect(() => {
     // Simular carga de datos
-    const loadSubcategoryData = () => {
+    const loadCollectionData = () => {
       setLoading(true);
       
       // Simular delay de API
       setTimeout(() => {
-        const foundSubcategory = MOCK_SUBCATEGORIES.find(item => item._id === itemId);
+        const foundCollection = MOCK_COLLECTIONS.find(col => col._id === collectionId);
         
-        if (foundSubcategory) {
-          setSubcategory(foundSubcategory);
+        if (foundCollection) {
+          setCollection(foundCollection);
         } else {
           // Si no encuentra en mock, crear objeto con datos básicos
-          setSubcategory({
-            _id: itemId,
-            name: itemName,
-            image: itemImage,
-            description: 'Una exclusiva selección de joyas cuidadosamente diseñadas para realzar tu estilo único y elegancia natural.'
+          setCollection({
+            _id: collectionId,
+            name: collectionName,
+            image: collectionImage,
+            description: 'Una exclusiva colección de joyas cuidadosamente diseñadas para realzar tu estilo único y elegancia natural.'
           });
         }
         
@@ -88,20 +88,11 @@ const SubcategoryDetailScreen = () => {
       }, 800);
     };
 
-    loadSubcategoryData();
-  }, [itemId, itemName, itemImage]);
+    loadCollectionData();
+  }, [collectionId, collectionName, collectionImage]);
 
   const handleBack = () => {
     navigation.goBack();
-  };
-
-  const handleExploreProducts = () => {
-    // Navegar a la pantalla de productos cuando esté disponible
-    Alert.alert(
-      'Próximamente',
-      'La exploración de productos estará disponible muy pronto.',
-      [{ text: 'Entendido' }]
-    );
   };
 
   if (!fontsLoaded) {
@@ -114,7 +105,7 @@ const SubcategoryDetailScreen = () => {
         <StatusBar barStyle="dark-content" backgroundColor="#E3C6B8" />
         <View style={styles.center}>
           <ActivityIndicator size="large" color="#3D1609" />
-          <Text style={styles.loadingText}>Cargando categoría...</Text>
+          <Text style={styles.loadingText}>Cargando colección...</Text>
         </View>
       </SafeAreaView>
     );
@@ -129,7 +120,7 @@ const SubcategoryDetailScreen = () => {
         <TouchableOpacity style={styles.backBtn} onPress={handleBack}>
           <Ionicons name="chevron-back" size={26} color="#3D1609" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Categoría</Text>
+        <Text style={styles.headerTitle}>Colección</Text>
         <View style={{ width: 26 }} />
       </View>
 
@@ -141,10 +132,10 @@ const SubcategoryDetailScreen = () => {
         {/* Hero Section */}
         <View style={styles.heroSection}>
           <View style={styles.imageContainer}>
-            {subcategory?.image ? (
+            {collection?.image ? (
               <Image 
-                source={{ uri: subcategory.image }} 
-                style={styles.subcategoryImage}
+                source={{ uri: collection.image }} 
+                style={styles.collectionImage}
                 resizeMode="cover"
               />
             ) : (
@@ -155,14 +146,14 @@ const SubcategoryDetailScreen = () => {
             )}
           </View>
           
-          <View style={styles.subcategoryInfo}>
-            <Text style={styles.subcategoryName}>
-              {subcategory?.name}
+          <View style={styles.collectionInfo}>
+            <Text style={styles.collectionName}>
+              {collection?.name}
             </Text>
             
-            {subcategory?.description && (
-              <Text style={styles.subcategoryDescription}>
-                {subcategory.description}
+            {collection?.description && (
+              <Text style={styles.collectionDescription}>
+                {collection.description}
               </Text>
             )}
           </View>
@@ -170,85 +161,62 @@ const SubcategoryDetailScreen = () => {
 
         {/* Features Section */}
         <View style={styles.featuresSection}>
-          <Text style={styles.sectionTitle}>Características de la Categoría</Text>
+          <Text style={styles.sectionTitle}>Características</Text>
           
           <View style={styles.featuresGrid}>
-            <View style={styles.featureCard}>
-              <View style={styles.featureIcon}>
-                <Ionicons name="sparkles-outline" size={24} color="#A73249" />
-              </View>
-              <Text style={styles.featureTitle}>Diseño Exclusivo</Text>
-              <Text style={styles.featureDescription}>
-                Cada pieza es única y refleja la más alta calidad en diseño
-              </Text>
-            </View>
-            
             <View style={styles.featureCard}>
               <View style={styles.featureIcon}>
                 <Ionicons name="diamond-outline" size={24} color="#A73249" />
               </View>
               <Text style={styles.featureTitle}>Material Premium</Text>
               <Text style={styles.featureDescription}>
-                Utilizamos solo los mejores materiales para garantizar durabilidad
+                Joyas elaboradas con materiales de la más alta calidad
               </Text>
             </View>
             
             <View style={styles.featureCard}>
               <View style={styles.featureIcon}>
-                <Ionicons name="color-palette-outline" size={24} color="#A73249" />
+                <Ionicons name="hand-left-outline" size={24} color="#A73249" />
               </View>
-              <Text style={styles.featureTitle}>Variedad de Estilos</Text>
+              <Text style={styles.featureTitle}>Hecho a Mano</Text>
               <Text style={styles.featureDescription}>
-                Desde diseños clásicos hasta las últimas tendencias
+                Cada pieza es cuidadosamente elaborada por artesanos expertos
               </Text>
             </View>
             
             <View style={styles.featureCard}>
               <View style={styles.featureIcon}>
-                <Ionicons name="heart-outline" size={24} color="#A73249" />
+                <Ionicons name="sparkles-outline" size={24} color="#A73249" />
               </View>
-              <Text style={styles.featureTitle}>Garantía de Calidad</Text>
+              <Text style={styles.featureTitle}>Diseño Exclusivo</Text>
               <Text style={styles.featureDescription}>
-                Todas nuestras piezas cuentan con garantía y certificación
+                Piezas únicas que reflejan tu estilo personal
+              </Text>
+            </View>
+            
+            <View style={styles.featureCard}>
+              <View style={styles.featureIcon}>
+                <Ionicons name="leaf-outline" size={24} color="#A73249" />
+              </View>
+              <Text style={styles.featureTitle}>Sostenible</Text>
+              <Text style={styles.featureDescription}>
+                Comprometidos con prácticas responsables y eco-amigables
               </Text>
             </View>
           </View>
         </View>
 
-        {/* Price Range Section */}
-        <View style={styles.priceSection}>
-          <Text style={styles.sectionTitle}>Rango de Precios</Text>
-          <View style={styles.priceCard}>
-            <View style={styles.priceRange}>
-              <View style={styles.priceItem}>
-                <Text style={styles.priceLabel}>Desde</Text>
-                <Text style={styles.priceValue}>$45</Text>
-              </View>
-              <View style={styles.priceSeparator}>
-                <Ionicons name="remove-outline" size={20} color="#E8E1D8" />
-              </View>
-              <View style={styles.priceItem}>
-                <Text style={styles.priceLabel}>Hasta</Text>
-                <Text style={styles.priceValue}>$280</Text>
-              </View>
-            </View>
-            <Text style={styles.priceNote}>
-              Precios varían según diseño, materiales y complejidad de la pieza
+        {/* Coming Soon Section */}
+        <View style={styles.comingSoonSection}>
+          <View style={styles.comingSoonCard}>
+            <Ionicons name="time-outline" size={40} color="#3D1609" />
+            <Text style={styles.comingSoonTitle}>Próximamente</Text>
+            <Text style={styles.comingSoonDescription}>
+              Estamos preparando los productos exclusivos de esta colección. 
+              Muy pronto podrás descubrir todas las piezas únicas que tenemos para ti.
             </Text>
-          </View>
-        </View>
-
-        {/* CTA Section */}
-        <View style={styles.ctaSection}>
-          <View style={styles.ctaCard}>
-            <Ionicons name="search-outline" size={40} color="#3D1609" />
-            <Text style={styles.ctaTitle}>Explora Nuestros Productos</Text>
-            <Text style={styles.ctaDescription}>
-              Descubre la completa colección de {subcategory?.name.toLowerCase()} 
-              disponibles en nuestro catálogo. Encuentra la pieza perfecta para ti.
-            </Text>
-            <TouchableOpacity style={styles.ctaButton} onPress={handleExploreProducts}>
-              <Text style={styles.ctaButtonText}>Ver Productos</Text>
+            <TouchableOpacity style={styles.notifyButton}>
+              <Text style={styles.notifyButtonText}>Notificarme</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -315,7 +283,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     elevation: 4,
   },
-  subcategoryImage: {
+  collectionImage: {
     width: '100%',
     height: '100%',
   },
@@ -332,17 +300,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: 8,
   },
-  subcategoryInfo: {
+  collectionInfo: {
     paddingHorizontal: 4,
   },
-  subcategoryName: {
+  collectionName: {
     fontFamily: 'CormorantGaramond-Bold',
     fontSize: 28,
     color: '#3D1609',
     marginBottom: 12,
     textAlign: 'center',
   },
-  subcategoryDescription: {
+  collectionDescription: {
     fontFamily: 'Nunito-Regular',
     fontSize: 16,
     color: '#3D1609',
@@ -402,73 +370,25 @@ const styles = StyleSheet.create({
     opacity: 0.7,
     lineHeight: 16,
   },
-  priceSection: {
+  comingSoonSection: {
     paddingHorizontal: 16,
-    marginBottom: 24,
   },
-  priceCard: {
+  comingSoonCard: {
     backgroundColor: '#F5EDE8',
-    borderRadius: 16,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: '#E8D5C9',
-  },
-  priceRange: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  priceItem: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  priceLabel: {
-    fontFamily: 'Nunito-Regular',
-    fontSize: 14,
-    color: '#3D1609',
-    opacity: 0.8,
-    marginBottom: 4,
-  },
-  priceValue: {
-    fontFamily: 'Quicksand-Bold',
-    fontSize: 24,
-    color: '#A73249',
-  },
-  priceSeparator: {
-    paddingHorizontal: 20,
-  },
-  priceNote: {
-    fontFamily: 'Nunito-Regular',
-    fontSize: 12,
-    color: '#3D1609',
-    textAlign: 'center',
-    opacity: 0.7,
-    fontStyle: 'italic',
-  },
-  ctaSection: {
-    paddingHorizontal: 16,
-  },
-  ctaCard: {
-    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 24,
     alignItems: 'center',
-    shadowColor: '#3D1609',
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
+    borderWidth: 1,
+    borderColor: '#E8D5C9',
   },
-  ctaTitle: {
+  comingSoonTitle: {
     fontFamily: 'Quicksand-Bold',
     fontSize: 20,
     color: '#3D1609',
     marginTop: 12,
     marginBottom: 8,
-    textAlign: 'center',
   },
-  ctaDescription: {
+  comingSoonDescription: {
     fontFamily: 'Nunito-Regular',
     fontSize: 14,
     color: '#3D1609',
@@ -477,22 +397,17 @@ const styles = StyleSheet.create({
     opacity: 0.8,
     marginBottom: 20,
   },
-  ctaButton: {
+  notifyButton: {
     backgroundColor: '#A73249',
-    paddingHorizontal: 32,
-    paddingVertical: 14,
-    borderRadius: 12,
-    shadowColor: '#A73249',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 4,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
   },
-  ctaButtonText: {
+  notifyButtonText: {
     fontFamily: 'Quicksand-Bold',
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: 14,
   },
 });
 
-export default SubcategoryDetailScreen;
+export default CollectionDetailScreen;
