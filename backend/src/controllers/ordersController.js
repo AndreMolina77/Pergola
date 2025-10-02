@@ -103,9 +103,11 @@ ordersController.putOrders = async (req, res) => {
     }
     // Verificar productos si se actualizan
     if (updates.items) {
-      const productsExist = await Products.countDocuments({ _id: { $in: updates.items } });
+      // Extraer solo los itemIds para la verificación
+      const itemIds = updates.items.map(item => item.itemId || item);
+      const productsExist = await Products.countDocuments({ _id: { $in: itemIds } });
       // Si no existen, devolver error
-      if (productsExist !== updates.items.length) {
+      if (productsExist !== itemIds.length) {
         // ESTADO DE ERROR DE INPUT DEL CLIENTE
         return res.status(400).json({ message: "Uno o más productos no existen" });
       }

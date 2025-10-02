@@ -96,9 +96,21 @@ const ordersSchema = new Schema({
     }
   },
   items: [{
-    type: Schema.Types.ObjectId,
-    ref: 'Products',
-    required: [true, "Al menos un producto es obligatorio"]
+    itemId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Products',
+      required: [true, "Al menos un producto es obligatorio"]
+    },
+    quantity: {
+      type: Number,
+      required: true,
+      min: 1
+    },
+    price: {
+      type: Number,
+      required: true,
+      min: 0
+    }
   }],
   subtotal: {
     type: Number,
