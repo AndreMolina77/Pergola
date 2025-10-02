@@ -119,7 +119,7 @@ export default function AppNavigator() {
           component={SurveyScreen}
           options={{ headerShown: false }}
         />
-                <Stack.Screen
+        <Stack.Screen
           name="CollectionDetail"
           component={CollectionDetailScreen}
           options={{ headerShown: false }}

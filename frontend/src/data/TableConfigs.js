@@ -364,7 +364,7 @@ export const customDesignsConfig = {
     },
     // Referencias a DesignElements
     { name: 'base', type: 'select', label: 'Base', required: true, options: 'designelements' },
-    { name: 'baseLength', type: 'text', label: 'Longitud de Base', required: true, placeholder: 'Ej: 18cm o 180mm', helperText: 'Formato: 1-3 dígitos seguidos de cm o mm (ej: 18cm, 180mm)', pattern: '^\\d{1,3}(cm|mm)?$', patternMessage: 'La longitud debe tener formato: 123cm o 123mm' },
+    { name: 'baseLength', type: 'text', label: 'Longitud de Base', required: true, placeholder: 'Ej: 18cm o 180mm', helperText: 'Formato: 1-3 dígitos seguidos de cm o mm (ej: 18cm, 180mm)', pattern: '^\\d{1,3}(cm|mm)$', patternMessage: 'La longitud debe tener formato: 123cm o 123mm' },
     { name: 'decoration', type: 'select-multiple', label: 'Decoración', required: true, options: 'designelements' },
     { name: 'clasp', type: 'select', label: 'Cierre', required: true, options: 'designelements' },
     { name: 'customerComments', type: 'textarea', label: 'Comentarios del Cliente', required: true, placeholder: 'Comentarios adicionales del cliente...', rows: 3, maxLength: 300 }
@@ -438,12 +438,13 @@ export const ordersConfig = {
         { value: 'otro', label: 'Otro' }
       ]
     },
-    { name: 'items', type: 'select-multiple', label: 'Items', required: true, options: 'products' },
+    { name: 'items', type: 'order-items', label: 'Productos del Pedido', required: true },
     { name: 'subtotal', type: 'number', label: 'Subtotal', required: true, placeholder: '0.00', min: 0.01, step: 0.01 },
     { name: 'total', type: 'number', label: 'Total', required: true, placeholder: '0.00', min: 0.01, step: 0.01 },
     { name: 'status', type: 'select', label: 'Estado', required: true,
       options: [
         { value: 'pendiente', label: 'Pendiente' },
+        { value: 'en proceso', label: 'En Proceso' },
         { value: 'enviado', label: 'Enviado' },
         { value: 'entregado', label: 'Entregado' },
         { value: 'cancelado', label: 'Cancelado' }

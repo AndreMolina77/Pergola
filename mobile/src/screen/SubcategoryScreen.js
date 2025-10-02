@@ -67,7 +67,6 @@ const SubcategoryDetailScreen = () => {
     // Simular carga de datos
     const loadSubcategoryData = () => {
       setLoading(true);
-      
       // Simular delay de API
       setTimeout(() => {
         const foundSubcategory = MOCK_SUBCATEGORIES.find(item => item._id === itemId);
