@@ -23,6 +23,10 @@ loginController.login = async (req, res) => {
       console.log("LOGIN ADMIN DETECTADO")  
       // Intentar buscar admin en la DB
       let adminUser = await adminModel.findOne({ email })
+      console.log("Admin desde DB:", adminUser)
+      console.log("Password ingresada:", password)
+      console.log("Password hash en DB:", adminUser.password)
+
       // Si no existe, crear uno con password de config como fallback
       if (!adminUser) {
         const salt = await bcryptjs.genSalt(10)
