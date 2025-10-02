@@ -7,7 +7,6 @@ import adminModel from "../models/Admin.js"
 import bcryptjs from "bcryptjs"
 import jsonwebtoken from "jsonwebtoken"
 import { config } from "../utils/config.js"
-import { API } from "../utils/api.js"
 //POST (CREATE)
 loginController.login = async (req, res) => {
   const { email, password, rememberMe, platform } = req.body // Platform agregado
@@ -27,7 +26,7 @@ loginController.login = async (req, res) => {
       // Si no existe, crear uno con password de config como fallback
       if (!adminUser) {
         const salt = await bcryptjs.genSalt(10)
-        const hashedPassword = await bcryptjs.hash(password, salt)
+        const hashedPassword = await bcryptjs.hash(config.CREDENTIALS.password, salt)
         adminUser = new adminModel({
           name: "Admin",
           lastName: "Pergola",
@@ -39,7 +38,13 @@ loginController.login = async (req, res) => {
         console.log("Admin creado en DB con password de config")
       }
       // Verificar contraseña
-      const isMatch = await bcryptjs.compare(password, adminUser.password)
+      let isMatch = false
+      if (adminUser.password) {
+        isMatch = await bcryptjs.compare(password, adminUser.password)
+      } else {
+        // Fallback solo para compatibilidad inicial
+        isMatch = password === config.CREDENTIALS.password
+      }
       if (!isMatch) {
         console.log("Contraseña de admin incorrecta")
         return res.status(400).json({ message: "Contraseña incorrecta" })
