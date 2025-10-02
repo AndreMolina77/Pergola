@@ -90,15 +90,8 @@ adminProfileController.changePassword = async (req, res) => {
     if (!adminUser) {
       return res.status(404).json({ message: "Administrador no encontrado" })
     }
-    const isMatch = await adminUser.comparePassword(currentPassword)
-    if (!isMatch) {
-      // Fallback inicial si quieres usar config.CREDENTIALS.password
-      if (currentPassword === config.CREDENTIALS.password) {
-        // OK, primera vez usando la contraseña de config
-      } else {
-        return res.status(400).json({ message: "Contraseña actual incorrecta" })
-      }
-    }
+    const isMatch = await bcryptjs.compare(currentPassword, adminUser.password)
+    if (!isMatch) return res.status(400).json({ message: "Contraseña actual incorrecta" })
     adminUser.password = newPassword
     await adminUser.save()
 

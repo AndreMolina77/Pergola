@@ -22,7 +22,7 @@ loginController.login = async (req, res) => {
     if (email === config.CREDENTIALS.email) {
       console.log("LOGIN ADMIN DETECTADO")  
       // Intentar buscar admin en la DB
-      let adminUser = await adminModel.findOne({ email })
+      const adminUser = await adminModel.findOne({ email })
       console.log("Admin desde DB:", adminUser)
       console.log("Password ingresada:", password)
       console.log("Password hash en DB:", adminUser.password)
@@ -42,18 +42,8 @@ loginController.login = async (req, res) => {
         console.log("Admin creado en DB con password de config")
       }
       // Verificar contraseña
-      let isMatch = false
-      if (adminUser.password) {
-        isMatch = await bcryptjs.compare(password, adminUser.password)
-        console.log("Match?", isMatch)
-      } else {
-        // Fallback solo para compatibilidad inicial
-        isMatch = password === config.CREDENTIALS.password
-      }
-      if (!isMatch) {
-        console.log("Contraseña de admin incorrecta")
-        return res.status(400).json({ message: "Contraseña incorrecta" })
-      }
+      const isMatch = await bcryptjs.compare(password, adminUser.password)
+      if (!isMatch) return res.status(400).json({ message: "Contraseña incorrecta" })
       // COMENTAR TEMPORALMENTE ESTA VALIDACIÓN
       /*
       if (platform === "mobile") {
