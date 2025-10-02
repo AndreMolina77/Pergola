@@ -3,7 +3,7 @@ const adminProfileController = {}
 // Importo el modelo de admin
 import adminModel from "../models/Admin.js"
 // Importación de librerías para encriptar, cloudinary y archivo config
-import bcrypt from "bcrypt"
+import bcryptjs from "bcryptjs"
 import { config } from "../utils/config.js"
 import { v2 as cloudinary } from 'cloudinary'
 
@@ -96,8 +96,8 @@ adminProfileController.changePassword = async (req, res) => {
       return res.status(400).json({ message: "Contraseña actual incorrecta" })
     }
     // Hashear nueva contraseña y guardar
-    const salt = await bcrypt.genSalt(10)
-    adminUser.password = await bcrypt.hash(newPassword, salt)
+    const salt = await bcryptjs.genSalt(10)
+    adminUser.password = await bcryptjs.hash(newPassword, salt)
     await adminUser.save()
 
     res.status(200).json({ message: "Contraseña actualizada correctamente" })
