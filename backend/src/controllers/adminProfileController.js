@@ -99,9 +99,7 @@ adminProfileController.changePassword = async (req, res) => {
         return res.status(400).json({ message: "Contraseña actual incorrecta" })
       }
     }
-    // Hashear nueva contraseña y guardar
-    const salt = await bcryptjs.genSalt(10)
-    adminUser.password = await bcryptjs.hash(newPassword, salt)
+    adminUser.password = newPassword
     await adminUser.save()
 
     res.status(200).json({ message: "Contraseña actualizada correctamente" })
