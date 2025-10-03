@@ -1,32 +1,163 @@
-// src/components/product/ProductCard.js
-import React from "react";
-import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
+import { useState, useContext } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  Dimensions,
+  Alert
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { AuthContext } from '../../context/AuthContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFonts } from 'expo-font';
+import { getProductPricing, getProductStatus, formatPrice } from '../../screen/catalog/productUtils';
 
-const ProductCard = ({ product, onPress, onFavorite }) => {
+const { width: screenWidth } = Dimensions.get('window');
+const cardWidth = (screenWidth - 60) / 2; // 2 columnas con márgenes
+
+const ProductCard = ({ product, onPress, wishlist = [], setWishlist }) => {
+  const { user } = useContext(AuthContext);
+  const [isInWishlist, setIsInWishlist] = useState(
+    wishlist.some(item => item._id === product._id)
+  );
+
+  const [fontsLoaded] = useFonts({
+    'Quicksand-Bold': require('../../../assets/fonts/Quicksand-Bold.ttf'),
+    'Quicksand-Medium': require('../../../assets/fonts/Quicksand-Medium.ttf'),
+    'Nunito-Bold': require('../../../assets/fonts/Nunito-Bold.ttf'),
+    'Nunito-SemiBold': require('../../../assets/fonts/Nunito-SemiBold.ttf'),
+    'Nunito-Regular': require('../../../assets/fonts/Nunito-Regular.ttf'),
+  });
+
+  const toggleWishlist = async () => {
+    if (!user) {
+      Alert.alert('Inicia sesión', 'Debes iniciar sesión para guardar productos en tu lista de deseos');
+      return;
+    }
+
+    try {
+      let newWishlist;
+      
+      if (isInWishlist) {
+        // Remover de wishlist
+        newWishlist = wishlist.filter(item => item._id !== product._id);
+      } else {
+        // Agregar a wishlist
+        newWishlist = [...wishlist, {
+          _id: product._id,
+          name: product.name,
+          description: product.description,
+          price: product.price,
+          images: product.images,
+          discount: product.discount
+        }];
+      }
+
+      // Actualizar estado local
+      setWishlist(newWishlist);
+      setIsInWishlist(!isInWishlist);
+
+      // Guardar en AsyncStorage
+      await AsyncStorage.setItem(`wishlist_${user.id}`, JSON.stringify(newWishlist));
+    } catch (error) {
+      console.error('Error updating wishlist:', error);
+      Alert.alert('Error', 'No se pudo actualizar la lista de deseos');
+    }
+  };
+
+  const calculateDiscountedPrice = () => {
+    const pricing = getProductPricing(product);
+    return pricing.finalPrice;
+  };
+
+  const formatPriceDisplay = (price) => {
+    return formatPrice(price);
+  };
+
+  const getStatusInfo = () => {
+    return getProductStatus(product);
+  };
+
+  if (!fontsLoaded) {
+    return null;
+  }
+
+  const pricing = getProductPricing(product);
+  const statusInfo = getStatusInfo();
+
   return (
-    <TouchableOpacity style={styles.card} onPress={() => onPress(product)}>
-      {/* Imagen del producto */}
+    <TouchableOpacity style={styles.card} onPress={() => onPress(product)} activeOpacity={0.8}>
       <View style={styles.imageContainer}>
         <Image
-          source={{ uri: product.image }}
-          style={styles.image}
-          resizeMode="contain"
+          source={{ uri: product.images?.[0] || 'https://via.placeholder.com/150' }}
+          style={styles.productImage}
+          resizeMode="cover"
         />
-
-        {/* Botón corazón (favorito) */}
+        
+        {/* Botón de wishlist */}
         <TouchableOpacity
-          style={styles.favoriteButton}
-          onPress={() => onFavorite(product)}
+          style={styles.wishlistBtn}
+          onPress={toggleWishlist}
+          activeOpacity={0.7}
         >
-          <Text style={styles.heart}>♡</Text>
+          <Ionicons
+            name={isInWishlist ? "heart" : "heart-outline"}
+            size={20}
+            color={isInWishlist ? "#A73249" : "#3D1609"}
+          />
         </TouchableOpacity>
+
+        {/* Etiqueta de descuento */}
+        {pricing.hasDiscount && (
+          <View style={styles.discountBadge}>
+            <Text style={styles.discountText}>
+              -{pricing.discountPercentage}%
+            </Text>
+          </View>
+        )}
+
+        {/* Etiqueta de stock agotado */}
+        {!statusInfo.available && (
+          <View style={styles.outOfStockOverlay}>
+            <Text style={styles.outOfStockText}>{statusInfo.displayText}</Text>
+          </View>
+        )}
       </View>
 
-      {/* Nombre del producto */}
-      <View style={styles.infoContainer}>
-        <Text style={styles.name} numberOfLines={2}>
+      <View style={styles.productInfo}>
+        <Text style={styles.productName} numberOfLines={2}>
           {product.name}
         </Text>
+        
+        <View style={styles.priceContainer}>
+          {pricing.hasDiscount ? (
+            <>
+              <Text style={styles.originalPrice}>
+                {formatPriceDisplay(pricing.originalPrice)}
+              </Text>
+              <Text style={styles.discountedPrice}>
+                {formatPriceDisplay(pricing.finalPrice)}
+              </Text>
+            </>
+          ) : (
+            <Text style={styles.price}>
+              {formatPriceDisplay(pricing.finalPrice)}
+            </Text>
+          )}
+        </View>
+
+        {/* Estado del producto */}
+        <View style={styles.statusContainer}>
+          <View style={[
+            styles.statusIndicator,
+            { backgroundColor: statusInfo.color }
+          ]} />
+          <Text style={styles.statusText}>
+            {statusInfo.displayText}
+          </Text>
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -34,52 +165,121 @@ const ProductCard = ({ product, onPress, onFavorite }) => {
 
 const styles = StyleSheet.create({
   card: {
-    width: 159,
-    height: 259,
-    borderRadius: 12,
-    backgroundColor: "#fff",
-    margin: 8,
-    elevation: 4, // sombra Android
-    shadowColor: "#000", // sombra iOS
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    overflow: "hidden",
+    width: cardWidth,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 15,
+    marginBottom: 16,
+    shadowColor: '#3D1609',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: '#E8E1D8',
   },
   imageContainer: {
-    flex: 1,
-    backgroundColor: "transparent",
-    justifyContent: "center",
-    alignItems: "center",
-    position: "relative",
+    position: 'relative',
+    width: '100%',
+    height: cardWidth * 0.75,
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
+    overflow: 'hidden',
   },
-  image: {
-    width: "100%",
-    height: "100%",
+  productImage: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#F5F5F5',
   },
-  favoriteButton: {
-    position: "absolute",
+  wishlistBtn: {
+    position: 'absolute',
     top: 8,
     right: 8,
-    backgroundColor: "rgba(255,255,255,0.8)",
-    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 15,
     padding: 6,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
   },
-  heart: {
-    fontSize: 16,
-    color: "#4B1E0E", // tu color vino/café
+  discountBadge: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    backgroundColor: '#A73249',
+    borderRadius: 8,
+    paddingHorizontal: 6,
+    paddingVertical: 3,
   },
-  infoContainer: {
-    backgroundColor: "#fff",
-    padding: 8,
-    justifyContent: "center",
-    alignItems: "center",
+  discountText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontFamily: 'Quicksand-Bold',
   },
-  name: {
+  outOfStockOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    paddingVertical: 4,
+    alignItems: 'center',
+  },
+  outOfStockText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontFamily: 'Quicksand-Bold',
+  },
+  productInfo: {
+    padding: 12,
+  },
+  productName: {
     fontSize: 14,
-    fontWeight: "600",
-    color: "#3d1609",
-    textAlign: "center",
+    fontFamily: 'Quicksand-Bold',
+    color: '#3D1609',
+    marginBottom: 6,
+    lineHeight: 18,
+  },
+  priceContainer: {
+    marginBottom: 6,
+  },
+  price: {
+    fontSize: 16,
+    fontFamily: 'Nunito-Bold',
+    color: '#A73249',
+  },
+  originalPrice: {
+    fontSize: 12,
+    fontFamily: 'Nunito-Regular',
+    color: '#9E9E9E',
+    textDecorationLine: 'line-through',
+  },
+  discountedPrice: {
+    fontSize: 16,
+    fontFamily: 'Nunito-Bold',
+    color: '#A73249',
+  },
+  statusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  statusIndicator: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    marginRight: 6,
+  },
+  statusText: {
+    fontSize: 10,
+    fontFamily: 'Nunito-Regular',
+    color: '#666666',
   },
 });
 

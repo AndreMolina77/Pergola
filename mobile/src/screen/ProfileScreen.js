@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { 
   View, 
   Text, 
@@ -70,22 +70,21 @@ export default function ProfileScreen() {
         setProfileData(userData);
         setProfilePic(userData.profilePic || null);
       } else {
-        console.error('Error loading profile:', response.status);
+        console.error('Error al cargar el perfil:', response.status);
       }
     } catch (error) {
-      console.error('Error loading profile:', error);
+      console.error('Error al cargar el perfil:', error);
     } finally {
       setLoadingProfile(false);
     }
   };
-
   const loadOrders = async () => {
     try {
       const response = await fetch(`${API}/public/orders`);
       if (response.ok) {
         const data = await response.json();
         // Filtrar solo los pedidos del usuario actual
-        const userOrders = Array.isArray(data) ? data.filter(order => order.customerId === user.id) : [];
+        const userOrders = Array.isArray(data) ? data.filter(order => order.customer === user.id) : [];
         setOrders(userOrders);
       }
     } catch (error) {
@@ -166,7 +165,7 @@ export default function ProfileScreen() {
         return;
       }
 
-      if (!editingData.phoneNumber || !/^\+503-\d{8}$/.test(editingData.phoneNumber)) {
+      if (!editingData.phoneNumber || !/^(\+503-?\d{4}-?\d{4})$/.test(editingData.phoneNumber)) {
         Alert.alert('Error', 'El teléfono debe tener formato +503-XXXXXXXX');
         return;
       }
