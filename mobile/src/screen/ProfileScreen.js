@@ -134,7 +134,7 @@ export default function ProfileScreen() {
         text: 'Eliminar', style: 'destructive', onPress: async () => {
           setLoadingPic(true);
           try {
-            const response = await fetch(`${API}/customers/${user.id}/profilePic`, {
+            const response = await fetch(`${API}/customers/${user.id}/profile-pic`, {
               method: 'DELETE',
             });
             if (response.ok) {
