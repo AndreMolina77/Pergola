@@ -9,12 +9,15 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  ScrollView
+  ScrollView,
+  Dimensions
 } from "react-native";
 import Checkbox from "expo-checkbox";
 import { Ionicons } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
 import { AuthContext } from "../context/AuthContext";
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 const RegisterScreen = ({ navigation }) => {
   const { register } = useContext(AuthContext);
@@ -34,7 +37,7 @@ const RegisterScreen = ({ navigation }) => {
     },
     step2: {
       email: "",
-      telefono: "",
+      telefono: "+503-",
       birthDate: "",
       DUI: ""
     },
@@ -70,65 +73,238 @@ const RegisterScreen = ({ navigation }) => {
     }
   ];
 
+  // FUNCIONES DE FORMATEO
+  const formatPhoneNumber = (text) => {
+    // Mantener siempre el prefijo +503-
+    const prefix = "+503-";
+    let numbers = text.replace(/\D/g, ''); // Solo números
+    
+    // Si se borra el prefijo, restaurarlo
+    if (!text.startsWith(prefix)) {
+      numbers = numbers.slice(3); // Remover 503 si está duplicado
+    }
+    
+    // Limitar a 8 dígitos después del prefijo
+    numbers = numbers.slice(0, 8);
+    
+    return prefix + numbers;
+  };
+
+  const formatDUI = (text) => {
+    // Solo números
+    let numbers = text.replace(/\D/g, '');
+    
+    // Limitar a 9 dígitos
+    numbers = numbers.slice(0, 9);
+    
+    // Formato: 12345678-9
+    if (numbers.length > 8) {
+      return numbers.slice(0, 8) + '-' + numbers.slice(8);
+    }
+    return numbers;
+  };
+
+  const formatBirthDate = (text) => {
+    // Solo números
+    let numbers = text.replace(/\D/g, '');
+    
+    // Limitar a 8 dígitos
+    numbers = numbers.slice(0, 8);
+    
+    // Formato: DD/MM/AAAA
+    if (numbers.length >= 5) {
+      return numbers.slice(0, 2) + '/' + numbers.slice(2, 4) + '/' + numbers.slice(4);
+    } else if (numbers.length >= 3) {
+      return numbers.slice(0, 2) + '/' + numbers.slice(2);
+    }
+    return numbers;
+  };
+
+  // FUNCIONES DE VALIDACIÓN MEJORADAS
+  const validateField = (field, value, step) => {
+    const errors = [];
+    
+    switch(field) {
+      case 'nombres':
+        if (!value || value.trim().length < 2) {
+          errors.push('Los nombres deben tener al menos 2 caracteres');
+        }
+        if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(value)) {
+          errors.push('Los nombres solo pueden contener letras');
+        }
+        break;
+        
+      case 'apellidos':
+        if (!value || value.trim().length < 2) {
+          errors.push('Los apellidos deben tener al menos 2 caracteres');
+        }
+        if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(value)) {
+          errors.push('Los apellidos solo pueden contener letras');
+        }
+        break;
+        
+      case 'username':
+        if (!value || value.trim().length < 3) {
+          errors.push('El nombre de usuario debe tener al menos 3 caracteres');
+        }
+        if (!/^[a-zA-Z0-9_]+$/.test(value)) {
+          errors.push('El nombre de usuario solo puede contener letras, números y guiones bajos');
+        }
+        break;
+        
+      case 'email':
+        if (!value || value.trim() === '') {
+          errors.push('El correo electrónico es obligatorio');
+        } else {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(value)) {
+            errors.push('El formato del correo electrónico no es válido');
+          }
+        }
+        break;
+        
+      case 'telefono':
+        if (!value || value.trim() === '') {
+          errors.push('El número de teléfono es obligatorio');
+        } else {
+          const phoneRegex = /^\+503-\d{8}$/;
+          if (!phoneRegex.test(value)) {
+            errors.push('El teléfono debe tener el formato +503-XXXXXXXX');
+          }
+        }
+        break;
+        
+      case 'birthDate':
+        if (value && value.trim() !== '') {
+          const dateRegex = /^\d{2}\/\d{2}\/\d{4}$/;
+          if (!dateRegex.test(value)) {
+            errors.push('La fecha debe tener el formato DD/MM/AAAA');
+          } else {
+            const [day, month, year] = value.split('/').map(Number);
+            const date = new Date(year, month - 1, day);
+            const today = new Date();
+            
+            if (date.getDate() !== day || date.getMonth() !== month - 1 || date.getFullYear() !== year) {
+              errors.push('La fecha de nacimiento no es válida');
+            } else if (date >= today) {
+              errors.push('La fecha de nacimiento debe ser anterior a hoy');
+            } else if (year < 1900 || year > today.getFullYear() - 13) {
+              errors.push('Debes tener al menos 13 años');
+            }
+          }
+        }
+        break;
+        
+      case 'DUI':
+        if (value && value.trim() !== '') {
+          const duiRegex = /^\d{8}-\d$/;
+          if (!duiRegex.test(value)) {
+            errors.push('El DUI debe tener el formato 12345678-9');
+          }
+        }
+        break;
+        
+      case 'password':
+        if (!value || value.length < 6) {
+          errors.push('La contraseña debe tener al menos 6 caracteres');
+        }
+        if (!/(?=.*[a-z])/.test(value)) {
+          errors.push('La contraseña debe contener al menos una letra minúscula');
+        }
+        if (!/(?=.*[A-Z])/.test(value)) {
+          errors.push('La contraseña debe contener al menos una letra mayúscula');
+        }
+        if (!/(?=.*\d)/.test(value)) {
+          errors.push('La contraseña debe contener al menos un número');
+        }
+        break;
+        
+      case 'confirmPassword':
+        if (!value) {
+          errors.push('Debes confirmar tu contraseña');
+        } else if (value !== formData.step3.password) {
+          errors.push('Las contraseñas no coinciden');
+        }
+        break;
+    }
+    
+    return errors;
+  };
+
   const updateFormData = (step, field, value) => {
+    let formattedValue = value;
+    
+    // Aplicar formateo automático
+    if (field === 'telefono') {
+      formattedValue = formatPhoneNumber(value);
+    } else if (field === 'DUI') {
+      formattedValue = formatDUI(value);
+    } else if (field === 'birthDate') {
+      formattedValue = formatBirthDate(value);
+    }
+    
     setFormData(prev => ({
       ...prev,
       [step]: {
         ...prev[step],
-        [field]: value
+        [field]: formattedValue
       }
     }));
   };
 
   const validateStep = (step) => {
     const currentData = formData[`step${step + 1}`];
+    const allErrors = [];
     
     switch(step) {
       case 0: // Step 1
-        if (!currentData.nombres || !currentData.apellidos || !currentData.username) {
-          Alert.alert("Error", "Por favor completa todos los campos");
-          return false;
-        }
-        return true;
+        const step1Fields = ['nombres', 'apellidos', 'username'];
+        step1Fields.forEach(field => {
+          const errors = validateField(field, currentData[field]);
+          allErrors.push(...errors);
+        });
+        break;
 
       case 1: // Step 2
-        if (!currentData.email || !currentData.telefono) {
-          Alert.alert("Error", "Email y teléfono son obligatorios");
-          return false;
-        }
+        const requiredFields = ['email', 'telefono'];
+        const optionalFields = ['birthDate', 'DUI'];
         
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(currentData.email)) {
-          Alert.alert("Error", "Por favor ingresa un email válido");
-          return false;
-        }
-        return true;
+        requiredFields.forEach(field => {
+          const errors = validateField(field, currentData[field]);
+          allErrors.push(...errors);
+        });
+        
+        optionalFields.forEach(field => {
+          if (currentData[field] && currentData[field].trim() !== '') {
+            const errors = validateField(field, currentData[field]);
+            allErrors.push(...errors);
+          }
+        });
+        break;
 
       case 2: // Step 3
-        if (!currentData.password || !currentData.confirmPassword) {
-          Alert.alert("Error", "Ambas contraseñas son obligatorias");
-          return false;
-        }
+        const step3Fields = ['password', 'confirmPassword'];
+        step3Fields.forEach(field => {
+          const errors = validateField(field, currentData[field]);
+          allErrors.push(...errors);
+        });
         
-        if (currentData.password !== currentData.confirmPassword) {
-          Alert.alert("Error", "Las contraseñas no coinciden");
-          return false;
-        }
-        
-        if (currentData.password.length < 6) {
-          Alert.alert("Error", "La contraseña debe tener al menos 6 caracteres");
-          return false;
-        }
-
         if (!acceptTerms) {
-          Alert.alert("Error", "Debes aceptar los términos y condiciones");
-          return false;
+          allErrors.push('Debes aceptar los términos y condiciones');
         }
-        return true;
-
-      default:
-        return true;
+        break;
     }
+    
+    if (allErrors.length > 0) {
+      Alert.alert(
+        "Errores de validación",
+        allErrors.join('\n• '),
+        [{ text: "Entendido", style: "default" }]
+      );
+      return false;
+    }
+    
+    return true;
   };
 
   const handleNextStep = () => {
@@ -153,15 +329,15 @@ const RegisterScreen = ({ navigation }) => {
     try {
       // PREPARAR DATOS FINALES PARA LA API
       const finalData = {
-        name: formData.step1.nombres,
-        lastName: formData.step1.apellidos,
-        username: formData.step1.username,
-        email: formData.step2.email,
+        name: formData.step1.nombres.trim(),
+        lastName: formData.step1.apellidos.trim(),
+        username: formData.step1.username.trim(),
+        email: formData.step2.email.trim(),
         phoneNumber: formData.step2.telefono,
-        birthDate: formData.step2.birthDate || "",
+        birthDate: formData.step2.birthDate ? convertDateToISO(formData.step2.birthDate) : "",
         DUI: formData.step2.DUI || "",
         password: formData.step3.password,
-        address: formData.step3.address || "",
+        address: formData.step3.address.trim() || "",
         isVerified: false
       };
 
@@ -178,6 +354,12 @@ const RegisterScreen = ({ navigation }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const convertDateToISO = (dateString) => {
+    if (!dateString) return "";
+    const [day, month, year] = dateString.split('/');
+    return new Date(year, month - 1, day).toISOString();
   };
 
   const renderStepIndicator = () => (
@@ -212,7 +394,7 @@ const RegisterScreen = ({ navigation }) => {
         return (
           <View style={styles.formSection}>
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Nombres</Text>
+              <Text style={styles.label}>Nombres *</Text>
               <TextInput
                 style={styles.input}
                 placeholder="Ingresa tus nombres"
@@ -220,11 +402,13 @@ const RegisterScreen = ({ navigation }) => {
                 value={formData.step1.nombres}
                 onChangeText={(text) => updateFormData("step1", "nombres", text)}
                 editable={!loading}
+                autoCapitalize="words"
+                maxLength={50}
               />
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Apellidos</Text>
+              <Text style={styles.label}>Apellidos *</Text>
               <TextInput
                 style={styles.input}
                 placeholder="Ingresa tus apellidos"
@@ -232,11 +416,13 @@ const RegisterScreen = ({ navigation }) => {
                 value={formData.step1.apellidos}
                 onChangeText={(text) => updateFormData("step1", "apellidos", text)}
                 editable={!loading}
+                autoCapitalize="words"
+                maxLength={50}
               />
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Nombre de usuario</Text>
+              <Text style={styles.label}>Nombre de usuario *</Text>
               <TextInput
                 style={styles.input}
                 placeholder="Crea un nombre de usuario"
@@ -245,6 +431,7 @@ const RegisterScreen = ({ navigation }) => {
                 onChangeText={(text) => updateFormData("step1", "username", text)}
                 autoCapitalize="none"
                 editable={!loading}
+                maxLength={20}
               />
             </View>
           </View>
@@ -254,7 +441,7 @@ const RegisterScreen = ({ navigation }) => {
         return (
           <View style={styles.formSection}>
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Correo electrónico</Text>
+              <Text style={styles.label}>Correo electrónico *</Text>
               <TextInput
                 style={styles.input}
                 placeholder="tu@email.com"
@@ -264,43 +451,49 @@ const RegisterScreen = ({ navigation }) => {
                 keyboardType="email-address"
                 autoCapitalize="none"
                 editable={!loading}
+                maxLength={100}
               />
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Teléfono</Text>
+              <Text style={styles.label}>Teléfono *</Text>
               <TextInput
                 style={styles.input}
-                placeholder="+503 XXXX XXXX"
+                placeholder="+503-XXXXXXXX"
                 placeholderTextColor="#A73249AA"
                 value={formData.step2.telefono}
                 onChangeText={(text) => updateFormData("step2", "telefono", text)}
-                keyboardType="phone-pad"
+                keyboardType="numeric"
                 editable={!loading}
+                maxLength={13}
               />
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Fecha de nacimiento (Opcional)</Text>
+              <Text style={styles.label}>Fecha de nacimiento</Text>
               <TextInput
                 style={styles.input}
                 placeholder="DD/MM/AAAA"
                 placeholderTextColor="#A73249AA"
                 value={formData.step2.birthDate}
                 onChangeText={(text) => updateFormData("step2", "birthDate", text)}
+                keyboardType="numeric"
                 editable={!loading}
+                maxLength={10}
               />
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>DUI (Opcional)</Text>
+              <Text style={styles.label}>DUI</Text>
               <TextInput
                 style={styles.input}
-                placeholder="XXXXXXXX-X"
+                placeholder="12345678-9"
                 placeholderTextColor="#A73249AA"
                 value={formData.step2.DUI}
                 onChangeText={(text) => updateFormData("step2", "DUI", text)}
+                keyboardType="numeric"
                 editable={!loading}
+                maxLength={10}
               />
             </View>
           </View>
@@ -310,7 +503,7 @@ const RegisterScreen = ({ navigation }) => {
         return (
           <View style={styles.formSection}>
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Contraseña</Text>
+              <Text style={styles.label}>Contraseña *</Text>
               <View style={styles.passwordContainer}>
                 <TextInput
                   style={styles.inputPassword}
@@ -320,6 +513,7 @@ const RegisterScreen = ({ navigation }) => {
                   onChangeText={(text) => updateFormData("step3", "password", text)}
                   secureTextEntry={!showPassword}
                   editable={!loading}
+                  maxLength={50}
                 />
                 <TouchableOpacity
                   onPress={() => setShowPassword(!showPassword)}
@@ -333,10 +527,13 @@ const RegisterScreen = ({ navigation }) => {
                   />
                 </TouchableOpacity>
               </View>
+              <Text style={styles.passwordHint}>
+                Debe contener mayúsculas, minúsculas y números
+              </Text>
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Confirmar contraseña</Text>
+              <Text style={styles.label}>Confirmar contraseña *</Text>
               <View style={styles.passwordContainer}>
                 <TextInput
                   style={styles.inputPassword}
@@ -346,6 +543,7 @@ const RegisterScreen = ({ navigation }) => {
                   onChangeText={(text) => updateFormData("step3", "confirmPassword", text)}
                   secureTextEntry={!showConfirmPassword}
                   editable={!loading}
+                  maxLength={50}
                 />
                 <TouchableOpacity
                   onPress={() => setShowConfirmPassword(!showConfirmPassword)}
@@ -362,9 +560,9 @@ const RegisterScreen = ({ navigation }) => {
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Dirección (Opcional)</Text>
+              <Text style={styles.label}>Dirección</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, styles.textArea]}
                 placeholder="Tu dirección completa"
                 placeholderTextColor="#A73249AA"
                 value={formData.step3.address}
@@ -372,6 +570,7 @@ const RegisterScreen = ({ navigation }) => {
                 editable={!loading}
                 multiline={true}
                 numberOfLines={2}
+                maxLength={200}
               />
             </View>
 
@@ -388,7 +587,7 @@ const RegisterScreen = ({ navigation }) => {
                 style={styles.checkbox}
               />
               <Text style={styles.termsText}>
-                Acepto los términos y condiciones y la política de privacidad
+                Acepto los términos y condiciones y la política de privacidad *
               </Text>
             </TouchableOpacity>
           </View>
@@ -514,12 +713,12 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1,
-    paddingHorizontal: 25,
+    paddingHorizontal: Math.max(20, screenWidth * 0.05),
     paddingTop: Platform.OS === 'ios' ? 40 : 20,
-    paddingBottom: 20, // Espacio para el footer
+    paddingBottom: 20,
   },
   header: {
-    marginBottom: 20,
+    marginBottom: screenHeight * 0.02,
   },
   backButton: {
     width: 40,
@@ -529,19 +728,19 @@ const styles = StyleSheet.create({
   },
   welcomeSection: {
     alignItems: "center",
-    marginBottom: 30,
+    marginBottom: screenHeight * 0.03,
   },
   welcomeTitle: {
     fontFamily: "Quicksand-Bold",
-    fontSize: 32,
+    fontSize: Math.min(32, screenWidth * 0.08),
     color: "#3D1609",
     textAlign: "center",
     marginBottom: 12,
-    lineHeight: 38,
+    lineHeight: Math.min(38, screenWidth * 0.095),
   },
   welcomeSubtitle: {
     fontFamily: "Nunito-Regular",
-    fontSize: 16,
+    fontSize: Math.min(16, screenWidth * 0.04),
     color: "#3D1609",
     textAlign: "center",
     lineHeight: 22,
@@ -552,16 +751,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 30,
+    marginBottom: screenHeight * 0.03,
   },
   stepRow: {
     flexDirection: "row",
     alignItems: "center",
   },
   stepCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 2,
@@ -576,7 +775,7 @@ const styles = StyleSheet.create({
   },
   stepNumber: {
     fontFamily: "Nunito-Bold",
-    fontSize: 16,
+    fontSize: 14,
   },
   stepNumberActive: {
     color: "#FFFFFF",
@@ -585,7 +784,7 @@ const styles = StyleSheet.create({
     color: "#3D1609",
   },
   stepLine: {
-    width: 40,
+    width: 30,
     height: 2,
     marginHorizontal: 5,
   },
@@ -598,8 +797,8 @@ const styles = StyleSheet.create({
   loginCard: {
     backgroundColor: "#F5EDE8",
     borderRadius: 20,
-    padding: 25,
-    marginBottom: 20, // Espacio antes del footer
+    padding: Math.max(20, screenWidth * 0.05),
+    marginBottom: 20,
     shadowColor: "#3D1609",
     shadowOffset: {
       width: 0,
@@ -610,22 +809,23 @@ const styles = StyleSheet.create({
     elevation: 8,
     borderWidth: 1,
     borderColor: "#E8D5C9",
+    minHeight: screenHeight * 0.4,
   },
   loginTitle: {
     fontFamily: "Quicksand-Bold",
-    fontSize: 24,
+    fontSize: Math.min(24, screenWidth * 0.06),
     color: "#3D1609",
     textAlign: "center",
-    marginBottom: 30,
+    marginBottom: 25,
   },
   formSection: {
-    marginBottom: 20,
+    marginBottom: 15,
   },
   inputContainer: {
-    marginBottom: 20,
+    marginBottom: 18,
   },
   label: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: "Nunito-SemiBold",
     color: "#3D1609",
     marginBottom: 8,
@@ -633,17 +833,20 @@ const styles = StyleSheet.create({
   },
   input: {
     width: "100%",
-    minHeight: 56,
+    minHeight: 50,
     backgroundColor: "#FFFFFF",
     borderRadius: 12,
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    fontSize: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 15,
     fontFamily: "Nunito-Regular",
     borderWidth: 2,
     borderColor: "#E8E1D8",
     color: "#3D1609",
-    textAlignVertical: "top", // Para multiline
+  },
+  textArea: {
+    minHeight: 70,
+    textAlignVertical: "top",
   },
   passwordContainer: {
     position: "relative",
@@ -651,32 +854,39 @@ const styles = StyleSheet.create({
   },
   inputPassword: {
     width: "100%",
-    height: 56,
+    height: 50,
     backgroundColor: "#FFFFFF",
     borderRadius: 12,
-    paddingHorizontal: 20,
-    fontSize: 16,
+    paddingHorizontal: 16,
+    fontSize: 15,
     fontFamily: "Nunito-Regular",
     borderWidth: 2,
     borderColor: "#E8E1D8",
     color: "#3D1609",
-    paddingRight: 60, // Más espacio para el ícono
+    paddingRight: 55,
   },
   eyeIconContainer: {
     position: "absolute",
-    right: 15,
+    right: 12,
     top: 0,
     bottom: 0,
     justifyContent: "center",
     alignItems: "center",
     width: 40,
-    height: 56,
+    height: 50,
+  },
+  passwordHint: {
+    fontSize: 12,
+    fontFamily: "Nunito-Regular",
+    color: "#A73249",
+    marginTop: 5,
+    marginLeft: 5,
   },
   termsContainer: {
     flexDirection: "row",
-    alignItems: "flex-start", // Cambio para mejor alineación
+    alignItems: "flex-start",
     marginTop: 10,
-    marginBottom: 20,
+    marginBottom: 15,
     paddingRight: 10,
   },
   checkbox: {
@@ -684,23 +894,24 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 4,
     marginRight: 10,
-    marginTop: 2, // Pequeño ajuste de alineación
+    marginTop: 2,
   },
   termsText: {
     fontFamily: "Nunito-Regular",
     color: "#3D1609",
-    fontSize: 14,
+    fontSize: 13,
     flex: 1,
-    lineHeight: 20,
+    lineHeight: 18,
   },
   buttonsContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    gap: 15,
+    gap: 12,
+    marginTop: 10,
   },
   navButton: {
-    height: 56,
+    height: 50,
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
@@ -711,13 +922,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 6,
-    minWidth: 100, // Ancho mínimo para consistencia
+    minWidth: 100,
   },
   prevButton: {
     backgroundColor: "#F5EDE8",
     borderWidth: 2,
     borderColor: "#A73249",
-    flex: 0.5, // Botón anterior más pequeño
+    flex: 0.4,
   },
   nextButton: {
     backgroundColor: "#A73249",
@@ -731,28 +942,28 @@ const styles = StyleSheet.create({
   prevButtonText: {
     color: "#A73249",
     fontFamily: "Quicksand-Bold",
-    fontSize: 16,
+    fontSize: 15,
   },
   nextButtonText: {
     color: "#fff",
     fontFamily: "Quicksand-Bold",
-    fontSize: 16,
+    fontSize: 15,
     letterSpacing: 0.5,
   },
   footer: {
-    paddingVertical: 20,
-    paddingHorizontal: 25,
+    paddingVertical: 16,
+    paddingHorizontal: Math.max(20, screenWidth * 0.05),
     borderTopWidth: 1,
     borderTopColor: "#D0C4B8",
     alignItems: "center",
-    backgroundColor: "#E3C6B8", // Asegurar color de fondo
+    backgroundColor: "#E3C6B8",
   },
   footerText: {
     textAlign: "center",
     color: "#3D1609",
-    fontSize: 15,
+    fontSize: 14,
     fontFamily: "Nunito-Regular",
-    lineHeight: 20,
+    lineHeight: 18,
   },
   footerLink: {
     color: "#A73249",

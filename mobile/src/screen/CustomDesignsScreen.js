@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import {
   View,
   Text,
+  ActivityIndicator,
   StyleSheet,
   TouchableOpacity,
   SafeAreaView,
@@ -21,7 +22,7 @@ const STEPS = [
   { key: 'base', title: 'Elige la base', description: 'Escoge el material base para tu joya.' },
   { key: 'baseLength', title: 'Longitud de la base', description: 'Especifica la longitud requerida (ej: 45cm).' },
   { key: 'decoration', title: 'Elige la decoración', description: 'Agrega toques únicos (puedes elegir varios).' },
-  { key: 'closure', title: 'Elige el cierre', description: 'Define el tipo de cierre para tu comodidad.' },
+  { key: 'clasp', title: 'Elige el cierre', description: 'Define el tipo de cierre para tu comodidad.' },
   { key: 'customerComments', title: 'Comentarios', description: 'Agrega algún detalle especial (opcional).' },
 ];
 
@@ -67,36 +68,36 @@ const CustomDesignsScreen = () => {
   const [selected, setSelected] = useState({
     piece: null,
     base: null,
-    baseLength: '', 
-    decoration: [], 
-    clasp: null, 
-    customerComments: '' 
+    baseLength: '',
+    decoration: [],
+    clasp: null,
+    customerComments: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errors, setErrors] = useState({}); 
+  const [errors, setErrors] = useState({});
 
   const currentStep = STEPS[stepIndex];
 
-    const validateBaseLength = (length) => {
+  const validateBaseLength = (length) => {
     if (!length.trim()) {
       return { isValid: false, message: 'La longitud es requerida' };
     }
-    
+
     const regex = /^\d{1,3}(cm|mm)?$/i;
     const trimmedLength = length.trim();
     if (!regex.test(trimmedLength)) {
       // Mensaje de error basado en lo que el backend realmente espera
       return { isValid: false, message: 'Formato inválido. Usa: 123, 123cm, o 123mm (sin decimales ni pulgadas)' };
     }
-    
+
     const match = trimmedLength.match(/^(\d{1,3})(cm|mm)?$/i);
     if (!match) {
       return { isValid: false, message: 'Error interno de validación al analizar el valor.' };
     }
     const value = parseFloat(match[1]);
     const unit = (match[2] || '').toLowerCase();
-    
-    const effectiveUnit = unit || 'cm'; 
+
+    const effectiveUnit = unit || 'cm';
 
     if (effectiveUnit === 'cm' && (value < 10 || value > 200)) {
       // Rango ajustado a las nuevas unidades permitidas (sin decimales)
@@ -106,7 +107,7 @@ const CustomDesignsScreen = () => {
       // Rango ajustado a las nuevas unidades permitidas (sin decimales)
       return { isValid: false, message: 'Longitud debe ser un entero entre 100mm y 2000mm' };
     }
-    
+
     return { isValid: true };
   };
 
@@ -119,7 +120,7 @@ const CustomDesignsScreen = () => {
   const canContinue = useMemo(() => {
     // Limpiar errores al cambiar de paso
     setErrors({});
-    
+
     if (currentStep.key === 'decoration') return selected.decoration.length > 0;
     if (currentStep.key === 'baseLength') {
       const lengthValid = validateBaseLength(selected.baseLength);
@@ -163,25 +164,27 @@ const CustomDesignsScreen = () => {
     else navigation.goBack();
   };
 
-   const finish = async () => {
+  const finish = async () => {
     // Validaciones finales antes de enviar
     const baseLengthValidation = validateBaseLength(selected.baseLength);
-    const commentsValidation = validateComments(selected.customerComments);
-    
+
+    // Solo validar comentarios si hay texto
+    const commentsValidation = selected.customerComments.trim().length > 0 ? validateComments(selected.customerComments) : { isValid: true };
+
     const validationErrors = {};
-    
+
     if (!selected.piece) validationErrors.piece = 'Selecciona una pieza';
     if (!selected.base) validationErrors.base = 'Selecciona un material base';
     if (!baseLengthValidation.isValid) validationErrors.baseLength = baseLengthValidation.message;
     if (selected.decoration.length === 0) validationErrors.decoration = 'Selecciona al menos una decoración';
     if (!selected.clasp) validationErrors.clasp = 'Selecciona un cierre';
     if (!commentsValidation.isValid) validationErrors.customerComments = commentsValidation.message;
-    
+
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       Alert.alert(
-        'Datos incompletos', 
-        'Por favor corrige los errores antes de continuar:\n\n' + 
+        'Datos incompletos',
+        'Por favor corrige los errores antes de continuar:\n\n' +
         Object.values(validationErrors).join('\n• ')
       );
       return;
@@ -190,7 +193,7 @@ const CustomDesignsScreen = () => {
       if (s.key === 'decoration') return selected.decoration.length === 0;
       return !selected[s.key];
     });
-    
+
     if (missing.length || !selected.baseLength.trim()) {
       Alert.alert('Faltan opciones', 'Por favor completa todas las selecciones antes de continuar.');
       return;
@@ -220,7 +223,7 @@ const CustomDesignsScreen = () => {
       if (response.ok) {
         Alert.alert(
           'Diseño creado',
-          `Código: ${designData.codeRequest}\nPieza: ${selected.piece.label}\nBase: ${selected.base.label}\nDecoraciones: ${selected.decoration.map(d => d.label).join(', ')}\nCierre: ${selected.clasp.label}\n\nPrecio estimado: $${estimatedPrice} USD`,
+          `Código: ${designData.codeRequest}\nPieza: ${selected.piece.label}\nBase: ${selected.base.label}\nDecoraciones: ${selected.decoration.map(d => d.label).join(', ')}\nCierre: ${selected.clasp.label}`,
           [
             { text: 'Aceptar', onPress: () => navigation.navigate('Home') },
           ]
@@ -236,74 +239,86 @@ const CustomDesignsScreen = () => {
     }
   };
   // Componente para longitud de base
-  const renderBaseLengthInput = () => (
-    <View style={styles.inputContainer}>
-      <Text style={styles.inputLabel}>Longitud de la base *</Text>
-      <TextInput
-        style={[styles.textInput, 
+  const renderBaseLengthInput = () => {
+    const validation = validateBaseLength(selected.baseLength);
+    return (
+      <View style={styles.inputContainer}>
+        <Text style={styles.inputLabel}>Longitud de la base *</Text>
+        <TextInput
+          style={[styles.textInput,
           selected.baseLength && !validation.isValid && styles.inputError // ← ESTILO DE ERROR
-        ]}
-        value={selected.baseLength}
-        onChangeText={(text) => {
-          setSelected(prev => ({ ...prev, baseLength: text }));
-          // Limpiar error específico al escribir
-          if (errors.baseLength) {
-            setErrors(prev => ({ ...prev, baseLength: null }));
-          }
-        }}
-        placeholder="Ej: 45cm o 180mm"
-        placeholderTextColor="#999"
-        keyboardType="numbers-and-punctuation"
-      />
-      <Text style={[styles.inputHint,
+          ]}
+          value={selected.baseLength}
+          onChangeText={(text) => {
+            setSelected(prev => ({ ...prev, baseLength: text }));
+            // Limpiar error específico al escribir
+            if (errors.baseLength) {
+              setErrors(prev => ({ ...prev, baseLength: null }));
+            }
+          }}
+          placeholder="Ej: 45cm o 180mm"
+          placeholderTextColor="#999"
+          keyboardType="numbers-and-punctuation"
+        />
+        <Text style={[styles.inputHint,
         selected.baseLength && !validation.isValid && styles.errorText // ← TEXTO DE ERROR
-      ]}>{selected.baseLength && !validation.isValid 
-          ? validation.message 
+        ]}>{selected.baseLength && !validation.isValid
+          ? validation.message
           : 'Formato: 45cm o 180mm'
-        }</Text>
-    </View>
-  );
+          }</Text>
+      </View>
+    );
+  };
   // Componente para comentarios opcionales
-  const renderCommentsInput = () => (
-    <View style={styles.inputContainer}>
-      <Text style={styles.inputLabel}>Comentarios adicionales (opcional)</Text>
-      <TextInput
-        style={[styles.textInput, styles.textArea, !validation.isValid && styles.inputError]}
-        value={selected.customerComments}
-        onChangeText={(text) => {setSelected(prev => ({ ...prev, customerComments: text }))
-          // Limpiar error específico al escribir
-          if (errors.customerComments) {
-            setErrors(prev => ({ ...prev, customerComments: null }));
-          }
-        }}
-        placeholder="Algún detalle especial o instrucción..."
-        placeholderTextColor="#999"
-        multiline
-        numberOfLines={3}
-        maxLength={300}
-      />
-      <Text style={[
-        styles.inputHint,
-        !validation.isValid && styles.errorText // ← TEXTO DE ERROR
-      ]}>{!validation.isValid 
-          ? validation.message 
+  const renderCommentsInput = () => {
+    const validation = validateComments(selected.customerComments);
+    return (
+      <View style={styles.inputContainer}>
+        <Text style={styles.inputLabel}>Comentarios adicionales (opcional)</Text>
+        <TextInput
+          style={[styles.textInput, styles.textArea, !validation.isValid && styles.inputError]}
+          value={selected.customerComments}
+          onChangeText={(text) => {
+            setSelected(prev => ({ ...prev, customerComments: text }))
+            // Limpiar error específico al escribir
+            if (errors.customerComments) {
+              setErrors(prev => ({ ...prev, customerComments: null }));
+            }
+          }}
+          placeholder="Algún detalle especial o instrucción..."
+          placeholderTextColor="#999"
+          multiline
+          numberOfLines={3}
+          maxLength={300}
+        />
+        <Text style={[
+          styles.inputHint,
+          !validation.isValid && styles.errorText // ← TEXTO DE ERROR
+        ]}>{!validation.isValid
+          ? validation.message
           : `${selected.customerComments.length}/300 caracteres`
-        }</Text>
-    </View>
-  );
+          }</Text>
+      </View>
+    );
+  };
   const renderOptions = () => {
     if (currentStep.key === 'baseLength') {
       return renderBaseLengthInput();
     }
-    
+
     if (currentStep.key === 'customerComments') {
       return renderCommentsInput();
+    }
+
+    // Prevención de error: si no hay opciones para el paso actual
+    if (!OPTIONS[currentStep.key]) {
+      return null;
     }
 
     return (
       <View style={styles.chipsWrap}>
         {OPTIONS[currentStep.key].map(opt => {
-          const isSelected = currentStep.key === 'decoration' 
+          const isSelected = currentStep.key === 'decoration'
             ? selected.decoration.some(deco => deco.elementId === opt.elementId)
             : selected[currentStep.key]?.elementId === opt.elementId;
 
@@ -311,7 +326,7 @@ const CustomDesignsScreen = () => {
             <TouchableOpacity
               key={opt.id}
               style={[styles.chip, isSelected && styles.chipSelected]}
-              onPress={() => currentStep.key === 'decoration' 
+              onPress={() => currentStep.key === 'decoration'
                 ? handleSelectDecoration(opt)
                 : handleSelect(currentStep.key, opt)
               }
@@ -392,7 +407,7 @@ const CustomDesignsScreen = () => {
           <View style={styles.summaryRow}>
             <Text style={styles.summaryKey}>Decoración</Text>
             <Text style={styles.summaryVal}>
-              {selected.decoration.length > 0 
+              {selected.decoration.length > 0
                 ? selected.decoration.map(d => d.label).join(', ')
                 : '—'
               }
@@ -412,19 +427,19 @@ const CustomDesignsScreen = () => {
       </ScrollView>
 
       {/* Footer actions */}
-      <View style={[styles.footer, { paddingBottom: insets.bottom || 16 }]}>        
+      <View style={[styles.footer, { paddingBottom: insets.bottom || 16 }]}>
         <TouchableOpacity style={[styles.navBtn, styles.secondaryBtn, isSubmitting && styles.disabledBtn]} onPress={back}
-        disabled={isSubmitting}>
+          disabled={isSubmitting}>
           <Text style={[styles.navBtnText, styles.secondaryText]}>{stepIndex === 0 ? 'Salir' : 'Atrás'}</Text>
         </TouchableOpacity>
         {stepIndex < STEPS.length - 1 ? (
-          <TouchableOpacity style={[styles.navBtn, (!canContinue || isSubmitting) && styles.disabledBtn]} onPress={next} 
-          disabled={(!canContinue || isSubmitting)}>
+          <TouchableOpacity style={[styles.navBtn, (!canContinue || isSubmitting) && styles.disabledBtn]} onPress={next}
+            disabled={(!canContinue || isSubmitting)}>
             <Text style={styles.navBtnText}>Siguiente</Text>
           </TouchableOpacity>
         ) : (
           <TouchableOpacity style={[styles.navBtn, (!canContinue || isSubmitting) && styles.disabledBtn]} onPress={finish}
-          disabled={(!canContinue || isSubmitting)}>
+            disabled={(!canContinue || isSubmitting)}>
             {isSubmitting ? (
               <ActivityIndicator size="small" color="#FFFFFF" />
             ) : (

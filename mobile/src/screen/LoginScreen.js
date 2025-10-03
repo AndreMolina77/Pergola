@@ -94,13 +94,13 @@ const LoginScreen = ({ navigation }) => {
       if (result.success) {
         setLoginAttempts(0);
         setIsBlocked(false);
-        navigation.replace("TabNavigator");
+        navigation.replace("Home");
       } else {
         const newAttempts = loginAttempts + 1;
         setLoginAttempts(newAttempts);
         
         if (result.blocked) {
-          const minutes = result.remainingMinutes || 1440; // 24 horas por defecto
+          const minutes = result.remainingMinutes || 1440;
           setIsBlocked(true);
           setRemainingTime(minutes);
           Alert.alert(
@@ -108,9 +108,13 @@ const LoginScreen = ({ navigation }) => {
             `Demasiados intentos fallidos. Tu cuenta ha sido bloqueada por ${formatTime(minutes)}.`
           );
         } else if (newAttempts >= 3) {
+          const minutes = 1440;
+          setIsBlocked(true);
+          setRemainingTime(minutes);
+          setLoginAttempts(3);
           Alert.alert(
-            "Advertencia", 
-            `Contraseña incorrecta. Te quedan ${3 - newAttempts} intentos antes del bloqueo.`
+            "Cuenta Bloqueada", 
+            `Demasiados intentos fallidos. Tu cuenta ha sido bloqueada por ${formatTime(minutes)}.`
           );
         } else {
           Alert.alert("Error", result.message || "Credenciales incorrectas");
