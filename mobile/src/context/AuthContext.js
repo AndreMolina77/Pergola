@@ -8,23 +8,63 @@ export { AuthContext };
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [authToken, setAuthToken] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Cambiar a true inicialmente
   const API_URL = "https://pergola-production.up.railway.app/api";
 
+  // Función para validar la sesión con el backend
+  const validateSession = async (userData) => {
+    try {
+      const response = await fetch(`${API_URL}/customers/${userData.id}`, {
+        method: "GET",
+        credentials: 'include', // Importante: incluir cookies
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        return true; // Sesión válida
+      } else if (response.status === 401) {
+        return false; // Token expirado o inválido
+      } else {
+        return false; // Otros errores
+      }
+    } catch (error) {
+      console.log("Error validando sesión:", error);
+      return false;
+    }
+  };
+
   useEffect(() => {
-    const loadUserSession = async () => {
+    const loadAndValidateSession = async () => {
       try {
         const userSession = await AsyncStorage.getItem("userSession");
+        
         if (userSession) {
           const userData = JSON.parse(userSession);
-          setUser(userData);
-          setAuthToken("authenticated");
+          
+          // Validar si la sesión sigue siendo válida en el backend
+          const isValid = await validateSession(userData);
+          
+          if (isValid) {
+            setUser(userData);
+            setAuthToken("authenticated");
+          } else {
+            // Sesión expirada - limpiar todo
+            console.log("Sesión expirada, limpiando...");
+            await clearSession();
+            ToastAndroid.show("Tu sesión ha expirado. Por favor, inicia sesión nuevamente.", ToastAndroid.LONG);
+          }
         }
       } catch (error) {
-        console.log("No hay sesión guardada");
+        console.log("Error cargando sesión:", error);
+        await clearSession();
+      } finally {
+        setLoading(false);
       }
     };
-    loadUserSession();
+    
+    loadAndValidateSession();
   }, []);
 
   const clearSession = async () => {
@@ -37,6 +77,7 @@ export const AuthProvider = ({ children }) => {
     try {
       await fetch(`${API_URL}/logout`, {
         method: "POST",
+        credentials: 'include',
         headers: {
           "Content-Type": "application/json",
         },
@@ -53,6 +94,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await fetch(`${API_URL}/login`, {
         method: "POST",
+        credentials: 'include', // Importante para recibir cookies
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, platform: "mobile" }),
       });
@@ -173,6 +215,35 @@ export const AuthProvider = ({ children }) => {
       console.error("Error during registration:", error);
       Alert.alert("Error de conexión", "No se pudo conectar con el servidor");
       return false;
+    }
+  };
+
+  // Función helper para hacer fetch con manejo de sesión expirada
+  const fetchWithAuth = async (url, options = {}) => {
+    try {
+      const response = await fetch(url, {
+        ...options,
+        credentials: 'include', // Siempre incluir cookies
+        headers: {
+          "Content-Type": "application/json",
+          ...options.headers,
+        },
+      });
+
+      // Si recibimos 401, la sesión expiró
+      if (response.status === 401) {
+        await clearSession();
+        ToastAndroid.show("Tu sesión ha expirado. Por favor, inicia sesión nuevamente.", ToastAndroid.LONG);
+        throw new Error('SESSION_EXPIRED');
+      }
+
+      return response;
+    } catch (error) {
+      if (error.message === 'SESSION_EXPIRED') {
+        throw error;
+      }
+      console.error("Error en fetchWithAuth:", error);
+      throw error;
     }
   };
 
@@ -329,6 +400,7 @@ export const AuthProvider = ({ children }) => {
       verifyCode, 
       verifyEmail, 
       resendVerificationCode, 
+      fetchWithAuth, // Exportar el helper
       API: API_URL 
     }}>
       {children}

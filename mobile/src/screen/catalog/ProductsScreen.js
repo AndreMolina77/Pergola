@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
+import { useRoute } from '@react-navigation/native';
 import {
   View,
   Text,
@@ -15,8 +16,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AuthContext } from '../../context/AuthContext';
+import { CartContext } from '../../context/CartContext';
 import ProductCard from '../../components/product/ProductCard';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts } from 'expo-font';
 import { 
   filterProductsByCategory, 
@@ -31,12 +32,15 @@ const statusBarHeight = Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 
 
 const ProductsScreen = ({ navigation }) => {
   const { user, API } = useContext(AuthContext);
+  const { wishlist } = useContext(CartContext);
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
   const [collections, setCollections] = useState([]);
-  const [wishlist, setWishlist] = useState([]);
+  const route = useRoute(); // <<--- USAR HOOK useRoute
+
+  const initialCategoryRaiz = route.params?.categoriaRaiz || null; // <<--- OBTENER PARÁMETRO
   
   // Estados de carga
   const [loading, setLoading] = useState(true);
@@ -46,7 +50,7 @@ const ProductsScreen = ({ navigation }) => {
   const [searchText, setSearchText] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [activeFilters, setActiveFilters] = useState({
-    category: null,
+    category: initialCategoryRaiz,
     subcategory: null,
     collection: null,
     priceRange: { min: 0, max: 1000 },
@@ -58,14 +62,11 @@ const ProductsScreen = ({ navigation }) => {
     'Quicksand-Medium': require('../../../assets/fonts/Quicksand-Medium.ttf'),
     'Nunito-Bold': require('../../../assets/fonts/Nunito-Bold.ttf'),
     'Nunito-SemiBold': require('../../../assets/fonts/Nunito-SemiBold.ttf'),
-    'Nunito-Regular': require('../../../assets/fonts/Nunito-Regular.ttf'),
+    'Nunito-Medium': require('../../../assets/fonts/Nunito-Medium.ttf'),
   });
 
   useEffect(() => {
     loadInitialData();
-    if (user) {
-      loadWishlist();
-    }
   }, [user]);
 
   useEffect(() => {
@@ -135,15 +136,6 @@ const ProductsScreen = ({ navigation }) => {
       }
     } catch (error) {
       console.error('Error loading collections:', error);
-    }
-  };
-
-  const loadWishlist = async () => {
-    try {
-      const stored = await AsyncStorage.getItem(`wishlist_${user.id}`);
-      setWishlist(stored ? JSON.parse(stored) : []);
-    } catch (error) {
-      console.error('Error loading wishlist:', error);
     }
   };
 
@@ -227,8 +219,6 @@ const ProductsScreen = ({ navigation }) => {
     <ProductCard
       product={item}
       onPress={navigateToProduct}
-      wishlist={wishlist}
-      setWishlist={setWishlist}
     />
   );
 
@@ -447,7 +437,7 @@ const ProductsScreen = ({ navigation }) => {
           onRefresh={onRefresh}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <Ionicons name="storefront-outline" size={64} color="#E0E0E0" />
+              <Ionicons name="storefront-outline" size={64} color="#3D1609" />
               <Text style={styles.emptyText}>No se encontraron productos</Text>
               <Text style={styles.emptySubtext}>
                 {searchText || getActiveFiltersCount() > 0
@@ -478,7 +468,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#E3C6B8',
   },
   header: {
-    backgroundColor: '#F5EDE8',
+    backgroundColor: '#E3C6B8',
     paddingTop: statusBarHeight + 10,
     paddingHorizontal: 16,
     paddingBottom: 16,
@@ -508,7 +498,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 14,
-    fontFamily: 'Nunito-Regular',
+    fontFamily: 'Nunito-Medium',
     color: '#3D1609',
     paddingVertical: 12,
   },
@@ -567,14 +557,14 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 18,
     fontFamily: 'Quicksand-Bold',
-    color: '#999999',
+    color: '#333333',
     marginTop: 16,
     textAlign: 'center',
   },
   emptySubtext: {
     fontSize: 14,
-    fontFamily: 'Nunito-Regular',
-    color: '#CCCCCC',
+    fontFamily: 'Nunito-Medium',
+    color: '#222222',
     marginTop: 4,
     textAlign: 'center',
   },
@@ -632,7 +622,7 @@ const styles = StyleSheet.create({
   },
   filterChipText: {
     fontSize: 14,
-    fontFamily: 'Nunito-Regular',
+    fontFamily: 'Nunito-Medium',
     color: '#3D1609',
   },
   filterChipTextActive: {

@@ -9,6 +9,7 @@ import SearchModal from '../components/SearchModal.js';
 import ColeccionesPergola from '../components/ColeccionesPergola.js';
 import CatalogoExclusivo from '../components/CatalogoExclusivo.js';
 import { AuthContext } from '../context/AuthContext';
+import NuestrosDiseños from '../components/NuestrosDiseños.js';
 
 const HomeScreen = () => {
   // Load fonts from the local assets directory
@@ -156,9 +157,19 @@ const HomeScreen = () => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Creaciones Pérgola</Text>
-            <TouchableOpacity>
-              <Text style={styles.seeAll}>Ver todo</Text>
+            {/* INICIO DE MODIFICACIÓN */}
+            <TouchableOpacity
+              onPress={() => {
+                // Navega a la pantalla de productos y envía un filtro inicial
+                navigation.navigate('ProductLines', { 
+                  categoriaRaiz: 'pergola' // Parámetro de filtro
+                });
+              }}
+            >
+              {/* Ícono que ocupa el espacio de "Ver todo" */}
+              <Icon name="options-outline" size={24} style={styles.sectionIcon} />
             </TouchableOpacity>
+            {/* FIN DE MODIFICACIÓN */}
           </View>
           <ColeccionesPergola />
         </View>
@@ -167,14 +178,45 @@ const HomeScreen = () => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Selección Exclusiva</Text>
-            <TouchableOpacity>
-              <Text style={styles.seeAll}>Ver todo</Text>
+            {/* INICIO DE MODIFICACIÓN */}
+            <TouchableOpacity
+              onPress={() => {
+                // Navega a la pantalla de productos y envía un filtro inicial
+                navigation.navigate('ProductLines', { 
+                  categoriaRaiz: 'exclusiva' // Parámetro de filtro
+                });
+              }}
+            >
+              {/* Ícono que ocupa el espacio de "Ver todo" */}
+              <Icon name="options-outline" size={24} style={styles.sectionIcon} />
             </TouchableOpacity>
+            {/* FIN DE MODIFICACIÓN */}
           </View>
           <CatalogoExclusivo />
         </View>
 
-        {/* Sección C: Espacio Promocional para Diseños Únicos */}
+        {/* Sección C: Explora Nuestros Diseños */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Explora Nuestros Diseños</Text>
+            {/* INICIO DE MODIFICACIÓN */}
+            <TouchableOpacity
+              onPress={() => {
+                // Navega a la pantalla de productos y envía un filtro inicial
+                navigation.navigate('ProductLines', { 
+                  categoriaRaiz: 'diseños' // Parámetro de filtro
+                });
+              }}
+            >
+              {/* Ícono que ocupa el espacio de "Ver todo" */}
+              <Icon name="options-outline" size={24} style={styles.sectionIcon} />
+            </TouchableOpacity>
+            {/* FIN DE MODIFICACIÓN */}
+          </View>
+          <NuestrosDiseños />
+        </View>
+
+        {/* Sección D: Espacio Promocional para Diseños Únicos */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Diseños Únicos</Text>
@@ -364,12 +406,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#3d1609',
   },
-  seeAll: {
-    fontFamily: "Quicksand",
-    fontSize: 14,
-    color: '#3d1609',
-    textDecorationLine: 'underline',
-  },
   horizontalScroll: {
     marginHorizontal: -5,
   },
@@ -476,6 +512,17 @@ const styles = StyleSheet.create({
     color: '#3d1609',
     marginBottom: 4,
     fontFamily: "Quicksand-Bold",
+  },
+  sectionIcon: {
+    color: '#3d1609', 
+    paddingHorizontal: 5, 
+    lineHeight: 24, 
+  },
+  seeAll: { 
+    fontFamily: "Quicksand",
+    fontSize: 18,
+    color: '#3d1609',
+    opacity: 0, // Lo puedes ocultar si necesitas que ocupe el espacio sin verse
   },
 });
 

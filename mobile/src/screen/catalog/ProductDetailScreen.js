@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useRef} from 'react';
 import {
   View,
   Text,
@@ -7,122 +7,105 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
-  Dimensions,
   Platform,
-  StatusBar
+  StatusBar,
+  Animated,
+  Share
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { AuthContext } from '../context/AuthContext';
-import ProductImageGallery from './ProductImageGallery';
-import ReviewsSection from './ReviewsSection';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AuthContext } from '../../context/AuthContext';
+import { CartContext } from '../../context/CartContext'; // AGREGAR ESTA IMPORTACIÓN
+import ProductImageGallery from '../../components/product/ProductImageGallery';
+import ReviewsSection from '../../components/product/ReviewsSection';
 import { useFonts } from 'expo-font';
-import { getProductPricing, getProductStatus, formatPrice, getProductCategoryInfo, sanitizeProduct } from '../../screen/catalog/productUtils';
+import { getProductPricing, getProductStatus, formatPrice, getProductCategoryInfo, sanitizeProduct, capitalizeFirst} from '../../screen/catalog/productUtils';
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const statusBarHeight = Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 0;
 
 const ProductDetailScreen = ({ route, navigation }) => {
   const { productId } = route.params;
-  const { user, API } = useContext(AuthContext);
+  const { user, API, fetchWithAuth } = useContext(AuthContext);
+  
+  // USAR EL CONTEXTO DEL CARRITO
+  const { 
+    addToCart: addToCartContext, 
+    toggleWishlist, 
+    isInWishlist: checkIsInWishlist 
+  } = useContext(CartContext);
   
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('details');
-  const [wishlist, setWishlist] = useState([]);
-  const [isInWishlist, setIsInWishlist] = useState(false);
   const [cartQuantity, setCartQuantity] = useState(1);
 
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, 100, 200],
+    outputRange: [0, 0.8, 1],
+    extrapolate: 'clamp'
+  });
+
   const [fontsLoaded] = useFonts({
-    'Quicksand-Bold': require('../../assets/fonts/Quicksand-Bold.ttf'),
-    'Quicksand-Medium': require('../../assets/fonts/Quicksand-Medium.ttf'),
-    'Nunito-Bold': require('../../assets/fonts/Nunito-Bold.ttf'),
-    'Nunito-SemiBold': require('../../assets/fonts/Nunito-SemiBold.ttf'),
-    'Nunito-Regular': require('../../assets/fonts/Nunito-Regular.ttf'),
+    'Quicksand-Bold': require('../../../assets/fonts/Quicksand-Bold.ttf'),
+    'Quicksand-Medium': require('../../../assets/fonts/Quicksand-Medium.ttf'),
+    'Nunito-Bold': require('../../../assets/fonts/Nunito-Bold.ttf'),
+    'Nunito-SemiBold': require('../../../assets/fonts/Nunito-SemiBold.ttf'),
+    'Nunito-Regular': require('../../../assets/fonts/Nunito-Regular.ttf'),
   });
 
   useEffect(() => {
     loadProduct();
-    if (user) {
-      loadWishlist();
-    }
-  }, [productId, user]);
-
-  useEffect(() => {
-    if (product && wishlist.length >= 0) {
-      setIsInWishlist(wishlist.some(item => item._id === product._id));
-    }
-  }, [product, wishlist]);
+  }, [productId]);
 
   const loadProduct = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API}/public/products`);
+      const response = await fetchWithAuth(`${API}/public/products`);
+      
       if (response.ok) {
         const products = await response.json();
         const foundProduct = products.find(p => p._id === productId);
         if (foundProduct) {
-          // Sanitizar producto para evitar errores de referencias undefined
           const sanitizedProduct = sanitizeProduct(foundProduct);
           setProduct(sanitizedProduct);
         } else {
           Alert.alert('Error', 'Producto no encontrado');
           navigation.goBack();
         }
+      } else {
+        throw new Error('Error al cargar productos');
       }
     } catch (error) {
       console.error('Error loading product:', error);
-      Alert.alert('Error', 'No se pudo cargar el producto');
+      if (error.message !== 'SESSION_EXPIRED') {
+        Alert.alert('Error', 'No se pudo cargar el producto');
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const loadWishlist = async () => {
-    try {
-      const stored = await AsyncStorage.getItem(`wishlist_${user.id}`);
-      setWishlist(stored ? JSON.parse(stored) : []);
-    } catch (error) {
-      console.error('Error loading wishlist:', error);
-    }
-  };
+  // VERIFICAR SI ESTÁ EN WISHLIST DE FORMA SEGURA
+  const isInWishlist = product ? checkIsInWishlist(product._id) : false;
 
-  const toggleWishlist = async () => {
+  const handleToggleWishlist = async () => {
     if (!user) {
       Alert.alert('Inicia sesión', 'Debes iniciar sesión para guardar productos en tu lista de deseos');
       return;
     }
 
-    try {
-      let newWishlist;
-      
-      if (isInWishlist) {
-        newWishlist = wishlist.filter(item => item._id !== product._id);
-      } else {
-        newWishlist = [...wishlist, {
-          _id: product._id,
-          name: product.name,
-          description: product.description,
-          price: product.price,
-          images: product.images,
-          discount: product.discount
-        }];
-      }
+    if (!product) return;
 
-      setWishlist(newWishlist);
-      setIsInWishlist(!isInWishlist);
-      await AsyncStorage.setItem(`wishlist_${user.id}`, JSON.stringify(newWishlist));
-    } catch (error) {
-      console.error('Error updating wishlist:', error);
-      Alert.alert('Error', 'No se pudo actualizar la lista de deseos');
-    }
+    await toggleWishlist(product);
   };
 
-  const addToCart = () => {
+  const handleAddToCart = async () => {
     if (!user) {
       Alert.alert('Inicia sesión', 'Debes iniciar sesión para agregar productos al carrito');
       return;
     }
+
+    if (!product) return;
 
     const statusInfo = getProductStatus(product);
     
@@ -136,50 +119,68 @@ const ProductDetailScreen = ({ route, navigation }) => {
       return;
     }
 
-    // Aquí implementarías la lógica del carrito
-    Alert.alert('Producto agregado', `${cartQuantity} ${cartQuantity === 1 ? 'unidad agregada' : 'unidades agregadas'} al carrito`);
-  };
-
-  const calculateDiscountedPrice = () => {
-    if (product?.discount && product.discount > 0) {
-      return product.price * (1 - product.discount);
-    }
-    return product?.price || 0;
-  };
-
-  const formatPrice = (price) => {
-    return `$${price.toFixed(2)}`;
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'disponible':
-        return '#4CAF50';
-      case 'agotado':
-        return '#F44336';
-      case 'en producción':
-        return '#FF9800';
-      case 'descontinuado':
-        return '#9E9E9E';
-      default:
-        return '#9E9E9E';
+    const result = await addToCartContext(product, cartQuantity);
+    
+    if (result.success) {
+      Alert.alert(
+        'Producto agregado',
+        `${cartQuantity} ${cartQuantity === 1 ? 'unidad agregada' : 'unidades agregadas'} al carrito`,
+        [
+          { text: 'Seguir comprando', style: 'cancel' },
+          { 
+            text: 'Ver carrito', 
+            onPress: () => navigation.navigate('Home', { screen: 'Cart' })
+          }
+        ]
+      );
+    } else {
+      Alert.alert('Error', 'No se pudo agregar al carrito');
     }
   };
 
-  const getStatusText = (status) => {
-    switch (status) {
-      case 'disponible':
-        return 'Disponible';
-      case 'agotado':
-        return 'Agotado';
-      case 'en producción':
-        return 'En producción';
-      case 'descontinuado':
-        return 'Descontinuado';
-      default:
-        return 'Sin estado';
-    }
-  };
+  const renderFloatingHeader = () => (
+    <Animated.View style={[styles.floatingHeader, { opacity: headerOpacity }]}>
+      <TouchableOpacity 
+        style={styles.floatingBackButton}
+        onPress={() => navigation.goBack()}
+      >
+        <Ionicons name="arrow-back" size={24} color="#3D1609" />
+      </TouchableOpacity>
+      
+      <Text style={styles.floatingTitle} numberOfLines={1}>
+        {product?.name}
+      </Text>
+      
+      <View style={styles.floatingActions}>
+        <TouchableOpacity style={styles.floatingActionBtn} onPress={handleToggleWishlist}>
+          <Ionicons
+            name={isInWishlist ? "heart" : "heart-outline"}
+            size={20}
+            color={isInWishlist ? "#A73249" : "#3D1609"}
+          />
+        </TouchableOpacity>
+      </View>
+    </Animated.View>
+  );
+
+  const renderProductHighlights = () => (
+    <View style={styles.highlightsContainer}>
+      <View style={styles.highlightItem}>
+        <Ionicons name="shield-checkmark" size={20} color="#4CAF50" />
+        <Text style={styles.highlightText}>Garantía de calidad</Text>
+      </View>
+      
+      <View style={styles.highlightItem}>
+        <Ionicons name="rocket" size={20} color="#2196F3" />
+        <Text style={styles.highlightText}>Envío rápido</Text>
+      </View>
+      
+      <View style={styles.highlightItem}>
+        <Ionicons name="refresh" size={20} color="#FF9800" />
+        <Text style={styles.highlightText}>Devolución fácil</Text>
+      </View>
+    </View>
+  );
 
   const renderTabContent = () => {
     if (activeTab === 'details') {
@@ -194,22 +195,22 @@ const ProductDetailScreen = ({ route, navigation }) => {
           {/* Información de categorías */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Categorización</Text>
-            <View style={styles.categoryInfo}>
+            <View style={styles.categoryCards}>
               {(() => {
                 const categoryInfo = getProductCategoryInfo(product);
                 return (
                   <>
-                    <View style={styles.categoryRow}>
-                      <Text style={styles.categoryLabel}>Colección:</Text>
-                      <Text style={styles.categoryValue}>{categoryInfo.collection.name}</Text>
+                    <View style={styles.categoryCard}>
+                      <Ionicons name="layers" size={16} color="#A73249" />
+                      <Text style={styles.categoryCardText}>{categoryInfo.collection.name}</Text>
                     </View>
-                    <View style={styles.categoryRow}>
-                      <Text style={styles.categoryLabel}>Categoría:</Text>
-                      <Text style={styles.categoryValue}>{categoryInfo.category.name}</Text>
+                    <View style={styles.categoryCard}>
+                      <Ionicons name="folder" size={16} color="#A73249" />
+                      <Text style={styles.categoryCardText}>{categoryInfo.category.name}</Text>
                     </View>
-                    <View style={styles.categoryRow}>
-                      <Text style={styles.categoryLabel}>Subcategoría:</Text>
-                      <Text style={styles.categoryValue}>{categoryInfo.subcategory.name}</Text>
+                    <View style={styles.categoryCard}>
+                      <Ionicons name="list" size={16} color="#A73249" />
+                      <Text style={styles.categoryCardText}>{categoryInfo.subcategory.name}</Text>
                     </View>
                   </>
                 );
@@ -220,30 +221,52 @@ const ProductDetailScreen = ({ route, navigation }) => {
           {/* Información de stock y estado */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Disponibilidad</Text>
-            <View style={styles.stockInfo}>
-              <View style={styles.stockRow}>
-                <Text style={styles.stockLabel}>Stock disponible:</Text>
-                <Text style={styles.stockValue}>{product.stock} unidades</Text>
+            <View style={styles.availabilityCard}>
+              <View style={styles.availabilityRow}>
+                <Text style={styles.availabilityLabel}>Stock disponible</Text>
+                <View style={styles.stockBadge}>
+                  <Text style={styles.stockBadgeText}>{product.stock} unidades</Text>
+                </View>
               </View>
-              <View style={styles.stockRow}>
-                <Text style={styles.stockLabel}>Estado:</Text>
+              
+              <View style={styles.availabilityRow}>
+                <Text style={styles.availabilityLabel}>Estado</Text>
                 {(() => {
                   const statusInfo = getProductStatus(product);
                   return (
-                    <View style={styles.statusContainer}>
-                      <View style={[
-                        styles.statusIndicator,
-                        { backgroundColor: statusInfo.color }
-                      ]} />
-                      <Text style={styles.statusText}>{statusInfo.displayText}</Text>
+                    <View style={styles.statusBadge}>
+                      <View style={[styles.statusDot, { backgroundColor: statusInfo.color }]} />
+                      <Text style={styles.statusBadgeText}>{statusInfo.displayText}</Text>
                     </View>
                   );
                 })()}
               </View>
+              
               {product.highlighted && (
-                <View style={styles.highlightedBadge}>
+                <View style={styles.featuredBadge}>
                   <Ionicons name="star" size={16} color="#FFD700" />
-                  <Text style={styles.highlightedText}>Producto destacado</Text>
+                  <Text style={styles.featuredText}>Producto destacado</Text>
+                </View>
+              )}
+            </View>
+          </View>
+
+          {/* Información adicional */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Información Adicional</Text>
+            <View style={styles.additionalInfoCard}>
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Código de producto:</Text>
+                <Text style={styles.infoValue}>{product.codeProduct || 'No especificado'}</Text>
+              </View>
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Tipo de movimiento:</Text>
+                <Text style={styles.infoValue}>{product.movementType ? capitalizeFirst(product.movementType) : 'No especificado'}</Text>
+              </View>
+              {product.applicableCosts && (
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>Costos aplicables:</Text>
+                  <Text style={styles.infoValue}>{product.applicableCosts}</Text>
                 </View>
               )}
             </View>
@@ -279,132 +302,141 @@ const ProductDetailScreen = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="arrow-back" size={24} color="#3D1609" />
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={styles.wishlistButton}
-          onPress={toggleWishlist}
-          activeOpacity={0.7}
-        >
-          <Ionicons
-            name={isInWishlist ? "heart" : "heart-outline"}
-            size={24}
-            color={isInWishlist ? "#A73249" : "#3D1609"}
-          />
-        </TouchableOpacity>
-      </View>
+      <Animated.ScrollView
+        showsVerticalScrollIndicator={false}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: true }
+        )}
+        scrollEventThrottle={16}
+      >
+        {/* Galería de imágenes */}
+        <ProductImageGallery images={product.images} />
 
-      {/* Galería de imágenes */}
-      <ProductImageGallery images={product.images} />
-
-      {/* Información del producto */}
-      <View style={styles.productInfo}>
-        <Text style={styles.productName}>{product.name}</Text>
-        
-        <View style={styles.priceContainer}>
-          {pricing.hasDiscount ? (
-            <>
-              <Text style={styles.originalPrice}>{formatPrice(pricing.originalPrice)}</Text>
-              <Text style={styles.discountedPrice}>{formatPrice(pricing.finalPrice)}</Text>
-              <View style={styles.discountBadge}>
-                <Text style={styles.discountText}>
-                  -{pricing.discountPercentage}%
-                </Text>
+        {/* Información del producto */}
+        <View style={styles.productInfo}>
+          <View style={styles.productHeader}>
+            <Text style={styles.productName}>{product.name}</Text>
+          </View>
+          
+          <View style={styles.priceContainer}>
+            {pricing.hasDiscount ? (
+              <View style={styles.discountContainer}>
+                <View style={styles.priceRow}>
+                  <Text style={styles.originalPrice}>{formatPrice(pricing.originalPrice)}</Text>
+                  <View style={styles.discountTag}>
+                    <Text style={styles.discountTagText}>
+                      -{pricing.discountPercentage}%
+                    </Text>
+                  </View>
+                </View>
+                <Text style={styles.discountedPrice}>{formatPrice(pricing.finalPrice)}</Text>
+                <Text style={styles.savingsText}>Ahorras {formatPrice(pricing.savings)}</Text>
               </View>
-            </>
-          ) : (
-            <Text style={styles.price}>{formatPrice(pricing.finalPrice)}</Text>
-          )}
+            ) : (
+              <Text style={styles.price}>{formatPrice(pricing.finalPrice)}</Text>
+            )}
+          </View>
+
+          {/* Highlights */}
+          {renderProductHighlights()}
         </View>
-      </View>
 
-      {/* Tabs */}
-      <View style={styles.tabsContainer}>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'details' && styles.activeTab]}
-          onPress={() => setActiveTab('details')}
-          activeOpacity={0.8}
-        >
-          <Text style={[
-            styles.tabText,
-            activeTab === 'details' && styles.activeTabText
-          ]}>Detalles</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'reviews' && styles.activeTab]}
-          onPress={() => setActiveTab('reviews')}
-          activeOpacity={0.8}
-        >
-          <Text style={[
-            styles.tabText,
-            activeTab === 'reviews' && styles.activeTabText
-          ]}>Reseñas</Text>
-        </TouchableOpacity>
-      </View>
+        {/* Tabs mejorados */}
+        <View style={styles.tabsContainer}>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'details' && styles.activeTab]}
+            onPress={() => setActiveTab('details')}
+          >
+            <Ionicons 
+              name="information-circle" 
+              size={20} 
+              color={activeTab === 'details' ? '#A73249' : '#666'} 
+            />
+            <Text style={[
+              styles.tabText,
+              activeTab === 'details' && styles.activeTabText
+            ]}>Detalles</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'reviews' && styles.activeTab]}
+            onPress={() => setActiveTab('reviews')}
+          >
+            <Ionicons 
+              name="star" 
+              size={20} 
+              color={activeTab === 'reviews' ? '#A73249' : '#666'} 
+            />
+            <Text style={[
+              styles.tabText,
+              activeTab === 'reviews' && styles.activeTabText
+            ]}>Reseñas</Text>
+          </TouchableOpacity>
+        </View>
 
-      {/* Contenido de las tabs */}
-      <View style={styles.tabContentContainer}>
-        {renderTabContent()}
-      </View>
+        {/* Contenido de las tabs */}
+        <View style={[ styles.tabContentContainer, activeTab === 'details' && { paddingTop: 16 } ]}>
+          {renderTabContent()}
+        </View>
+      </Animated.ScrollView>
 
-      {/* Footer con botón de agregar al carrito */}
-      {activeTab === 'details' && (
-        <View style={styles.footer}>
-          {product.status === 'disponible' && product.stock > 0 ? (
-            <View style={styles.addToCartContainer}>
-              <View style={styles.quantitySelector}>
-                <TouchableOpacity
-                  style={styles.quantityBtn}
-                  onPress={() => setCartQuantity(Math.max(1, cartQuantity - 1))}
-                  activeOpacity={0.7}
-                >
-                  <Ionicons name="remove" size={20} color="#A73249" />
-                </TouchableOpacity>
-                
-                <Text style={styles.quantityText}>{cartQuantity}</Text>
-                
-                <TouchableOpacity
-                  style={styles.quantityBtn}
-                  onPress={() => setCartQuantity(Math.min(product.stock, cartQuantity + 1))}
-                  activeOpacity={0.7}
-                >
-                  <Ionicons name="add" size={20} color="#A73249" />
-                </TouchableOpacity>
-              </View>
+      {/* Header flotante */}
+      {renderFloatingHeader()}
 
+      {/* Footer fijo */}
+      <View style={styles.footer}>
+        <View style={styles.footerContent}>
+          <View style={styles.quantitySection}>
+            <Text style={styles.quantityLabel}>Cantidad</Text>
+            <View style={styles.quantitySelector}>
               <TouchableOpacity
-                style={styles.addToCartBtn}
-                onPress={addToCart}
-                activeOpacity={0.8}
+                style={styles.quantityBtn}
+                onPress={() => setCartQuantity(Math.max(1, cartQuantity - 1))}
               >
-                <Ionicons name="bag-add" size={20} color="#FFFFFF" />
-                <Text style={styles.addToCartText}>Agregar al carrito</Text>
+                <Ionicons name="remove" size={20} color="#A73249" />
+              </TouchableOpacity>
+              
+              <Text style={styles.quantityText}>{cartQuantity}</Text>
+              
+              <TouchableOpacity
+                style={styles.quantityBtn}
+                onPress={() => setCartQuantity(Math.min(product.stock, cartQuantity + 1))}
+              >
+                <Ionicons name="add" size={20} color="#A73249" />
               </TouchableOpacity>
             </View>
-          ) : (
-            <View style={styles.unavailableContainer}>
-              <Text style={styles.unavailableText}>Producto no disponible</Text>
-            </View>
-          )}
+          </View>
+
+          <TouchableOpacity
+            style={[
+              styles.addToCartBtn,
+              !statusInfo.available && styles.addToCartBtnDisabled
+            ]}
+            onPress={handleAddToCart}
+            disabled={!statusInfo.available}
+          >
+            <Ionicons name="bag-add" size={22} color="#FFFFFF" />
+            <Text style={styles.addToCartText}>
+              {statusInfo.available ? 'Agregar al carrito' : 'No disponible'}
+            </Text>
+            {statusInfo.available && (
+              <Text style={styles.priceBadge}>
+                {formatPrice(pricing.finalPrice * cartQuantity)}
+              </Text>
+            )}
+          </TouchableOpacity>
         </View>
-      )}
+      </View>
     </View>
   );
 };
 
+// Los estilos permanecen igual...
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#E3C6B8',
+    backgroundColor: '#FFFFFF',
   },
   loadingContainer: {
     flex: 1,
@@ -437,54 +469,80 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Quicksand-Bold',
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: statusBarHeight + 10,
-    paddingBottom: 10,
-    backgroundColor: 'rgba(227, 198, 184, 0.95)',
+  
+  // HEADER FLOTANTE
+  floatingHeader: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
-    zIndex: 100,
-  },
-  backButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderRadius: 20,
-    padding: 8,
-  },
-  wishlistButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderRadius: 20,
-    padding: 8,
-  },
-  productInfo: {
     backgroundColor: '#FFFFFF',
-    padding: 16,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    marginTop: -20,
-  },
-  productName: {
-    fontSize: 22,
-    fontFamily: 'Quicksand-Bold',
-    color: '#3D1609',
-    marginBottom: 12,
-    lineHeight: 28,
-  },
-  priceContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    flexWrap: 'wrap',
+    paddingHorizontal: 16,
+    paddingTop: statusBarHeight + 10,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E8E1D8',
+    zIndex: 1000,
+  },
+  floatingBackButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 20,
+    padding: 8,
+    marginRight: 12,
+  },
+  floatingTitle: {
+    flex: 1,
+    fontSize: 16,
+    fontFamily: 'Quicksand-Bold',
+    color: '#3D1609',
+  },
+  floatingActions: {
+    flexDirection: 'row',
     gap: 8,
   },
-  price: {
+  floatingActionBtn: {
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 20,
+    padding: 8,
+  },
+
+  // PRODUCT INFO MEJORADO
+  productInfo: {
+    backgroundColor: '#FFFFFF',
+    padding: 20,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    marginTop: -20,
+  },
+  productHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  productName: {
+    flex: 1,
     fontSize: 24,
-    fontFamily: 'Nunito-Bold',
-    color: '#A73249',
+    fontFamily: 'Quicksand-Bold',
+    color: '#3D1609',
+    lineHeight: 30,
+    marginRight: 12,
+  },
+  shareButton: {
+    padding: 8,
+  },
+  priceContainer: {
+    marginBottom: 16,
+  },
+  discountContainer: {
+    gap: 4,
+  },
+  priceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   originalPrice: {
     fontSize: 16,
@@ -492,22 +550,56 @@ const styles = StyleSheet.create({
     color: '#999999',
     textDecorationLine: 'line-through',
   },
-  discountedPrice: {
-    fontSize: 24,
-    fontFamily: 'Nunito-Bold',
-    color: '#A73249',
-  },
-  discountBadge: {
+  discountTag: {
     backgroundColor: '#A73249',
-    borderRadius: 12,
+    borderRadius: 8,
     paddingHorizontal: 8,
     paddingVertical: 4,
   },
-  discountText: {
+  discountTagText: {
     color: '#FFFFFF',
     fontSize: 12,
     fontFamily: 'Quicksand-Bold',
   },
+  discountedPrice: {
+    fontSize: 28,
+    fontFamily: 'Nunito-Bold',
+    color: '#A73249',
+  },
+  savingsText: {
+    fontSize: 14,
+    fontFamily: 'Nunito-Regular',
+    color: '#4CAF50',
+  },
+  price: {
+    fontSize: 28,
+    fontFamily: 'Nunito-Bold',
+    color: '#A73249',
+  },
+
+  // HIGHLIGHTS
+  highlightsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: '#F0F0F0',
+  },
+  highlightItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  highlightText: {
+    fontSize: 12,
+    fontFamily: 'Nunito-Regular',
+    color: '#666666',
+    marginTop: 4,
+    textAlign: 'center',
+  },
+
+  // TABS MEJORADOS
   tabsContainer: {
     flexDirection: 'row',
     backgroundColor: '#FFFFFF',
@@ -516,8 +608,11 @@ const styles = StyleSheet.create({
   },
   tab: {
     flex: 1,
-    paddingVertical: 16,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    gap: 8,
     borderBottomWidth: 2,
     borderBottomColor: 'transparent',
   },
@@ -526,122 +621,180 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontSize: 16,
-    fontFamily: 'Nunito-Regular',
+    fontFamily: 'Nunito-SemiBold',
     color: '#666666',
   },
   activeTabText: {
     color: '#A73249',
     fontFamily: 'Nunito-Bold',
   },
+
   tabContentContainer: {
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
   tabContent: {
     flex: 1,
-    padding: 16,
   },
+
+  // SECCIONES MEJORADAS
   section: {
     marginBottom: 24,
+    paddingHorizontal: 20,
   },
   sectionTitle: {
     fontSize: 18,
     fontFamily: 'Quicksand-Bold',
     color: '#3D1609',
-    marginBottom: 12,
+    marginBottom: 16,
   },
   description: {
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: 'Nunito-Regular',
     color: '#3D1609',
-    lineHeight: 20,
+    lineHeight: 22,
   },
-  categoryInfo: {
+
+  // CATEGORÍAS MEJORADAS
+  categoryCards: {
+    flexDirection: 'row',
     gap: 8,
   },
-  categoryRow: {
+  categoryCard: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F5EDE8',
+    borderRadius: 12,
+    padding: 12,
+    gap: 8,
+  },
+  categoryCardText: {
+    fontSize: 12,
+    fontFamily: 'Nunito-SemiBold',
+    color: '#3D1609',
+    flex: 1,
+  },
+
+  // DISPONIBILIDAD MEJORADA
+  availabilityCard: {
+    backgroundColor: '#F8F8F8',
+    borderRadius: 16,
+    padding: 16,
+    gap: 12,
+  },
+  availabilityRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  categoryLabel: {
+  availabilityLabel: {
     fontSize: 14,
     fontFamily: 'Nunito-SemiBold',
     color: '#666666',
   },
-  categoryValue: {
+  stockBadge: {
+    backgroundColor: '#E8F5E8',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  stockBadgeText: {
+    fontSize: 12,
+    fontFamily: 'Nunito-Bold',
+    color: '#4CAF50',
+  },
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    gap: 6,
+  },
+  statusDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  statusBadgeText: {
+    fontSize: 12,
+    fontFamily: 'Nunito-Bold',
+    color: '#3D1609',
+  },
+
+  featuredBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF8E1',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    gap: 6,
+    alignSelf: 'flex-start',
+  },
+  featuredText: {
+    fontSize: 12,
+    fontFamily: 'Quicksand-Bold',
+    color: '#F57C00',
+  },
+
+  // INFORMACIÓN ADICIONAL
+  additionalInfoCard: {
+    backgroundColor: '#F8F8F8',
+    borderRadius: 16,
+    padding: 16,
+    gap: 12,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  infoLabel: {
+    fontSize: 14,
+    fontFamily: 'Nunito-SemiBold',
+    color: '#666666',
+    flex: 1,
+  },
+  infoValue: {
     fontSize: 14,
     fontFamily: 'Nunito-Regular',
     color: '#3D1609',
     flex: 1,
     textAlign: 'right',
   },
-  stockInfo: {
-    gap: 8,
-  },
-  stockRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  stockLabel: {
-    fontSize: 14,
-    fontFamily: 'Nunito-SemiBold',
-    color: '#666666',
-  },
-  stockValue: {
-    fontSize: 14,
-    fontFamily: 'Nunito-Bold',
-    color: '#3D1609',
-  },
-  statusContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  statusIndicator: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: 8,
-  },
-  statusText: {
-    fontSize: 14,
-    fontFamily: 'Nunito-Regular',
-    color: '#3D1609',
-  },
-  highlightedBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFF8E1',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    alignSelf: 'flex-start',
-    marginTop: 8,
-  },
-  highlightedText: {
-    fontSize: 12,
-    fontFamily: 'Quicksand-Bold',
-    color: '#F57C00',
-    marginLeft: 4,
-  },
+
+  // FOOTER MEJORADO CON PADDING SEGURO
   footer: {
     backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
     borderTopColor: '#E8E1D8',
-    padding: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    paddingBottom: Platform.OS === 'ios' ? 34 : 16,
   },
-  addToCartContainer: {
+  footerContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 16,
+  },
+  quantitySection: {
+    alignItems: 'center',
+  },
+  quantityLabel: {
+    fontSize: 12,
+    fontFamily: 'Nunito-Regular',
+    color: '#666666',
+    marginBottom: 8,
   },
   quantitySelector: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#F5EDE8',
-    borderRadius: 8,
-    paddingHorizontal: 4,
+    borderRadius: 12,
+    paddingHorizontal: 8,
   },
   quantityBtn: {
     padding: 8,
@@ -660,25 +813,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#A73249',
-    borderRadius: 12,
-    paddingVertical: 14,
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
     gap: 8,
+    position: 'relative',
+  },
+  addToCartBtnDisabled: {
+    backgroundColor: '#CCCCCC',
   },
   addToCartText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontFamily: 'Quicksand-Bold',
   },
-  unavailableContainer: {
-    backgroundColor: '#F5F5F5',
+  priceBadge: {
+    position: 'absolute',
+    top: -8,
+    right: -8,
+    backgroundColor: '#3D1609',
     borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  unavailableText: {
-    fontSize: 16,
-    fontFamily: 'Nunito-Regular',
-    color: '#999999',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    fontSize: 12,
+    fontFamily: 'Quicksand-Bold',
+    color: '#FFFFFF',
   },
 });
 

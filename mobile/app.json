@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Pérgola",
-    "slug": "pergola",
+    "slug": "mobile",
     "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -17,11 +17,11 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/logoapp.png",
+        "foregroundImage": "./assets/image.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.pablomenjivar.mobile"
+      "package": "com.pablomenjivar.pergola"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -33,6 +33,7 @@
       "eas": {
         "projectId": "5bb73a58-78ba-4c13-b827-491014fdd1f2"
       }
-    }
+    },
+    "owner": "pablo-menjivar"
   }
 }

@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react';
+import { useContext } from 'react';
 import {
   View,
   Text,
@@ -10,18 +10,19 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AuthContext } from '../../context/AuthContext';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { CartContext } from '../../context/CartContext';
 import { useFonts } from 'expo-font';
 import { getProductPricing, getProductStatus, formatPrice } from '../../screen/catalog/productUtils';
 
 const { width: screenWidth } = Dimensions.get('window');
 const cardWidth = (screenWidth - 60) / 2; // 2 columnas con márgenes
 
-const ProductCard = ({ product, onPress, wishlist = [], setWishlist }) => {
+const ProductCard = ({ product, onPress }) => {
   const { user } = useContext(AuthContext);
-  const [isInWishlist, setIsInWishlist] = useState(
-    wishlist.some(item => item._id === product._id)
-  );
+  const { toggleWishlist, isInWishlist } = useContext(CartContext);
+
+  const inWishlist = isInWishlist(product._id);
+
 
   const [fontsLoaded] = useFonts({
     'Quicksand-Bold': require('../../../assets/fonts/Quicksand-Bold.ttf'),
@@ -31,45 +32,13 @@ const ProductCard = ({ product, onPress, wishlist = [], setWishlist }) => {
     'Nunito-Regular': require('../../../assets/fonts/Nunito-Regular.ttf'),
   });
 
-  const toggleWishlist = async () => {
+  const handleToggleWishlist = async () => {
     if (!user) {
       Alert.alert('Inicia sesión', 'Debes iniciar sesión para guardar productos en tu lista de deseos');
       return;
     }
 
-    try {
-      let newWishlist;
-      
-      if (isInWishlist) {
-        // Remover de wishlist
-        newWishlist = wishlist.filter(item => item._id !== product._id);
-      } else {
-        // Agregar a wishlist
-        newWishlist = [...wishlist, {
-          _id: product._id,
-          name: product.name,
-          description: product.description,
-          price: product.price,
-          images: product.images,
-          discount: product.discount
-        }];
-      }
-
-      // Actualizar estado local
-      setWishlist(newWishlist);
-      setIsInWishlist(!isInWishlist);
-
-      // Guardar en AsyncStorage
-      await AsyncStorage.setItem(`wishlist_${user.id}`, JSON.stringify(newWishlist));
-    } catch (error) {
-      console.error('Error updating wishlist:', error);
-      Alert.alert('Error', 'No se pudo actualizar la lista de deseos');
-    }
-  };
-
-  const calculateDiscountedPrice = () => {
-    const pricing = getProductPricing(product);
-    return pricing.finalPrice;
+    await toggleWishlist(product);
   };
 
   const formatPriceDisplay = (price) => {
@@ -99,13 +68,13 @@ const ProductCard = ({ product, onPress, wishlist = [], setWishlist }) => {
         {/* Botón de wishlist */}
         <TouchableOpacity
           style={styles.wishlistBtn}
-          onPress={toggleWishlist}
+          onPress={handleToggleWishlist}
           activeOpacity={0.7}
         >
           <Ionicons
-            name={isInWishlist ? "heart" : "heart-outline"}
+            name={inWishlist ? "heart" : "heart-outline"}
             size={20}
-            color={isInWishlist ? "#A73249" : "#3D1609"}
+            color={inWishlist ? "#A73249" : "#3D1609"}
           />
         </TouchableOpacity>
 

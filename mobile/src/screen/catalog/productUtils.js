@@ -237,6 +237,12 @@ export const sanitizeProduct = (product) => {
     status: product.status || 'unknown',
     images: Array.isArray(product.images) ? product.images : [],
     highlighted: Boolean(product.highlighted),
+    // AÑADIR ESTOS CAMPOS:
+    codeProduct: product.codeProduct || null,
+    movementType: product.movementType || null,
+    correlative: product.correlative || null,
+    applicableCosts: product.applicableCosts || null,
+    hasDiscount: Boolean(product.hasDiscount),
     collection: product.collection ? {
       _id: product.collection._id || null,
       name: product.collection.name || 'Sin nombre'
@@ -250,4 +256,13 @@ export const sanitizeProduct = (product) => {
       name: product.subcategory.name || 'Sin nombre'
     } : null
   };
+};
+/**
+ * Función helper para capitalizar texto
+ * @param {String} text - Texto a capitalizar
+ * @returns {String} - Texto con primera letra mayúscula
+ */
+export const capitalizeFirst = (text) => {
+  if (!text || typeof text !== 'string') return text;
+  return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
 };

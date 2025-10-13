@@ -1,13 +1,13 @@
 import { useContext, useState, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  Image, 
-  TouchableOpacity, 
-  ScrollView, 
-  Alert, 
-  FlatList, 
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+  FlatList,
   ActivityIndicator,
   Modal,
   TextInput,
@@ -16,9 +16,10 @@ import {
   StatusBar
 } from 'react-native';
 import { AuthContext } from '../context/AuthContext';
+import { CartContext } from '../context/CartContext';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Avatar } from '@kolking/react-native-avatar';
 import { useFonts } from 'expo-font';
 
@@ -26,16 +27,16 @@ const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const statusBarHeight = Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 0;
 
 export default function ProfileScreen() {
-  const { user, logout, API } = useContext(AuthContext);
+  const navigation = useNavigation();
+  const { user, logout, API, fetchWithAuth } = useContext(AuthContext);
+  const { wishlist, removeFromWishlist } = useContext(CartContext);
+  const loadingWishlist = false; // Ya no necesitas este loading
   const [profileData, setProfileData] = useState(user || {});
   const [profilePic, setProfilePic] = useState(user?.profilePic || null);
   const [loadingPic, setLoadingPic] = useState(false);
   const [loadingProfile, setLoadingProfile] = useState(false);
   const [orders, setOrders] = useState([]);
-  const [wishlist, setWishlist] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
-  const [loadingWishlist, setLoadingWishlist] = useState(true);
-  
   // Estados del modal de edición
   const [modalVisible, setModalVisible] = useState(false);
   const [editingData, setEditingData] = useState({});
@@ -55,13 +56,12 @@ export default function ProfileScreen() {
     if (user?.id) {
       loadUserProfile();
       loadOrders();
-      loadWishlist();
     }
   }, [user]);
 
   const loadUserProfile = async () => {
     if (!user?.id) return;
-    
+
     setLoadingProfile(true);
     try {
       const response = await fetch(`${API}/customers/${user.id}`);
@@ -73,7 +73,9 @@ export default function ProfileScreen() {
         console.error('Error al cargar el perfil:', response.status);
       }
     } catch (error) {
-      console.error('Error al cargar el perfil:', error);
+      if (error.message !== 'SESSION_EXPIRED') {
+        console.error('Error al cargar el perfil:', error);
+      }
     } finally {
       setLoadingProfile(false);
     }
@@ -88,22 +90,12 @@ export default function ProfileScreen() {
         setOrders(userOrders);
       }
     } catch (error) {
-      console.error('Error loading orders:', error);
+      if (error.message !== 'SESSION_EXPIRED') {
+        console.error('Error loading orders:', error);
+      }
       setOrders([]);
     } finally {
       setLoadingOrders(false);
-    }
-  };
-
-  const loadWishlist = async () => {
-    try {
-      const stored = await AsyncStorage.getItem(`wishlist_${user.id}`);
-      setWishlist(stored ? JSON.parse(stored) : []);
-    } catch (error) {
-      console.error('Error loading wishlist:', error);
-      setWishlist([]);
-    } finally {
-      setLoadingWishlist(false);
     }
   };
 
@@ -111,11 +103,11 @@ export default function ProfileScreen() {
   const formatPhoneNumber = (text) => {
     const prefix = "+503-";
     let numbers = text.replace(/\D/g, '');
-    
+
     if (!text.startsWith(prefix)) {
       numbers = numbers.slice(3);
     }
-    
+
     numbers = numbers.slice(0, 8);
     return prefix + numbers;
   };
@@ -123,7 +115,7 @@ export default function ProfileScreen() {
   const formatDUI = (text) => {
     let numbers = text.replace(/\D/g, '');
     numbers = numbers.slice(0, 9);
-    
+
     if (numbers.length > 8) {
       return numbers.slice(0, 8) + '-' + numbers.slice(8);
     }
@@ -133,7 +125,7 @@ export default function ProfileScreen() {
   const formatBirthDate = (text) => {
     let numbers = text.replace(/\D/g, '');
     numbers = numbers.slice(0, 8);
-    
+
     if (numbers.length >= 5) {
       return numbers.slice(0, 2) + '/' + numbers.slice(2, 4) + '/' + numbers.slice(4);
     } else if (numbers.length >= 3) {
@@ -160,14 +152,74 @@ export default function ProfileScreen() {
     setLoadingUpdate(true);
     try {
       // Validaciones básicas
-      if (!editingData.name?.trim() || !editingData.lastName?.trim()) {
-        Alert.alert('Error', 'Nombre y apellidos son obligatorios');
+      if (!editingData.name?.trim() || editingData.name.trim().length < 2) {
+        Alert.alert('Error', 'El nombre debe tener al menos 2 caracteres');
+        setLoadingUpdate(false);
         return;
       }
 
-      if (!editingData.phoneNumber || !/^(\+503-?\d{4}-?\d{4})$/.test(editingData.phoneNumber)) {
-        Alert.alert('Error', 'El teléfono debe tener formato +503-XXXXXXXX');
+      if (editingData.name.trim().length > 100) {
+        Alert.alert('Error', 'El nombre no puede exceder los 100 caracteres');
+        setLoadingUpdate(false);
         return;
+      }
+
+      if (!editingData.lastName?.trim() || editingData.lastName.trim().length < 2) {
+        Alert.alert('Error', 'Los apellidos deben tener al menos 2 caracteres');
+        setLoadingUpdate(false);
+        return;
+      }
+
+      if (editingData.lastName.trim().length > 100) {
+        Alert.alert('Error', 'Los apellidos no pueden exceder los 100 caracteres');
+        setLoadingUpdate(false);
+        return;
+      }
+
+      // Validar teléfono con regex del backend: /^\+503[-\d]{8,12}$/
+      if (!editingData.phoneNumber || !/^\+503[-\d]{8,12}$/.test(editingData.phoneNumber)) {
+        Alert.alert('Error', 'El teléfono debe tener formato +503-XXXXXXXX (8 dígitos)');
+        setLoadingUpdate(false);
+        return;
+      }
+
+      // Validar dirección si tiene contenido
+      if (editingData.address && editingData.address.trim() !== '') {
+        if (editingData.address.trim().length < 5) {
+          Alert.alert('Error', 'La dirección debe tener al menos 5 caracteres');
+          setLoadingUpdate(false);
+          return;
+        }
+        if (editingData.address.trim().length > 200) {
+          Alert.alert('Error', 'La dirección no puede exceder los 200 caracteres');
+          setLoadingUpdate(false);
+          return;
+        }
+      }
+
+      // Validar DUI si tiene contenido (regex del backend: /^\d{8}-\d$/)
+      if (editingData.DUI && editingData.DUI.trim() !== '') {
+        if (!/^\d{8}-\d$/.test(editingData.DUI)) {
+          Alert.alert('Error', 'El DUI debe tener formato 12345678-9');
+          setLoadingUpdate(false);
+          return;
+        }
+      }
+
+      // Validar fecha de nacimiento si tiene contenido
+      if (editingData.birthDate && editingData.birthDate.trim() !== '') {
+        const [day, month, year] = editingData.birthDate.split('/');
+        if (!day || !month || !year || year.length !== 4) {
+          Alert.alert('Error', 'La fecha debe tener formato DD/MM/AAAA');
+          setLoadingUpdate(false);
+          return;
+        }
+        const testDate = new Date(year, month - 1, day);
+        if (isNaN(testDate.getTime()) || testDate >= new Date()) {
+          Alert.alert('Error', 'La fecha de nacimiento no es válida o es futura');
+          setLoadingUpdate(false);
+          return;
+        }
       }
 
       // Preparar datos para envío
@@ -178,7 +230,7 @@ export default function ProfileScreen() {
         address: editingData.address?.trim() || '',
       };
 
-      // Añadir fecha si existe
+      // Añadir fecha si existe y es válida
       if (editingData.birthDate && editingData.birthDate.trim()) {
         const [day, month, year] = editingData.birthDate.split('/');
         if (day && month && year) {
@@ -191,11 +243,8 @@ export default function ProfileScreen() {
         updateData.DUI = editingData.DUI;
       }
 
-      const response = await fetch(`${API}/customers/${user.id}`, {
+      const response = await fetchWithAuth(`${API}/customers/${user.id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify(updateData),
       });
 
@@ -209,8 +258,10 @@ export default function ProfileScreen() {
         Alert.alert('Error', errorData.message || 'No se pudo actualizar el perfil');
       }
     } catch (error) {
-      console.error('Error updating profile:', error);
-      Alert.alert('Error', 'Error de conexión al actualizar el perfil');
+      if (error.message !== 'SESSION_EXPIRED') {
+        console.error('Error updating profile:', error);
+        Alert.alert('Error', 'Error de conexión al actualizar el perfil');
+      }
     } finally {
       setLoadingUpdate(false);
     }
@@ -233,7 +284,7 @@ export default function ProfileScreen() {
 
       setLoadingPic(true);
       const formData = new FormData();
-      
+
       formData.append('profilePic', {
         uri: uri,
         name: fileName,
@@ -241,10 +292,18 @@ export default function ProfileScreen() {
       });
 
       try {
+        // Para FormData, no podemos usar fetchWithAuth directamente porque sobreescribe el Content-Type
         const response = await fetch(`${API}/customers/${user.id}`, {
           method: 'PUT',
+          credentials: 'include',
           body: formData,
         });
+
+        if (response.status === 401) {
+          await logout();
+          ToastAndroid.show("Tu sesión ha expirado. Por favor, inicia sesión nuevamente.", ToastAndroid.LONG);
+          return;
+        }
 
         const data = await response.json();
         if (response.ok && data.data?.profilePic) {
@@ -267,15 +326,15 @@ export default function ProfileScreen() {
     Alert.alert('Eliminar foto', '¿Seguro que deseas borrar tu foto de perfil?', [
       { text: 'Cancelar', style: 'cancel' },
       {
-        text: 'Eliminar', 
-        style: 'destructive', 
+        text: 'Eliminar',
+        style: 'destructive',
         onPress: async () => {
           setLoadingPic(true);
           try {
-            const response = await fetch(`${API}/customers/${user.id}/profile-pic`, {
+            const response = await fetchWithAuth(`${API}/customers/${user.id}/profile-pic`, {
               method: 'DELETE',
             });
-            
+
             if (response.ok) {
               setProfilePic(null);
               setProfileData(prev => ({ ...prev, profilePic: null }));
@@ -283,8 +342,10 @@ export default function ProfileScreen() {
               Alert.alert('Error', 'No se pudo borrar la foto');
             }
           } catch (error) {
-            console.error('Error deleting photo:', error);
-            Alert.alert('Error', 'No se pudo borrar la foto');
+            if (error.message !== 'SESSION_EXPIRED') {
+              console.error('Error deleting photo:', error);
+              Alert.alert('Error', 'No se pudo borrar la foto');
+            }
           } finally {
             setLoadingPic(false);
           }
@@ -293,10 +354,19 @@ export default function ProfileScreen() {
     ]);
   };
 
-  const removeFromWishlist = async (itemId) => {
-    const newWishlist = wishlist.filter(w => w._id !== itemId);
-    setWishlist(newWishlist);
-    await AsyncStorage.setItem(`wishlist_${user.id}`, JSON.stringify(newWishlist));
+  const handleRemoveFromWishlist = async (itemId, itemName) => {
+    Alert.alert(
+      'Eliminar de lista de deseos',
+      `¿Deseas eliminar "${itemName}" de tu lista de deseos?`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Eliminar',
+          style: 'destructive',
+          onPress: () => removeFromWishlist(itemId)
+        }
+      ]
+    );
   };
 
   const renderOrder = ({ item }) => (
@@ -313,8 +383,8 @@ export default function ProfileScreen() {
     <View style={styles.wishlistItem}>
       <Text style={styles.wishlistTitle}>{item.name || 'Producto'}</Text>
       <Text style={styles.wishlistDesc} numberOfLines={2}>{item.description || ''}</Text>
-      <TouchableOpacity 
-        onPress={() => removeFromWishlist(item._id)} 
+      <TouchableOpacity
+        onPress={() => handleRemoveFromWishlist(item._id, item.name)}
         style={styles.deleteWishBtn}
       >
         <MaterialCommunityIcons name="delete" size={18} color="#A73249" />
@@ -366,11 +436,11 @@ export default function ProfileScreen() {
                 )}
               </>
             )}
-            
+
             <TouchableOpacity style={styles.editPicBtn} onPress={handleChangePhoto}>
               <MaterialCommunityIcons name="camera" size={20} color="#fff" />
             </TouchableOpacity>
-            
+
             {profilePic && (
               <TouchableOpacity style={styles.deletePicBtn} onPress={handleDeletePhoto}>
                 <MaterialCommunityIcons name="delete" size={18} color="#fff" />
@@ -380,13 +450,13 @@ export default function ProfileScreen() {
 
           <Text style={styles.name}>{fullName || 'Usuario'}</Text>
           <Text style={styles.email}>{profileData.email || user.email}</Text>
-          
+
           <View style={styles.actionButtons}>
             <TouchableOpacity style={styles.editBtn} onPress={openEditModal}>
               <Ionicons name="create-outline" size={16} color="#A73249" />
               <Text style={styles.editBtnText}>Editar perfil</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
               <Ionicons name="log-out-outline" size={16} color="#fff" />
               <Text style={styles.logoutText}>Cerrar sesión</Text>
@@ -397,7 +467,7 @@ export default function ProfileScreen() {
         {/* Información de perfil */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Información de perfil</Text>
-          
+
           {loadingProfile ? (
             <ActivityIndicator color="#A73249" style={{ marginVertical: 20 }} />
           ) : (
@@ -466,6 +536,26 @@ export default function ProfileScreen() {
               style={styles.horizontalList}
             />
           )}
+        </View>
+
+        {/* Botón para navegar a la pantalla de Wishlist */}
+        <View style={{ alignItems: 'center', marginBottom: 24 }}>
+          <TouchableOpacity
+            style={{
+              backgroundColor: '#A73249',
+              borderRadius: 10,
+              paddingVertical: 12,
+              paddingHorizontal: 28,
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginTop: 4,
+              elevation: 2,
+            }}
+            onPress={() => navigation.navigate('WishList')}
+          >
+            <MaterialCommunityIcons name="heart" size={20} color="#fff" />
+            <Text style={{ color: '#fff', fontFamily: 'Quicksand-Bold', marginLeft: 10, fontSize: 15 }}>Ver mi lista de deseos</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
 
@@ -559,14 +649,14 @@ export default function ProfileScreen() {
             </ScrollView>
 
             <View style={styles.modalFooter}>
-              <TouchableOpacity 
-                style={styles.cancelBtn} 
+              <TouchableOpacity
+                style={styles.cancelBtn}
                 onPress={() => setModalVisible(false)}
               >
                 <Text style={styles.cancelBtnText}>Cancelar</Text>
               </TouchableOpacity>
-              
-              <TouchableOpacity 
+
+              <TouchableOpacity
                 style={[styles.saveBtn, loadingUpdate && styles.saveBtn]}
                 onPress={updateProfile}
                 disabled={loadingUpdate}
@@ -809,7 +899,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
     textAlign: 'center',
   },
-  
+
   // Estilos del modal
   modalOverlay: {
     flex: 1,

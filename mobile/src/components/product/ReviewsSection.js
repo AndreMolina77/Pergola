@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import {
   View,
   Text,
@@ -15,8 +15,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { AuthContext } from '../../context/AuthContext';
 import { useFonts } from 'expo-font';
 
-const { width: screenWidth } = Dimensions.get('window');
-
 const ReviewsSection = ({ productId }) => {
   const { user, API } = useContext(AuthContext);
   const [reviews, setReviews] = useState([]);
@@ -27,6 +25,7 @@ const ReviewsSection = ({ productId }) => {
     rating: 5,
     comment: ''
   });
+  const [expandedReview, setExpandedReview] = useState(null);
 
   const [fontsLoaded] = useFonts({
     'Quicksand-Bold': require('../../../assets/fonts/Quicksand-Bold.ttf'),
@@ -138,29 +137,268 @@ const ReviewsSection = ({ productId }) => {
     return <View style={styles.starsContainer}>{stars}</View>;
   };
 
-  const renderReviewItem = ({ item: review }) => (
-    <View style={styles.reviewItem}>
-      <View style={styles.reviewHeader}>
-        <View style={styles.reviewerInfo}>
-          <Text style={styles.reviewerName}>
-            {review.customer?.username || 'Usuario anónimo'}
-          </Text>
-          {renderStars(review.rating, 14)}
+  const renderRatingSummary = () => {
+    const averageRating = calculateAverageRating();
+    const distribution = getRatingDistribution();
+    const totalReviews = reviews.length;
+
+    return (
+      <View style={styles.ratingSummary}>
+        {/* Header con rating promedio */}
+        <View style={styles.ratingHeader}>
+          <View style={styles.averageRatingBox}>
+            <Text style={styles.averageRatingNumber}>{averageRating}</Text>
+            <View style={styles.averageStars}>
+              {renderStars(Math.round(parseFloat(averageRating)), 20)}
+            </View>
+            <Text style={styles.totalReviewsText}>
+              {totalReviews} {totalReviews === 1 ? 'reseña' : 'reseñas'}
+            </Text>
+          </View>
+          
+          <TouchableOpacity
+            style={styles.writeReviewButton}
+            onPress={() => setShowReviewModal(true)}
+          >
+            <Ionicons name="create-outline" size={20} color="#FFFFFF" />
+            <Text style={styles.writeReviewButtonText}>Escribir reseña</Text>
+          </TouchableOpacity>
         </View>
-        <Text style={styles.reviewDate}>
-          {new Date(review.createdAt).toLocaleDateString('es-ES')}
-        </Text>
+
+        {/* Distribución de ratings mejorada */}
+        <View style={styles.ratingDistribution}>
+          <Text style={styles.distributionTitle}>Distribución de calificaciones</Text>
+          <View style={styles.distributionBars}>
+            {[5, 4, 3, 2, 1].map(rating => {
+              const percentage = totalReviews > 0 ? (distribution[rating] / totalReviews) * 100 : 0;
+              return (
+                <View key={rating} style={styles.distributionRow}>
+                  <View style={styles.ratingLabel}>
+                    <Text style={styles.ratingNumber}>{rating}</Text>
+                    <Ionicons name="star" size={14} color="#FFD700" />
+                  </View>
+                  
+                  <View style={styles.barContainer}>
+                    <View 
+                      style={[
+                        styles.ratingBar,
+                        { width: `${Math.max(8, percentage)}%` } // Mínimo 8% para que sea visible
+                      ]} 
+                    />
+                  </View>
+                  
+                  <Text style={styles.ratingCount}>
+                    {distribution[rating]}
+                  </Text>
+                </View>
+              );
+            })}
+          </View>
+        </View>
       </View>
-      
-      <Text style={styles.reviewComment}>{review.comment}</Text>
-      
-      {review.response && (
-        <View style={styles.responseContainer}>
-          <Text style={styles.responseLabel}>Respuesta del vendedor:</Text>
-          <Text style={styles.responseText}>{review.response}</Text>
+    );
+  };
+
+  const toggleReviewExpansion = (reviewId) => {
+    setExpandedReview(expandedReview === reviewId ? null : reviewId);
+  };
+
+  const renderReviewItem = (review, index) => {
+    const isExpanded = expandedReview === (review._id || index);
+    const comment = review.comment || '';
+    const needsTruncation = comment.length > 150;
+
+    return (
+      <View key={review._id || index} style={styles.reviewCard}>
+        <View style={styles.reviewHeader}>
+          <View style={styles.reviewerInfo}>
+            <View style={styles.avatar}>
+              <Text style={styles.avatarText}>
+                {review.customer?.username?.charAt(0)?.toUpperCase() || 'U'}
+              </Text>
+            </View>
+            <View style={styles.reviewerDetails}>
+              <Text style={styles.reviewerName}>
+                {review.customer?.username || 'Usuario anónimo'}
+              </Text>
+              <Text style={styles.reviewDate}>
+                {new Date(review.createdAt).toLocaleDateString('es-ES', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </Text>
+            </View>
+          </View>
+          
+          <View style={styles.ratingBadge}>
+            {renderStars(review.rating, 14)}
+          </View>
         </View>
-      )}
-    </View>
+        
+        <View style={styles.reviewContent}>
+          <Text 
+            style={styles.reviewComment}
+            numberOfLines={isExpanded ? undefined : 3}
+          >
+            {comment}
+          </Text>
+          
+          {needsTruncation && (
+            <TouchableOpacity 
+              style={styles.readMoreButton}
+              onPress={() => toggleReviewExpansion(review._id || index)}
+            >
+              <Text style={styles.readMoreText}>
+                {isExpanded ? 'Leer menos' : 'Leer más'}
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
+        
+        {review.response && (
+          <View style={styles.responseContainer}>
+            <View style={styles.responseHeader}>
+              <Ionicons name="business" size={16} color="#A73249" />
+              <Text style={styles.responseLabel}>Respuesta del vendedor</Text>
+            </View>
+            <Text style={styles.responseText}>{review.response}</Text>
+          </View>
+        )}
+      </View>
+    );
+  };
+
+  const renderReviewModal = () => (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={showReviewModal}
+      onRequestClose={() => setShowReviewModal(false)}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Escribe tu reseña</Text>
+            <TouchableOpacity 
+              style={styles.modalCloseButton}
+              onPress={() => setShowReviewModal(false)}
+            >
+              <Ionicons name="close" size={24} color="#3D1609" />
+            </TouchableOpacity>
+          </View>
+
+          {/* SCROLLVIEW MEJORADO - CON FLEX Y SIN ALTURA FIJA */}
+          <ScrollView 
+            style={styles.modalBody}
+            contentContainerStyle={styles.modalBodyContent}
+            showsVerticalScrollIndicator={true}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View style={styles.ratingSection}>
+              <Text style={styles.ratingLabel}>¿Cómo calificarías este producto?</Text>
+              <View style={styles.starRating}>
+                {[1, 2, 3, 4, 5].map(star => (
+                  <TouchableOpacity
+                    key={star}
+                    onPress={() => setNewReview(prev => ({ ...prev, rating: star }))}
+                    style={styles.starButton}
+                  >
+                    <Ionicons
+                      name={star <= newReview.rating ? "star" : "star-outline"}
+                      size={36}
+                      color={star <= newReview.rating ? "#FFD700" : "#E0E0E0"}
+                    />
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <Text style={styles.ratingHint}>
+                {newReview.rating === 5 ? 'Excelente' :
+                newReview.rating === 4 ? 'Muy bueno' :
+                newReview.rating === 3 ? 'Bueno' :
+                newReview.rating === 2 ? 'Regular' : 'Malo'}
+              </Text>
+            </View>
+
+            <View style={styles.commentSection}>
+              <Text style={styles.commentLabel}>Tu reseña</Text>
+              <TextInput
+                style={styles.commentInput}
+                placeholder="Comparte tu experiencia con este producto..."
+                placeholderTextColor="#A73249AA"
+                value={newReview.comment}
+                onChangeText={(text) => setNewReview(prev => ({ ...prev, comment: text }))}
+                multiline={true}
+                numberOfLines={6}
+                maxLength={500}
+                textAlignVertical="top"
+              />
+              <View style={styles.characterCounter}>
+                <Text style={styles.characterCount}>
+                  {newReview.comment.length}/500 caracteres
+                </Text>
+                {newReview.comment.length < 10 && (
+                  <Text style={styles.minimumWarning}>
+                    Mínimo 10 caracteres
+                  </Text>
+                )}
+              </View>
+            </View>
+
+            <View style={styles.tipsSection}>
+              <Text style={styles.tipsTitle}>Consejos para una buena reseña:</Text>
+              <View style={styles.tipItem}>
+                <Ionicons name="checkmark-circle" size={16} color="#4CAF50" />
+                <Text style={styles.tipText}>Describe la calidad del producto</Text>
+              </View>
+              <View style={styles.tipItem}>
+                <Ionicons name="checkmark-circle" size={16} color="#4CAF50" />
+                <Text style={styles.tipText}>Menciona si cumple con lo esperado</Text>
+              </View>
+              <View style={styles.tipItem}>
+                <Ionicons name="checkmark-circle" size={16} color="#4CAF50" />
+                <Text style={styles.tipText}>Sé específico y honesto</Text>
+              </View>
+              {/* CONSEJO ADICIONAL PARA MEJORAR EL SCROLL */}
+              <View style={styles.tipItem}>
+                <Ionicons name="checkmark-circle" size={16} color="#4CAF50" />
+                <Text style={styles.tipText}>Incluye detalles sobre el uso del producto</Text>
+              </View>
+            </View>
+
+            {/* ESPACIO EXTRA AL FINAL PARA MEJORAR SCROLL */}
+            <View style={styles.modalSpacer} />
+          </ScrollView>
+
+          <View style={styles.modalFooter}>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => setShowReviewModal(false)}
+            >
+              <Text style={styles.cancelButtonText}>Cancelar</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.submitButton,
+                (newReview.comment.length < 10 || submitting) && styles.submitButtonDisabled
+              ]}
+              onPress={submitReview}
+              disabled={newReview.comment.length < 10 || submitting}
+            >
+              {submitting ? (
+                <ActivityIndicator color="#FFFFFF" size="small" />
+              ) : (
+                <>
+                  <Ionicons name="send" size={18} color="#FFFFFF" />
+                  <Text style={styles.submitButtonText}>Publicar reseña</Text>
+                </>
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
   );
 
   if (!fontsLoaded) {
@@ -171,138 +409,40 @@ const ReviewsSection = ({ productId }) => {
     );
   }
 
-  const averageRating = calculateAverageRating();
-  const distribution = getRatingDistribution();
-
   return (
     <View style={styles.container}>
-      {/* Header de reseñas */}
-      <View style={styles.header}>
-        <View style={styles.ratingOverview}>
-          <View style={styles.averageRating}>
-            <Text style={styles.ratingNumber}>{averageRating}</Text>
-            {renderStars(Math.round(parseFloat(averageRating)), 20)}
-            <Text style={styles.reviewCount}>
-              {reviews.length} {reviews.length === 1 ? 'reseña' : 'reseñas'}
-            </Text>
-          </View>
-
-          {/* Distribución de calificaciones */}
-          <View style={styles.ratingDistribution}>
-            {[5, 4, 3, 2, 1].map(rating => (
-              <View key={rating} style={styles.distributionRow}>
-                <Text style={styles.ratingLabel}>{rating}</Text>
-                <Ionicons name="star" size={12} color="#FFD700" />
-                <View style={styles.distributionBar}>
-                  <View 
-                    style={[
-                      styles.distributionFill,
-                      { width: `${reviews.length > 0 ? (distribution[rating] / reviews.length) * 100 : 0}%` }
-                    ]} 
-                  />
-                </View>
-                <Text style={styles.distributionCount}>{distribution[rating]}</Text>
-              </View>
-            ))}
-          </View>
-        </View>
-
-        {/* Botón para escribir reseña */}
-        <TouchableOpacity
-          style={styles.writeReviewBtn}
-          onPress={() => setShowReviewModal(true)}
-          activeOpacity={0.8}
-        >
-          <Ionicons name="create-outline" size={18} color="#FFFFFF" />
-          <Text style={styles.writeReviewText}>Escribir reseña</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Lista de reseñas */}
+      {renderRatingSummary()}
+      
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#A73249" />
+          <Text style={styles.loadingText}>Cargando reseñas...</Text>
         </View>
       ) : reviews.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Ionicons name="chatbubble-outline" size={48} color="#E0E0E0" />
-          <Text style={styles.emptyText}>No hay reseñas aún</Text>
-          <Text style={styles.emptySubtext}>Sé el primero en escribir una reseña</Text>
+        <View style={styles.emptyState}>
+          <Ionicons name="chatbubble-ellipses-outline" size={64} color="#E0E0E0" />
+          <Text style={styles.emptyStateTitle}>Aún no hay reseñas</Text>
+          <Text style={styles.emptyStateSubtitle}>
+            Sé el primero en compartir tu experiencia con este producto
+          </Text>
+          <TouchableOpacity
+            style={styles.emptyStateButton}
+            onPress={() => setShowReviewModal(true)}
+          >
+            <Text style={styles.emptyStateButtonText}>Escribir primera reseña</Text>
+          </TouchableOpacity>
         </View>
       ) : (
-        <ScrollView style={styles.reviewsList} showsVerticalScrollIndicator={false}>
-          {reviews.map((review, index) => (
-            <View key={review._id || index}>
-              {renderReviewItem({ item: review })}
-            </View>
-          ))}
+        <ScrollView 
+          style={styles.reviewsList}
+          showsVerticalScrollIndicator={false}
+        >
+          <Text style={styles.reviewsTitle}>Reseñas de clientes</Text>
+          {reviews.map((review, index) => renderReviewItem(review, index))}
         </ScrollView>
       )}
 
-      {/* Modal para escribir reseña */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={showReviewModal}
-        onRequestClose={() => setShowReviewModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Escribir reseña</Text>
-              <TouchableOpacity onPress={() => setShowReviewModal(false)}>
-                <Ionicons name="close" size={24} color="#3D1609" />
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView style={styles.modalBody}>
-              <Text style={styles.inputLabel}>Calificación</Text>
-              <View style={styles.ratingSelector}>
-                {renderStars(newReview.rating, 32, (rating) => 
-                  setNewReview(prev => ({ ...prev, rating }))
-                )}
-              </View>
-
-              <Text style={styles.inputLabel}>Comentario</Text>
-              <TextInput
-                style={styles.commentInput}
-                placeholder="Escribe tu opinión sobre este producto..."
-                placeholderTextColor="#A73249AA"
-                value={newReview.comment}
-                onChangeText={(text) => setNewReview(prev => ({ ...prev, comment: text }))}
-                multiline={true}
-                numberOfLines={5}
-                maxLength={500}
-                textAlignVertical="top"
-              />
-              <Text style={styles.characterCount}>
-                {newReview.comment.length}/500 caracteres
-              </Text>
-            </ScrollView>
-
-            <View style={styles.modalFooter}>
-              <TouchableOpacity
-                style={styles.cancelBtn}
-                onPress={() => setShowReviewModal(false)}
-              >
-                <Text style={styles.cancelBtnText}>Cancelar</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.submitBtn, submitting && styles.submitBtnDisabled]}
-                onPress={submitReview}
-                disabled={submitting}
-              >
-                {submitting ? (
-                  <ActivityIndicator color="#FFFFFF" size="small" />
-                ) : (
-                  <Text style={styles.submitBtnText}>Enviar reseña</Text>
-                )}
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      {renderReviewModal()}
     </View>
   );
 };
@@ -318,130 +458,230 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 40,
   },
-  header: {
-    padding: 16,
-    backgroundColor: '#F5EDE8',
+  loadingText: {
+    fontSize: 16,
+    fontFamily: 'Nunito-Regular',
+    color: '#666666',
+    marginTop: 12,
+  },
+
+  // RATING SUMMARY MEJORADO - DISEÑO MÁS ATRACTIVO
+  ratingSummary: {
+    backgroundColor: '#F8F8F8',
+    padding: 24,
     borderBottomWidth: 1,
     borderBottomColor: '#E8E1D8',
   },
-  ratingOverview: {
-    marginBottom: 16,
-  },
-  averageRating: {
+  ratingHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
   },
-  ratingNumber: {
-    fontSize: 32,
+  averageRatingBox: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  averageRatingNumber: {
+    fontSize: 52,
     fontFamily: 'Quicksand-Bold',
     color: '#3D1609',
     marginBottom: 4,
   },
-  reviewCount: {
+  averageStars: {
+    marginBottom: 8,
+  },
+  totalReviewsText: {
     fontSize: 14,
     fontFamily: 'Nunito-Regular',
     color: '#666666',
-    marginTop: 4,
   },
+  writeReviewButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#A73249',
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    gap: 8,
+    minWidth: 160,
+  },
+  writeReviewButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontFamily: 'Quicksand-Bold',
+  },
+
+  // DISTRIBUCIÓN DE RATINGS MEJORADA
   ratingDistribution: {
-    gap: 4,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  distributionTitle: {
+    fontSize: 16,
+    fontFamily: 'Quicksand-Bold',
+    color: '#3D1609',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  distributionBars: {
+    gap: 12,
   },
   distributionRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
   },
   ratingLabel: {
-    fontSize: 12,
-    fontFamily: 'Nunito-Regular',
-    color: '#3D1609',
-    width: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: 30,
+    gap: 4,
   },
-  distributionBar: {
+  ratingNumber: {
+    fontSize: 14,
+    fontFamily: 'Nunito-Bold',
+    color: '#3D1609',
+  },
+  barContainer: {
     flex: 1,
     height: 8,
-    backgroundColor: '#E0E0E0',
+    backgroundColor: '#F0F0F0',
     borderRadius: 4,
     overflow: 'hidden',
   },
-  distributionFill: {
+  ratingBar: {
     height: '100%',
     backgroundColor: '#FFD700',
+    borderRadius: 4,
+    minWidth: 8, // Asegura que siempre sea visible
   },
-  distributionCount: {
-    fontSize: 12,
-    fontFamily: 'Nunito-Regular',
-    color: '#666666',
+  ratingCount: {
+    fontSize: 14,
+    fontFamily: 'Nunito-Bold',
+    color: '#3D1609',
     width: 20,
     textAlign: 'right',
   },
-  writeReviewBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#A73249',
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    justifyContent: 'center',
-    gap: 8,
-  },
-  writeReviewText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontFamily: 'Quicksand-Bold',
-  },
+
   starsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
+
+  // REVIEWS LIST
   reviewsList: {
     flex: 1,
+    padding: 20,
   },
-  reviewItem: {
+  reviewsTitle: {
+    fontSize: 18,
+    fontFamily: 'Quicksand-Bold',
+    color: '#3D1609',
+    marginBottom: 16,
+  },
+
+  // REVIEW CARDS (mantenido igual)
+  reviewCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
     padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
   reviewHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 8,
+    marginBottom: 12,
   },
   reviewerInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#A73249',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  avatarText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontFamily: 'Quicksand-Bold',
+  },
+  reviewerDetails: {
     flex: 1,
   },
   reviewerName: {
     fontSize: 14,
     fontFamily: 'Quicksand-Bold',
     color: '#3D1609',
-    marginBottom: 4,
+    marginBottom: 2,
   },
   reviewDate: {
     fontSize: 12,
     fontFamily: 'Nunito-Regular',
     color: '#999999',
   },
+  ratingBadge: {
+    backgroundColor: '#FFF8E1',
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  reviewContent: {
+    marginBottom: 12,
+  },
   reviewComment: {
     fontSize: 14,
     fontFamily: 'Nunito-Regular',
     color: '#3D1609',
     lineHeight: 20,
-    marginBottom: 8,
+  },
+  readMoreButton: {
+    marginTop: 8,
+  },
+  readMoreText: {
+    fontSize: 14,
+    fontFamily: 'Nunito-SemiBold',
+    color: '#A73249',
   },
   responseContainer: {
     backgroundColor: '#F5EDE8',
-    borderRadius: 8,
+    borderRadius: 12,
     padding: 12,
     marginTop: 8,
     borderLeftWidth: 3,
     borderLeftColor: '#A73249',
   },
+  responseHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+    gap: 6,
+  },
   responseLabel: {
     fontSize: 12,
     fontFamily: 'Quicksand-Bold',
     color: '#A73249',
-    marginBottom: 4,
   },
   responseText: {
     fontSize: 13,
@@ -449,26 +689,43 @@ const styles = StyleSheet.create({
     color: '#3D1609',
     lineHeight: 18,
   },
-  emptyContainer: {
+  // ESTADOS VACÍOS
+  emptyState: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 60,
+    paddingHorizontal: 40,
   },
-  emptyText: {
-    fontSize: 18,
+  emptyStateTitle: {
+    fontSize: 20,
     fontFamily: 'Quicksand-Bold',
     color: '#999999',
     marginTop: 16,
+    textAlign: 'center',
   },
-  emptySubtext: {
+  emptyStateSubtitle: {
     fontSize: 14,
     fontFamily: 'Nunito-Regular',
     color: '#CCCCCC',
-    marginTop: 4,
+    marginTop: 8,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  emptyStateButton: {
+    backgroundColor: '#A73249',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    marginTop: 20,
+  },
+  emptyStateButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontFamily: 'Quicksand-Bold',
   },
 
-  // Estilos del modal
+  // MODAL (mantenido igual)
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -477,99 +734,175 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   modalContent: {
-    backgroundColor: '#F5EDE8',
-    borderRadius: 20,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
     width: '100%',
-    maxHeight: '80%',
+    maxHeight: '85%', // Aumentado ligeramente para mejor visualización
+    minHeight: '60%', // Mínimo para que no se vea muy pequeño
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
-    shadowRadius: 10,
+    shadowRadius: 20,
     elevation: 10,
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
+    padding: 24,
     borderBottomWidth: 1,
-    borderBottomColor: '#E8D5C9',
+    borderBottomColor: '#E8E1D8',
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontFamily: 'Quicksand-Bold',
     color: '#3D1609',
   },
-  modalBody: {
-    padding: 20,
-    maxHeight: 300,
+  modalCloseButton: {
+    padding: 4,
   },
-  inputLabel: {
-    fontSize: 14,
+  modalBody: {
+    flex: 1, // IMPORTANTE: Usar flex en lugar de altura fija
+  },
+  modalBodyContent: {
+    padding: 24,
+    paddingBottom: 10, // Reducido para dar más espacio
+  },
+  ratingSection: {
+    alignItems: 'center',
+    marginBottom: 24,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+  ratingLabel: {
+    fontSize: 16,
     fontFamily: 'Nunito-SemiBold',
     color: '#3D1609',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  starRating: {
+    flexDirection: 'row',
+    gap: 8,
     marginBottom: 8,
   },
-  ratingSelector: {
-    alignItems: 'center',
-    paddingVertical: 16,
-    marginBottom: 20,
+  starButton: {
+    padding: 4,
+  },
+  ratingHint: {
+    fontSize: 14,
+    fontFamily: 'Nunito-Regular',
+    color: '#666666',
+    fontStyle: 'italic',
+  },
+  commentSection: {
+    marginBottom: 24,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+  commentLabel: {
+    fontSize: 16,
+    fontFamily: 'Nunito-SemiBold',
+    color: '#3D1609',
+    marginBottom: 12,
   },
   commentInput: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 10,
-    paddingHorizontal: 14,
+    backgroundColor: '#F8F8F8',
+    borderRadius: 12,
+    paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 14,
     fontFamily: 'Nunito-Regular',
     borderWidth: 1,
-    borderColor: '#E8D5C9',
+    borderColor: '#E8E1D8',
     color: '#3D1609',
-    minHeight: 100,
+    minHeight: 120,
     textAlignVertical: 'top',
+  },
+  characterCounter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 8,
   },
   characterCount: {
     fontSize: 12,
     fontFamily: 'Nunito-Regular',
     color: '#999999',
-    textAlign: 'right',
-    marginTop: 4,
   },
+  minimumWarning: {
+    fontSize: 12,
+    fontFamily: 'Nunito-Regular',
+    color: '#FF6B6B',
+  },
+  tipsSection: {
+    backgroundColor: '#F0F8F0',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 10, // Espacio antes del spacer
+  },
+  tipsTitle: {
+    fontSize: 14,
+    fontFamily: 'Nunito-SemiBold',
+    color: '#2E7D32',
+    marginBottom: 12,
+  },
+  tipItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start', // Cambiado a flex-start para mejor alineación
+    gap: 8,
+    marginBottom: 8,
+  },
+  tipText: {
+    fontSize: 12,
+    fontFamily: 'Nunito-Regular',
+    color: '#2E7D32',
+    flex: 1,
+    lineHeight: 16,
+  },
+  // ESPACIO EXTRA PARA MEJORAR SCROLL
+  modalSpacer: {
+    height: 20, // Espacio extra al final para mejor scroll
+  },
+  // FOOTER DEL MODAL MEJORADO
   modalFooter: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 20,
+    padding: 24,
     borderTopWidth: 1,
-    borderTopColor: '#E8D5C9',
+    borderTopColor: '#E8E1D8',
     gap: 12,
   },
-  cancelBtn: {
+  cancelButton: {
     flex: 1,
-    backgroundColor: '#E8D5C9',
-    borderRadius: 10,
-    paddingVertical: 12,
+    backgroundColor: '#F5F5F5',
+    borderRadius: 12,
+    paddingVertical: 14,
     alignItems: 'center',
   },
-  cancelBtnText: {
-    color: '#3D1609',
+  cancelButtonText: {
+    color: '#666666',
+    fontSize: 16,
     fontFamily: 'Quicksand-Bold',
-    fontSize: 14,
   },
-  submitBtn: {
-    flex: 1,
+  submitButton: {
+    flex: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: '#A73249',
-    borderRadius: 10,
-    paddingVertical: 12,
-    alignItems: 'center',
+    borderRadius: 12,
+    paddingVertical: 14,
+    gap: 8,
   },
-  submitBtnDisabled: {
-    backgroundColor: '#A7324980',
+  submitButtonDisabled: {
+    backgroundColor: '#CCCCCC',
   },
-  submitBtnText: {
+  submitButtonText: {
     color: '#FFFFFF',
+    fontSize: 16,
     fontFamily: 'Quicksand-Bold',
-    fontSize: 14,
-  },
+  }
 });
 
 export default ReviewsSection;

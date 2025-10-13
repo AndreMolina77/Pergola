@@ -20,14 +20,14 @@ import AppLoading from 'expo-app-loading';
 import { AuthContext } from '../context/AuthContext';
 import ProductCard from '../components/product/ProductCard';
 
-const CollectionDetailScreen = () => {
+const CategoryDetailScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const insets = useSafeAreaInsets();
 
-  const { collectionId, collectionName, collectionImage } = route.params;
+  const { categoryId, categoryName, categoryImage } = route.params;
 
-  const [collection, setCollection] = useState(null);
+  const [category, setCategory] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -41,44 +41,44 @@ const CollectionDetailScreen = () => {
   });
 
   useEffect(() => {
-    const fetchCollectionDetail = async () => {
+    const fetchCategoryDetail = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        // Hacer petición a la API para obtener todas las colecciones
-        const response = await fetch('https://pergola-production.up.railway.app/api/public/collections');
+        // Hacer petición a la API para obtener todas las categorías
+        const response = await fetch('https://pergola-production.up.railway.app/api/public/categories');
 
         if (!response.ok) {
           throw new Error(`Error: ${response.status}`);
         }
 
-        const allCollections = await response.json();
+        const allCategories = await response.json();
 
-        // Buscar la colección específica por ID
-        const foundCollection = allCollections.find(collection => collection._id === collectionId);
+        // Buscar la categoría específica por ID
+        const foundCategory = allCategories.find(category => category._id === categoryId);
 
-        if (foundCollection) {
-          setCollection(foundCollection);
+        if (foundCategory) {
+          setCategory(foundCategory);
         } else {
           // Si no encuentra, usar datos básicos de los parámetros
-          setCollection({
-            _id: collectionId,
-            name: collectionName,
-            image: collectionImage,
+          setCategory({
+            _id: categoryId,
+            name: categoryName,
+            image: categoryImage,
             description: 'Una exclusiva selección de joyas cuidadosamente diseñadas para realzar tu estilo único y elegancia natural.'
           });
         }
 
       } catch (err) {
-        console.error('Error fetching collection:', err);
-        setError('No se pudo cargar la colección');
+        console.error('Error fetching category:', err);
+        setError('No se pudo cargar la categoría');
 
         // Fallback: usar datos básicos si la API falla
-        setCollection({
-          _id: collectionId,
-          name: collectionName,
-          image: collectionImage,
+        setCategory({
+          _id: categoryId,
+          name: categoryName,
+          image: categoryImage,
           description: 'Una exclusiva selección de joyas cuidadosamente diseñadas para realzar tu estilo único y elegancia natural.'
         });
       } finally {
@@ -86,9 +86,9 @@ const CollectionDetailScreen = () => {
       }
     };
 
-    fetchCollectionDetail();
+    fetchCategoryDetail();
 
-  }, [collectionId, collectionName, collectionImage]);
+  }, [categoryId, categoryName, categoryImage]);
 
   const handleBack = () => {
     navigation.goBack();
@@ -104,7 +104,7 @@ const CollectionDetailScreen = () => {
         <StatusBar barStyle="dark-content" backgroundColor="#E3C6B8" />
         <View style={styles.center}>
           <ActivityIndicator size="large" color="#3D1609" />
-          <Text style={styles.loadingText}>Cargando colección...</Text>
+          <Text style={styles.loadingText}>Cargando categoría...</Text>
         </View>
       </SafeAreaView>
     );
@@ -119,7 +119,7 @@ const CollectionDetailScreen = () => {
         <TouchableOpacity style={styles.backBtn} onPress={handleBack}>
           <Ionicons name="chevron-back" size={26} color="#3D1609" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Colecciones</Text>
+        <Text style={styles.headerTitle}>Categorías</Text>
         <View style={{ width: 26 }} />
       </View>
 
@@ -131,10 +131,10 @@ const CollectionDetailScreen = () => {
         {/* Hero Section */}
         <View style={styles.heroSection}>
           <View style={styles.imageContainer}>
-            {collection?.image ? (
+            {category?.image ? (
               <Image
-                source={{ uri: collection.image }}
-                style={styles.collectionImage}
+                source={{ uri: category.image }}
+                style={styles.categoryImage}
                 resizeMode="contain"
               />
             ) : (
@@ -145,14 +145,14 @@ const CollectionDetailScreen = () => {
             )}
           </View>
 
-          <View style={styles.collectionInfo}>
-            <Text style={styles.collectionName}>
-              {collection?.name}
+          <View style={styles.categoryInfo}>
+            <Text style={styles.categoryName}>
+              {category?.name}
             </Text>
 
-            {collection?.description && (
-              <Text style={styles.collectionDescription}>
-                {collection.description}
+            {category?.description && (
+              <Text style={styles.categoryDescription}>
+                {category.description}
               </Text>
             )}
           </View>
@@ -205,15 +205,15 @@ const CollectionDetailScreen = () => {
           </View>
         </View>
 
-        {/* Grid de productos de la colección */}
-        <ProductsGrid collectionId={collection?._id} navigation={navigation} />
+        {/* Grid de productos de la categoría */}
+        <ProductsGrid categoryId={category?._id} navigation={navigation} />
       </ScrollView>
     </SafeAreaView>
   );
 };
 
 /// --- COMPONENTE GRID DE PRODUCTOS ---
-function ProductsGrid({ collectionId, navigation }) {
+function ProductsGrid({ categoryId, navigation }) {
   const { API } = useContext(AuthContext);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -226,12 +226,12 @@ function ProductsGrid({ collectionId, navigation }) {
         const response = await fetch(`${API}/public/products`);
         if (response.ok) {
           const data = await response.json();
-          // Filtrar productos por colección
+          // Filtrar productos por categoría
           const filtered = data.filter(
             (product) =>
-              product.collection &&
-              (product.collection._id === collectionId ||
-                product.collection === collectionId
+              product.category &&
+              (product.category._id === categoryId ||
+                product.category === categoryId
               )
           );
           setProducts(filtered);
@@ -244,8 +244,8 @@ function ProductsGrid({ collectionId, navigation }) {
         setLoading(false);
       }
     };
-    if (collectionId) fetchProducts();
-  }, [collectionId, API]);
+    if (categoryId) fetchProducts();
+  }, [categoryId, API]);
 
   const handleProductPress = (product) => {
     navigation.navigate("ProductDetail", { productId: product._id });
@@ -264,7 +264,7 @@ function ProductsGrid({ collectionId, navigation }) {
     return (
       <View style={styles.emptyContainer}>
         <Ionicons name="storefront-outline" size={64} color="#3D1609" />
-        <Text style={styles.emptyText}>No hay productos en esta colección</Text>
+        <Text style={styles.emptyText}>No hay productos en esta categoría</Text>
       </View>
     );
   }
@@ -395,7 +395,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     elevation: 4,
   },
-  collectionImage: {
+  categoryImage: {
     width: '100%',
     height: '100%',
   },
@@ -412,17 +412,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: 8,
   },
-  collectionInfo: {
+  categoryInfo: {
     paddingHorizontal: 4,
   },
-  collectionName: {
+  categoryName: {
     fontFamily: 'CormorantGaramond-Bold',
     fontSize: 28,
     color: '#3D1609',
     marginBottom: 12,
     textAlign: 'center',
   },
-  collectionDescription: {
+  categoryDescription: {
     fontFamily: 'Nunito-Regular',
     fontSize: 16,
     color: '#3D1609',
@@ -548,4 +548,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CollectionDetailScreen;
+export default CategoryDetailScreen;

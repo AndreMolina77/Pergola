@@ -1,6 +1,6 @@
 import { View, Text, Image, StyleSheet, ActivityIndicator, ScrollView, TouchableOpacity } from 'react-native';
 import { useState, useEffect } from 'react';
-import { useNavigation } from '@react-navigation/native'; // 1. Importar useNavigation
+import { useNavigation } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 
 const CatalogoExclusivo = () => {
@@ -8,7 +8,7 @@ const CatalogoExclusivo = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const navigation = useNavigation(); // 2. Obtener el objeto navigation
+  const navigation = useNavigation();
 
   const [fontsLoaded] = useFonts({
     'CormorantGaramond-Bold': require('../../assets/fonts/CormorantGaramond-Bold.ttf'),
@@ -89,23 +89,37 @@ const CatalogoExclusivo = () => {
         <TouchableOpacity 
           key={col._id || col.id} 
           style={styles.exclusivaItem}
-          onPress={() => handleItemPress(col._id || col.id, col.name)}
+          onPress={() => handleItemPress(col._id || col.id, col.name, col.image)}
+          activeOpacity={0.7}
         >
-          {col.image ? (
-            <Image 
-              source={{ uri: col.image }} 
-              style={styles.exclusivaImage}
-              resizeMode="cover"
-            />
-          ) : (
-            <View style={styles.placeholderImage}>
-              <Text style={styles.placeholderText}>Sin imagen</Text>
-            </View>
-          )}
-          <Text style={styles.exclusivaTitle}>{col.name}</Text>
-          {col.price && (
-            <Text style={styles.exclusivaPrice}>${col.price}</Text>
-          )}
+          {/* Container de la imagen con aspect ratio fijo */}
+          <View style={styles.imageContainer}>
+            {col.image ? (
+              <Image 
+                source={{ uri: col.image }} 
+                style={styles.exclusivaImage}
+                resizeMode="contain" 
+              />
+            ) : (
+              <View style={styles.placeholderImage}>
+                <Text style={styles.placeholderText}>Sin imagen</Text>
+              </View>
+            )}
+          </View>
+          
+          {/* Container del texto con altura mínima */}
+          <View style={styles.textContainer}>
+            <Text 
+              style={styles.exclusivaTitle}
+              numberOfLines={2}
+              ellipsizeMode="tail"
+            >
+              {col.name}
+            </Text>
+            {col.price && (
+              <Text style={styles.exclusivaPrice}>${col.price}</Text>
+            )}
+          </View>
         </TouchableOpacity>
       ))}
     </ScrollView>
@@ -118,18 +132,32 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 5,
+    paddingVertical: 5,
   },
   exclusivaItem: {
     backgroundColor: 'white',
-    borderRadius: 15,
-    padding: 15,
+    borderRadius: 20,
+    padding: 12,
     marginHorizontal: 8,
-    width: 140,
-    elevation: 3,
+    width: 160,
+    elevation: 4,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    // Mejora para iOS
+    shadowColor: '#3d1609',
+  },
+  // Contenedor de imagen con aspect ratio consistente
+  imageContainer: {
+    width: '100%',
+    aspectRatio: 1, 
+    borderRadius: 15,
+    marginBottom: 12,
+    backgroundColor: '#f8f4f1', // Color de fondo suave
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   exclusivaImage: {
     height: 80,
@@ -141,26 +169,33 @@ const styles = StyleSheet.create({
     height: 80,
     width: '100%',
     borderRadius: 10,
-    marginBottom: 10,
-    backgroundColor: '#f0f0f0',
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#f0ebe8',
   },
   placeholderText: {
-    fontSize: 10,
-    color: '#666',
+    fontSize: 11,
+    color: '#999',
     fontFamily: "Quicksand",
   },
+  // Contenedor de texto con altura consistente
+  textContainer: {
+    justifyContent: 'flex-start',
+  },
   exclusivaTitle: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: "Quicksand-Bold",
     color: '#3d1609',
-    marginBottom: 5,
+    marginBottom: 4,
+    lineHeight: 18,
+    // Altura máxima para 2 líneas
+    maxHeight: 36,
   },
   exclusivaPrice: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: "Quicksand-Bold",
     color: '#a73249',
+    marginTop: 2,
   },
   center: {
     flex: 1,

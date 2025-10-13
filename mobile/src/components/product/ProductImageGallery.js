@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   View,
   Image,
@@ -7,7 +7,8 @@ import {
   Dimensions,
   ScrollView,
   Modal,
-  ActivityIndicator
+  ActivityIndicator,
+  Text
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 

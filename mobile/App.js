@@ -4,6 +4,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import CustomSplashScreen from './src/screen/SplashScreen';
 import AppNavigator from './src/navigation/AppNavigator';
 import { AuthProvider } from './src/context/AuthContext';
+import { CartProvider } from './src/context/CartContext';
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -30,8 +31,10 @@ export default function App() {
 
   return (
     <AuthProvider>
-      <StatusBar />
-      <AppNavigator />
+      <CartProvider>
+        <StatusBar/>
+        <AppNavigator/>
+      </CartProvider>
     </AuthProvider>
   );
 }

@@ -18,7 +18,7 @@ import SizeSelector from "../components/SizeSelector";
 
 const SurveyScreen = ({ navigation, route }) => {
   const { user, API } = useContext(AuthContext);
-  
+
   const [allergies, setAllergies] = useState("");
   const [budget, setBudget] = useState("");
   const [jewelSize, setJewelSize] = useState("");
@@ -78,12 +78,12 @@ const SurveyScreen = ({ navigation, route }) => {
 
       if (response.ok) {
         Alert.alert(
-          "¡Éxito!", 
+          "¡Éxito!",
           "Tus preferencias han sido guardadas correctamente",
           [
             {
               text: "Continuar",
-              onPress: () => navigation.navigate("TabNavigator")
+              onPress: () => navigation.navigate("Home")
             }
           ]
         );
@@ -109,7 +109,7 @@ const SurveyScreen = ({ navigation, route }) => {
         },
         {
           text: "Saltar",
-          onPress: () => navigation.navigate("TabNavigator")
+          onPress: () => navigation.navigate("Home")
         }
       ]
     );
@@ -117,13 +117,13 @@ const SurveyScreen = ({ navigation, route }) => {
 
   const isValidForm = () => {
     // Todos los campos son opcionales, pero al menos uno debe estar lleno
-    return allergies.trim() !== "" || 
-           budget.trim() !== "" || 
-           jewelSize !== "" || 
-           preferredColors.trim() !== "" || 
-           preferredMaterials.trim() !== "" || 
-           preferredJewelStyle.trim() !== "" || 
-           purchaseOpportunity.trim() !== "";
+    return allergies.trim() !== "" ||
+      budget.trim() !== "" ||
+      jewelSize !== "" ||
+      preferredColors.trim() !== "" ||
+      preferredMaterials.trim() !== "" ||
+      preferredJewelStyle.trim() !== "" ||
+      purchaseOpportunity.trim() !== "";
   };
 
   if (!fontsLoaded) {
@@ -135,18 +135,18 @@ const SurveyScreen = ({ navigation, route }) => {
   }
 
   return (
-    <KeyboardAvoidingView 
+    <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.backButton}
             onPress={() => navigation.goBack()}
             activeOpacity={0.7}
@@ -154,7 +154,7 @@ const SurveyScreen = ({ navigation, route }) => {
             <Ionicons name="arrow-back" size={24} color="#3D1609" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Preferencias</Text>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.skipButton}
             onPress={handleSkip}
             activeOpacity={0.7}
@@ -184,6 +184,12 @@ const SurveyScreen = ({ navigation, route }) => {
               editable={!loading}
               multiline={true}
               numberOfLines={3}
+              inputStyle={{
+                minHeight: 48,
+                textAlignVertical: 'top',
+                flexWrap: 'wrap',
+                paddingHorizontal: 10
+              }}
             />
           </View>
 
@@ -213,6 +219,12 @@ const SurveyScreen = ({ navigation, route }) => {
               onChangeText={setBudget}
               keyboardType="default"
               editable={!loading}
+              inputStyle={{
+                minHeight: 48,
+                textAlignVertical: 'top',
+                flexWrap: 'wrap',
+                paddingHorizontal: 10
+              }}
             />
           </View>
 
@@ -228,6 +240,12 @@ const SurveyScreen = ({ navigation, route }) => {
               value={preferredColors}
               onChangeText={setPreferredColors}
               editable={!loading}
+              inputStyle={{
+                minHeight: 48,
+                textAlignVertical: 'top',
+                flexWrap: 'wrap',
+                paddingHorizontal: 10
+              }}
             />
           </View>
 
@@ -242,6 +260,12 @@ const SurveyScreen = ({ navigation, route }) => {
               value={preferredMaterials}
               onChangeText={setPreferredMaterials}
               editable={!loading}
+              inputStyle={{
+                minHeight: 48,
+                textAlignVertical: 'top',
+                flexWrap: 'wrap',
+                paddingHorizontal: 10
+              }}
             />
           </View>
 
@@ -256,6 +280,12 @@ const SurveyScreen = ({ navigation, route }) => {
               value={preferredJewelStyle}
               onChangeText={setPreferredJewelStyle}
               editable={!loading}
+              inputStyle={{
+                minHeight: 48,
+                textAlignVertical: 'top',
+                flexWrap: 'wrap',
+                paddingHorizontal: 10
+              }}
             />
           </View>
 
@@ -270,15 +300,24 @@ const SurveyScreen = ({ navigation, route }) => {
               value={purchaseOpportunity}
               onChangeText={setPurchaseOpportunity}
               editable={!loading}
+              multiline={true}
+              numberOfLines={3}
+              inputStyle={{
+                minHeight: 56,
+                maxHeight: 100,
+                textAlignVertical: 'top',
+                flexWrap: 'wrap',
+                paddingHorizontal: 10
+              }}
             />
           </View>
 
           {/* Botón Finalizar */}
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[
-              styles.button, 
+              styles.button,
               (!isValidForm() || loading) && styles.buttonDisabled
-            ]} 
+            ]}
             onPress={handleFinish}
             disabled={!isValidForm() || loading}
             activeOpacity={0.8}

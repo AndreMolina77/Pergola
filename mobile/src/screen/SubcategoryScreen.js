@@ -1,58 +1,35 @@
-import { 
-  View, 
-  Text, 
-  Image, 
-  StyleSheet, 
-  ActivityIndicator, 
-  ScrollView, 
+import { useState, useEffect, useContext, useRef } from 'react';
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  ActivityIndicator,
+  ScrollView,
   TouchableOpacity,
   SafeAreaView,
-  StatusBar 
+  StatusBar, 
+  Animated,
+  FlatList
 } from 'react-native';
-import { useState, useEffect } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
 import AppLoading from 'expo-app-loading';
-
-// Mock data para subcategorías
-const MOCK_SUBCATEGORIES = [
-  {
-    _id: '1',
-    name: 'Anillos de Compromiso',
-    image: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=400',
-    description: 'Anillos que simbolizan amor eterno y compromiso. Diseños únicos para el momento más especial.'
-  },
-  {
-    _id: '2',
-    name: 'Collares Elegantes',
-    image: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=400',
-    description: 'Collares que realzan tu elegancia natural. Piezas perfectas para cualquier ocasión.'
-  },
-  {
-    _id: '3',
-    name: 'Pulseras Artesanales',
-    image: 'https://images.unsplash.com/photo-1588444650700-6c7f0c89d36b?w=400',
-    description: 'Pulseras elaboradas a mano con atención a cada detalle. Estilo y artesanía en perfecta armonía.'
-  },
-  {
-    _id: '4',
-    name: 'Aretes Modernos',
-    image: 'https://images.unsplash.com/photo-1506630448388-4e683c67ddb0?w=400',
-    description: 'Aretes contemporáneos que complementan tu estilo único. Diseños vanguardistas y atemporales.'
-  }
-];
+import { AuthContext } from '../context/AuthContext';
+import ProductCard from '../components/product/ProductCard';
 
 const SubcategoryDetailScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const insets = useSafeAreaInsets();
-  
+
   const { itemId, itemName, itemImage } = route.params;
-  
+
   const [subcategory, setSubcategory] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const [fontsLoaded] = useFonts({
     'CormorantGaramond-Bold': require('../../assets/fonts/CormorantGaramond-Bold.ttf'),
@@ -64,17 +41,27 @@ const SubcategoryDetailScreen = () => {
   });
 
   useEffect(() => {
-    // Simular carga de datos
-    const loadSubcategoryData = () => {
-      setLoading(true);
-      // Simular delay de API
-      setTimeout(() => {
-        const foundSubcategory = MOCK_SUBCATEGORIES.find(item => item._id === itemId);
-        
+    const fetchSubcategoryDetail = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Hacer petición a la API para obtener todas las subcategorías
+        const response = await fetch('https://pergola-production.up.railway.app/api/public/subcategories');
+
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status}`);
+        }
+
+        const allSubcategories = await response.json();
+
+        // Buscar la subcategoría específica por ID
+        const foundSubcategory = allSubcategories.find(item => item._id === itemId);
+
         if (foundSubcategory) {
           setSubcategory(foundSubcategory);
         } else {
-          // Si no encuentra en mock, crear objeto con datos básicos
+          // Si no encuentra, usar datos básicos de los parámetros
           setSubcategory({
             _id: itemId,
             name: itemName,
@@ -82,25 +69,29 @@ const SubcategoryDetailScreen = () => {
             description: 'Una exclusiva selección de joyas cuidadosamente diseñadas para realzar tu estilo único y elegancia natural.'
           });
         }
-        
+
+      } catch (err) {
+        console.error('Error fetching subcategory:', err);
+        setError('No se pudo cargar la subcategoría');
+
+        // Fallback: usar datos básicos si la API falla
+        setSubcategory({
+          _id: itemId,
+          name: itemName,
+          image: itemImage,
+          description: 'Una exclusiva selección de joyas cuidadosamente diseñadas para realzar tu estilo único y elegancia natural.'
+        });
+      } finally {
         setLoading(false);
-      }, 800);
+      }
     };
 
-    loadSubcategoryData();
+    fetchSubcategoryDetail();
+
   }, [itemId, itemName, itemImage]);
 
   const handleBack = () => {
     navigation.goBack();
-  };
-
-  const handleExploreProducts = () => {
-    // Navegar a la pantalla de productos cuando esté disponible
-    Alert.alert(
-      'Próximamente',
-      'La exploración de productos estará disponible muy pronto.',
-      [{ text: 'Entendido' }]
-    );
   };
 
   if (!fontsLoaded) {
@@ -113,7 +104,7 @@ const SubcategoryDetailScreen = () => {
         <StatusBar barStyle="dark-content" backgroundColor="#E3C6B8" />
         <View style={styles.center}>
           <ActivityIndicator size="large" color="#3D1609" />
-          <Text style={styles.loadingText}>Cargando categoría...</Text>
+          <Text style={styles.loadingText}>Cargando subcategoría...</Text>
         </View>
       </SafeAreaView>
     );
@@ -128,11 +119,11 @@ const SubcategoryDetailScreen = () => {
         <TouchableOpacity style={styles.backBtn} onPress={handleBack}>
           <Ionicons name="chevron-back" size={26} color="#3D1609" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Categoría</Text>
+        <Text style={styles.headerTitle}>Subcategorías</Text>
         <View style={{ width: 26 }} />
       </View>
 
-      <ScrollView 
+      <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
@@ -141,10 +132,10 @@ const SubcategoryDetailScreen = () => {
         <View style={styles.heroSection}>
           <View style={styles.imageContainer}>
             {subcategory?.image ? (
-              <Image 
-                source={{ uri: subcategory.image }} 
+              <Image
+                source={{ uri: subcategory.image }}
                 style={styles.subcategoryImage}
-                resizeMode="cover"
+                resizeMode="contain"
               />
             ) : (
               <View style={styles.placeholderImage}>
@@ -153,12 +144,12 @@ const SubcategoryDetailScreen = () => {
               </View>
             )}
           </View>
-          
+
           <View style={styles.subcategoryInfo}>
             <Text style={styles.subcategoryName}>
               {subcategory?.name}
             </Text>
-            
+
             {subcategory?.description && (
               <Text style={styles.subcategoryDescription}>
                 {subcategory.description}
@@ -169,92 +160,181 @@ const SubcategoryDetailScreen = () => {
 
         {/* Features Section */}
         <View style={styles.featuresSection}>
-          <Text style={styles.sectionTitle}>Características de la Categoría</Text>
-          
+          <Text style={styles.sectionTitle}>Características</Text>
+
           <View style={styles.featuresGrid}>
-            <View style={styles.featureCard}>
-              <View style={styles.featureIcon}>
-                <Ionicons name="sparkles-outline" size={24} color="#A73249" />
-              </View>
-              <Text style={styles.featureTitle}>Diseño Exclusivo</Text>
-              <Text style={styles.featureDescription}>
-                Cada pieza es única y refleja la más alta calidad en diseño
-              </Text>
-            </View>
-            
             <View style={styles.featureCard}>
               <View style={styles.featureIcon}>
                 <Ionicons name="diamond-outline" size={24} color="#A73249" />
               </View>
               <Text style={styles.featureTitle}>Material Premium</Text>
               <Text style={styles.featureDescription}>
-                Utilizamos solo los mejores materiales para garantizar durabilidad
+                Joyas elaboradas con materiales de la más alta calidad
               </Text>
             </View>
-            
+
             <View style={styles.featureCard}>
               <View style={styles.featureIcon}>
-                <Ionicons name="color-palette-outline" size={24} color="#A73249" />
+                <Ionicons name="hand-left-outline" size={24} color="#A73249" />
               </View>
-              <Text style={styles.featureTitle}>Variedad de Estilos</Text>
+              <Text style={styles.featureTitle}>Hecho a Mano</Text>
               <Text style={styles.featureDescription}>
-                Desde diseños clásicos hasta las últimas tendencias
+                Cada pieza es cuidadosamente elaborada con amor y dedicación.
               </Text>
             </View>
-            
+
             <View style={styles.featureCard}>
               <View style={styles.featureIcon}>
-                <Ionicons name="heart-outline" size={24} color="#A73249" />
+                <Ionicons name="sparkles-outline" size={24} color="#A73249" />
               </View>
-              <Text style={styles.featureTitle}>Garantía de Calidad</Text>
+              <Text style={styles.featureTitle}>Diseño Exclusivo</Text>
               <Text style={styles.featureDescription}>
-                Todas nuestras piezas cuentan con garantía y certificación
+                Piezas únicas que reflejan tu estilo personal
+              </Text>
+            </View>
+
+            <View style={styles.featureCard}>
+              <View style={styles.featureIcon}>
+                <Ionicons name="leaf-outline" size={24} color="#A73249" />
+              </View>
+              <Text style={styles.featureTitle}>Sostenible</Text>
+              <Text style={styles.featureDescription}>
+                Comprometidos con prácticas responsables y eco-amigables
               </Text>
             </View>
           </View>
         </View>
 
-        {/* Price Range Section */}
-        <View style={styles.priceSection}>
-          <Text style={styles.sectionTitle}>Rango de Precios</Text>
-          <View style={styles.priceCard}>
-            <View style={styles.priceRange}>
-              <View style={styles.priceItem}>
-                <Text style={styles.priceLabel}>Desde</Text>
-                <Text style={styles.priceValue}>$45</Text>
-              </View>
-              <View style={styles.priceSeparator}>
-                <Ionicons name="remove-outline" size={20} color="#E8E1D8" />
-              </View>
-              <View style={styles.priceItem}>
-                <Text style={styles.priceLabel}>Hasta</Text>
-                <Text style={styles.priceValue}>$280</Text>
-              </View>
-            </View>
-            <Text style={styles.priceNote}>
-              Precios varían según diseño, materiales y complejidad de la pieza
-            </Text>
-          </View>
-        </View>
-
-        {/* CTA Section */}
-        <View style={styles.ctaSection}>
-          <View style={styles.ctaCard}>
-            <Ionicons name="search-outline" size={40} color="#3D1609" />
-            <Text style={styles.ctaTitle}>Explora Nuestros Productos</Text>
-            <Text style={styles.ctaDescription}>
-              Descubre la completa colección de {subcategory?.name.toLowerCase()} 
-              disponibles en nuestro catálogo. Encuentra la pieza perfecta para ti.
-            </Text>
-            <TouchableOpacity style={styles.ctaButton} onPress={handleExploreProducts}>
-              <Text style={styles.ctaButtonText}>Ver Productos</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+        {/* Grid de productos de la subcategoría */}
+        <ProductsGrid subcategoryId={subcategory?._id} navigation={navigation} />
       </ScrollView>
     </SafeAreaView>
   );
 };
+
+/// --- COMPONENTE GRID DE PRODUCTOS ---
+function ProductsGrid({ subcategoryId, navigation }) {
+  const { API } = useContext(AuthContext);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [wishlist, setWishlist] = useState([]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(`${API}/public/products`);
+        if (response.ok) {
+          const data = await response.json();
+          // Filtrar productos por subcategoría
+          const filtered = data.filter(
+            (product) =>
+              product.subcategory &&
+              (product.subcategory._id === subcategoryId ||
+                product.subcategory === subcategoryId)
+          );
+          setProducts(filtered);
+        } else {
+          setProducts([]);
+        }
+      } catch (err) {
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (subcategoryId) fetchProducts();
+  }, [subcategoryId, API]);
+
+  const handleProductPress = (product) => {
+    navigation.navigate("ProductDetail", { productId: product._id });
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color="#A73249" />
+        <Text style={styles.loadingText}>Cargando productos...</Text>
+      </View>
+    );
+  }
+
+  if (!products.length) {
+    return (
+      <View style={styles.emptyContainer}>
+        <Ionicons name="storefront-outline" size={64} color="#3D1609" />
+        <Text style={styles.emptyText}>No hay productos en esta subcategoría</Text>
+      </View>
+    );
+  }
+
+  return (
+    <View style={{ paddingHorizontal: 16, paddingBottom: 20 }}>
+      <Text style={styles.sectionTitle}>Productos</Text>
+
+      <FlatList
+        data={products}
+        keyExtractor={(item) => item._id}
+        renderItem={({ item, index }) => (
+          <AnimatedProductCard
+            product={item}
+            index={index}
+            onPress={handleProductPress}
+            wishlist={wishlist}
+            setWishlist={setWishlist}
+          />
+        )}
+        numColumns={2}
+        columnWrapperStyle={{ justifyContent: "space-between" }}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 10 }}
+        scrollEnabled={false}
+      />
+    </View>
+  );
+}
+
+// --- SUBCOMPONENTE CON ANIMACIÓN ---
+function AnimatedProductCard({ product, index, onPress, wishlist, setWishlist }) {
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(20)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 400,
+        delay: index * 80,
+        useNativeDriver: true,
+      }),
+      Animated.timing(translateY, {
+        toValue: 0,
+        duration: 400,
+        delay: index * 80,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [fadeAnim, translateY, index]);
+
+  return (
+    <Animated.View
+      style={{
+        opacity: fadeAnim,
+        transform: [{ translateY }],
+        width: "48%",
+        marginBottom: 16,
+      }}
+    >
+      <ProductCard
+        product={product}
+        onPress={onPress}
+        wishlist={wishlist}
+        setWishlist={setWishlist}
+      />
+    </Animated.View>
+  );
+}
+
 
 const styles = StyleSheet.create({
   container: {
@@ -349,6 +429,32 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     opacity: 0.9,
   },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 60,
+    paddingHorizontal: 20,
+    backgroundColor: '#E3C6B8',
+  },
+  emptyIconWrapper: {
+    backgroundColor: '#F5EDE8',
+    borderRadius: 50,
+    padding: 20,
+    marginBottom: 12,
+    shadowColor: '#3D1609',
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
+  },
+  emptyText: {
+    fontFamily: 'Quicksand',
+    fontSize: 16,
+    color: '#3D1609',
+    textAlign: 'center',
+    opacity: 0.8,
+  },
   featuresSection: {
     paddingHorizontal: 16,
     marginBottom: 24,
@@ -401,73 +507,25 @@ const styles = StyleSheet.create({
     opacity: 0.7,
     lineHeight: 16,
   },
-  priceSection: {
+  comingSoonSection: {
     paddingHorizontal: 16,
-    marginBottom: 24,
   },
-  priceCard: {
+  comingSoonCard: {
     backgroundColor: '#F5EDE8',
-    borderRadius: 16,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: '#E8D5C9',
-  },
-  priceRange: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  priceItem: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  priceLabel: {
-    fontFamily: 'Nunito-Regular',
-    fontSize: 14,
-    color: '#3D1609',
-    opacity: 0.8,
-    marginBottom: 4,
-  },
-  priceValue: {
-    fontFamily: 'Quicksand-Bold',
-    fontSize: 24,
-    color: '#A73249',
-  },
-  priceSeparator: {
-    paddingHorizontal: 20,
-  },
-  priceNote: {
-    fontFamily: 'Nunito-Regular',
-    fontSize: 12,
-    color: '#3D1609',
-    textAlign: 'center',
-    opacity: 0.7,
-    fontStyle: 'italic',
-  },
-  ctaSection: {
-    paddingHorizontal: 16,
-  },
-  ctaCard: {
-    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 24,
     alignItems: 'center',
-    shadowColor: '#3D1609',
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
+    borderWidth: 1,
+    borderColor: '#E8D5C9',
   },
-  ctaTitle: {
+  comingSoonTitle: {
     fontFamily: 'Quicksand-Bold',
     fontSize: 20,
     color: '#3D1609',
     marginTop: 12,
     marginBottom: 8,
-    textAlign: 'center',
   },
-  ctaDescription: {
+  comingSoonDescription: {
     fontFamily: 'Nunito-Regular',
     fontSize: 14,
     color: '#3D1609',
@@ -476,21 +534,16 @@ const styles = StyleSheet.create({
     opacity: 0.8,
     marginBottom: 20,
   },
-  ctaButton: {
+  notifyButton: {
     backgroundColor: '#A73249',
-    paddingHorizontal: 32,
-    paddingVertical: 14,
-    borderRadius: 12,
-    shadowColor: '#A73249',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 4,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
   },
-  ctaButtonText: {
+  notifyButtonText: {
     fontFamily: 'Quicksand-Bold',
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: 14,
   },
 });
 

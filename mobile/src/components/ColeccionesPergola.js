@@ -88,7 +88,7 @@ const ColeccionesPergola = () => {
         <TouchableOpacity 
           key={col._id || col.id} 
           style={styles.creacionItem}
-          onPress={() => handleCollectionPress(col._id || col.id, col.name)}
+          onPress={() => handleCollectionPress(col._id || col.id, col.name, col.image)}
         >
           <View style={styles.creacionImage}>
             {col.image ? (
