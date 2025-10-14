@@ -4,6 +4,9 @@ import express from "express"
 import refundsController from "../controllers/refundsController.js"
 
 const router = express.Router()
+
+// Ruta para obtener devoluciones sin iniciar sesión (para app móvil)
+router.get("/public", refundsController.getPublicRefunds)
 // Rutas que no requieren ningún parámetro en específico
 router.route("/")
   .get(refundsController.getRefunds)

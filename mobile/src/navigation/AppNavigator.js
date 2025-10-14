@@ -29,6 +29,9 @@ import CheckoutScreen from '../screen/checkout/CheckoutScreen';
 import OrderSuccessScreen from '../screen/checkout/OrderSucessScreen';
 import OrderHistoryScreen from '../screen/OrderHistoryScreen';
 import OrderDetailScreen from '../screen/OrderDetailScreen';
+import RefundsScreen from '../screen/RefundsScreen';
+import NewRefundScreen from '../screen/NewRefundsScreen';
+import RefundDetailScreen from '../screen/RefundDetailScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -227,7 +230,22 @@ export default function AppNavigator() {
           component={OrderDetailScreen}
           options={{ headerShown: false }}
         />
-        </Stack.Navigator>
+        <Stack.Screen 
+          name="Refunds" 
+          component={RefundsScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen 
+          name="NewRefund" 
+          component={NewRefundScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen 
+          name="RefundDetail" 
+          component={RefundDetailScreen}
+          options={{ headerShown: false }}
+        />
+      </Stack.Navigator>
     </NavigationContainer>
   );
 }

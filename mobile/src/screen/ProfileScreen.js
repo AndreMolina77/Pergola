@@ -574,7 +574,24 @@ export default function ProfileScreen() {
               Ver mis pedidos
             </Text>
           </TouchableOpacity>
-
+          <TouchableOpacity
+            style={{
+              backgroundColor: '#A73249',
+              borderRadius: 10,
+              paddingVertical: 12,
+              paddingHorizontal: 28,
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginTop: 10,
+              elevation: 2,
+            }}
+            onPress={() => navigation.navigate('Refunds')}
+          >
+            <Ionicons name="return-down-back-outline" size={20} color="#fff" />
+            <Text style={{ color: '#fff', fontFamily: 'Quicksand-Bold', marginLeft: 10, fontSize: 15 }}>
+              Mis devoluciones
+            </Text>
+          </TouchableOpacity>
         </View>
         
       </ScrollView>

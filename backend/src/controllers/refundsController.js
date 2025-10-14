@@ -64,6 +64,20 @@ refundsController.getRefunds = async (req, res) => {
     res.status(500).json({ message: "Error al obtener ordenes", error: error.message });
   };
 };
+// READ (GET ALL PUBLIC REFUNDS)
+refundsController.getPublicRefunds = async (req, res) => {
+  try {
+    // Buscar devoluciones públicas (para app móvil)
+    const publicRefunds = await Refunds.find()
+      .populate('order', 'orderCode')
+      .populate('customer', 'username email')
+      .populate('items', 'name price images');
+    
+    res.status(200).json(publicRefunds);
+  } catch (error) {
+    res.status(500).json({ message: "Error al obtener devoluciones públicas", error: error.message });
+  }
+};
 // READ (GET ONE BY ID)
 refundsController.getRefund = async (req, res) => {
   try {

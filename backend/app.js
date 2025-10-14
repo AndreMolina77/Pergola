@@ -59,6 +59,7 @@ app.use("/api/public/collections", collectionsRoutes);
 app.use("/api/public/reviews", reviewsRoutes);
 app.use("/api/public/customers", customersRoutes);
 app.use("/api/public/orders", ordersRoutes);
+app.use("/api/public/refunds", refundsRoutes);
 
 // Ruta especial para validar token (acepta cualquier tipo de usuario válido)
 app.use("/api/validateAuthToken", validateAuthTokenRoutes)
