@@ -91,7 +91,7 @@ const ordersSchema = new Schema({
   deliveryDate: {
     type: Date,
     validate: {
-      validator: v => v >= new Date(),
+      validator: v => !v || v >= new Date(),
       message: "La fecha de entrega debe ser futura"
     }
   },
