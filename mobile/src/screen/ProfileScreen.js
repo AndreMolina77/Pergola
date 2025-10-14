@@ -86,7 +86,7 @@ export default function ProfileScreen() {
       if (response.ok) {
         const data = await response.json();
         // Filtrar solo los pedidos del usuario actual
-        const userOrders = Array.isArray(data) ? data.filter(order => order.customer === user.id) : [];
+        const userOrders = Array.isArray(data) ? data.filter(order => order.customer === user.id || order.customer?._id === user.id || order.customer?.$oid === user.id ) : [];
         setOrders(userOrders);
       }
     } catch (error) {
@@ -538,8 +538,8 @@ export default function ProfileScreen() {
           )}
         </View>
 
-        {/* Botón para navegar a la pantalla de Wishlist */}
-        <View style={{ alignItems: 'center', marginBottom: 24 }}>
+        {/* Botones para ver lista de deseos e historial de pedidos */}
+        <View style={{ alignItems: 'center', flex: 1 }}>
           <TouchableOpacity
             style={{
               backgroundColor: '#A73249',
@@ -556,7 +556,27 @@ export default function ProfileScreen() {
             <MaterialCommunityIcons name="heart" size={20} color="#fff" />
             <Text style={{ color: '#fff', fontFamily: 'Quicksand-Bold', marginLeft: 10, fontSize: 15 }}>Ver mi lista de deseos</Text>
           </TouchableOpacity>
+          <TouchableOpacity
+            style={{
+              backgroundColor: '#A73249',
+              borderRadius: 10,
+              paddingVertical: 12,
+              paddingHorizontal: 28,
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginTop: 10,
+              elevation: 2,
+            }}
+            onPress={() => navigation.navigate('OrderHistory')}
+          >
+            <Ionicons name="receipt-outline" size={20} color="#fff" />
+            <Text style={{ color: '#fff', fontFamily: 'Quicksand-Bold', marginLeft: 10, fontSize: 15 }}>
+              Ver mis pedidos
+            </Text>
+          </TouchableOpacity>
+
         </View>
+        
       </ScrollView>
 
       {/* Modal de edición */}

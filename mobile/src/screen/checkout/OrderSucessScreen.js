@@ -94,14 +94,14 @@ const OrderSuccessScreen = ({ route, navigation }) => {
       <View style={styles.footer}>
         <TouchableOpacity
           style={styles.primaryButton}
-          onPress={() => navigation.navigate('Profile')}
+          onPress={() => navigation.navigate('Home', { screen: 'Profile' })}
         >
           <Text style={styles.primaryButtonText}>Ver mis pedidos</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.secondaryButton}
-          onPress={() => navigation.navigate('Products')}
+          onPress={() => navigation.navigate('Home', { screen: 'Home' })}
         >
           <Text style={styles.secondaryButtonText}>Seguir comprando</Text>
         </TouchableOpacity>

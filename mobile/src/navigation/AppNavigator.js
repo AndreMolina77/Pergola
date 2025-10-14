@@ -27,6 +27,8 @@ import CategoryDetailScreen from '../screen/CategoryScreen';
 import WishlistScreen from '../screen/WishlistScreen';
 import CheckoutScreen from '../screen/checkout/CheckoutScreen';
 import OrderSuccessScreen from '../screen/checkout/OrderSucessScreen';
+import OrderHistoryScreen from '../screen/OrderHistoryScreen';
+import OrderDetailScreen from '../screen/OrderDetailScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -212,6 +214,17 @@ export default function AppNavigator() {
         <Stack.Screen 
           name="OrderSuccess" 
           component={OrderSuccessScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="OrderHistory"
+          component={OrderHistoryScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="OrderDetail"
+          params
+          component={OrderDetailScreen}
           options={{ headerShown: false }}
         />
         </Stack.Navigator>
