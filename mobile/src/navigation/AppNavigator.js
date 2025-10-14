@@ -25,6 +25,8 @@ import CollectionDetailScreen from '../screen/CollectionScreen';
 import ProductDetailScreen from '../screen/catalog/ProductDetailScreen';
 import CategoryDetailScreen from '../screen/CategoryScreen';
 import WishlistScreen from '../screen/WishlistScreen';
+import CheckoutScreen from '../screen/checkout/CheckoutScreen';
+import OrderSuccessScreen from '../screen/checkout/OrderSucessScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -200,6 +202,16 @@ export default function AppNavigator() {
           name="WishList"
           params
           component={WishlistScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen 
+          name="Checkout" 
+          component={CheckoutScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen 
+          name="OrderSuccess" 
+          component={OrderSuccessScreen}
           options={{ headerShown: false }}
         />
         </Stack.Navigator>

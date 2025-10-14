@@ -80,7 +80,7 @@ const refundsSchema = new Schema({
     type: String,
     required: [true, "El método de reembolso es obligatorio"],
     enum: {
-      values: ["efectivo", "tarjeta de crédito", "transferencia", "vale", "mismo método de pago", "otro"],
+      values: ["efectivo contra entrega", "transferencia bancaria"],
       message: "Método de reembolso no válido"
     },
     validate: {

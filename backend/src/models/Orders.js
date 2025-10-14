@@ -54,7 +54,7 @@ const ordersSchema = new Schema({
     type: String,
     required: [true, "El método de pago es obligatorio"],
     enum: {
-      values: ["efectivo", "tarjeta de crédito", "transferencia", "paypal", "otro"],
+      values: ["efectivo contra entrega", "transferencia bancaria"],
       message: "Método de pago no válido"
     },
     validate: {

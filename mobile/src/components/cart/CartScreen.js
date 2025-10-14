@@ -82,8 +82,7 @@ const CartScreen = ({ navigation }) => {
       return;
     }
 
-    // Aquí navegarías a la pantalla de checkout
-    Alert.alert('Checkout', 'Función de checkout en desarrollo');
+    navigation.navigate('Checkout');
   };
 
   const renderCartItem = ({ item }) => {
