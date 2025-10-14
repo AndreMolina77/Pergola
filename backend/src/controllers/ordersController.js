@@ -138,7 +138,7 @@ ordersController.getOrders = async (req, res) => {
 ordersController.getPublicOrders = async (req, res) => {
   try {
     // Buscar pedidos publicos
-    const publicOrders = await Orders.find().populate('customer', 'username email').populate({path: "items.itemId", select: "name price" });
+    const publicOrders = await Orders.find().populate('customer', 'username email').populate({path: "items.itemId", select: "name price images" });
     // ESTADO DE OK
     res.status(200).json(publicOrders);
   } catch (error) {
