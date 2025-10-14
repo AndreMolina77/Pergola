@@ -125,7 +125,7 @@ ordersController.postOrders = async (req, res) => {
 ordersController.getOrders = async (req, res) => {
   try {
     // Buscar pedidos
-    const orders = await Orders.find().populate('customer', 'username email').populate({path: "items.itemId", select: "name price" });
+    const orders = await Orders.find().populate('customer', 'username email').populate({path: "items.itemId", select: "name price images" });
     // ESTADO DE OK
     res.status(200).json(orders);
   } catch (error) {
@@ -151,7 +151,7 @@ ordersController.getPublicOrders = async (req, res) => {
 ordersController.getOrder = async (req, res) => {
   try {
     // Buscar un solo pedido
-    const order = await Orders.findById(req.params.id).populate('customer', 'username email').populate({path: "items.itemId", select: "name price" });
+    const order = await Orders.findById(req.params.id).populate('customer', 'username email').populate({path: "items.itemId", select: "name price images" });
     // Validar que el pedido si exista
     if (!order) {
       // ESTADO DE NO ENCONTRADO
