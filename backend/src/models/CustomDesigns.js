@@ -27,7 +27,7 @@ const customDesignsSchema = new Schema({
   },
   base: {
     type: Schema.Types.ObjectId,
-    ref: "DesignElement",
+    ref: "DesignElements",
     required: [true, "La base es obligatoria"]
   },
   baseLength: {
@@ -42,12 +42,12 @@ const customDesignsSchema = new Schema({
   },
   decoration: [{
     type: Schema.Types.ObjectId,
-    ref: "DesignElement",
+    ref: "DesignElements",
     required: true
   }],
   clasp: {
     type: Schema.Types.ObjectId,
-    ref: "DesignElement",
+    ref: "DesignElements",
     required: [true, "El cierre es obligatorio"]
   },
   customerComments: {
