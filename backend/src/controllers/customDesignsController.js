@@ -41,32 +41,34 @@ customDesignsController.postPublicDesigns = async (req, res) => {
   }
 };
 // READ (GET ALL)
-customDesignsController.getDesigns = async (req, res) => {
+customDesignsController.getCustomDesigns = async (req, res) => {
   try {
-    // Buscar diseños
-    const designs = await CustomDesigns.find();
-    // ESTADO DE OK
-    res.status(200).json(designs);
+    const customDesigns = await CustomDesigns.find()
+      .populate('base', 'name type image') // Popular base con sus campos
+      .populate('decoration', 'name type image') // Popular decoration
+      .populate('clasp', 'name type image') // Popular clasp
+      .sort({ createdAt: -1 });
+    
+    res.status(200).json(customDesigns);
   } catch (error) {
-    // ESTADO DE ERROR DEL SERVIDOR
-    res.status(500).json({ message: "Error al obtener diseños", error: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 // READ (GET ONE BY ID)
-customDesignsController.getDesign = async (req, res) => {
+customDesignsController.getCustomDesign = async (req, res) => {
   try {
-    // Buscar un solo diseño
-    const design = await CustomDesigns.findById(req.params.id)
-    // Validar que el diseño si exista
-    if (!design) {
-      // ESTADO DE NO ENCONTRADO
+    const customDesign = await CustomDesigns.findById(req.params.id)
+      .populate('base', 'name type image')
+      .populate('decoration', 'name type image')
+      .populate('clasp', 'name type image');
+    
+    if (!customDesign) {
       return res.status(404).json({ message: "Diseño no encontrado" });
     }
-    // ESTADO DE OK
-    res.status(200).json(design);
+    
+    res.status(200).json(customDesign);
   } catch (error) {
-    // ESTADO DE ERROR DEL SERVIDOR
-    res.status(500).json({ message: "Error al obtener diseño", error: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 // UPDATE (PUT)

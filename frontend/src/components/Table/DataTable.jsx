@@ -1,10 +1,10 @@
 // Importa hooks y componentes necesarios
 import { useState } from 'react'
-import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Edit, Trash2, Eye } from 'lucide-react'
+import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Edit, Trash2, Eye, User, Mail, Smartphone } from 'lucide-react'
 import ActionButton from './Buttons/ActionButton'
 
 // Componente de tabla de datos reutilizable
-const DataTable = ({data = [], columns = [], isLoading = false, 
+const DataTable = ({ data = [], columns = [], isLoading = false,
   pagination = {
     page: 1,
     pageSize: 10,
@@ -24,8 +24,8 @@ const DataTable = ({data = [], columns = [], isLoading = false,
   // Renderiza el icono de ordenamiento
   const renderSortIcon = (columnKey) => {
     if (sortConfig.key !== columnKey) return null
-    return sortConfig.direction === 'asc' ? 
-      <ChevronUp className="w-4 h-4" /> : 
+    return sortConfig.direction === 'asc' ?
+      <ChevronUp className="w-4 h-4" /> :
       <ChevronDown className="w-4 h-4" />
   }
   // Renderiza el contenido de cada celda según el tipo de columna
@@ -40,6 +40,88 @@ const DataTable = ({data = [], columns = [], isLoading = false,
         console.log('Item has itemId?', value[0]?.itemId);
       }
     }
+    // ✅ MANEJO ESPECIAL PARA CUSTOMER ANTES DEL SWITCH
+    if (column.key === 'customer' && value && typeof value === 'object') {
+      return (
+        <div className="flex flex-col gap-1.5 py-1">
+          {value.username && (
+            <div className="flex items-center gap-1.5">
+              <User className="w-3.5 h-3.5 text-blue-600" />
+              <span className="text-xs font-semibold text-[#3d1609]">
+                {value.username}
+              </span>
+            </div>
+          )}
+          {value.email && (
+            <div className="flex items-center gap-1.5">
+              <Mail className="w-3.5 h-3.5 text-gray-500" />
+              <span className="text-xs text-gray-600">
+                {value.email}
+              </span>
+            </div>
+          )}
+          {value.phoneNumber && (
+            <div className="flex items-center gap-1.5">
+              <Smartphone className="w-3.5 h-3.5 text-[#A73249]" />
+              <span className="text-xs text-[#A73249] font-medium">
+                {value.phoneNumber}
+              </span>
+            </div>
+          )}
+          {!value.username && !value.email && !value.phoneNumber && (
+            <span className="text-xs text-gray-400 italic">
+              {value.name && value.lastName ? `${value.name} ${value.lastName}` : 'Sin información'}
+            </span>
+          )}
+        </div>
+      )
+    }
+    // ✅ MANEJO PARA CAMPOS CON OPTIONS (mostrar label en vez de value)
+    if (column.key === 'type' && value && typeof value === 'string') {
+      // Mapeo de valores a etiquetas legibles
+      const typeLabels = {
+        // Elementos de diseño
+        'base': 'Base',
+        'decoration': 'Decoración',
+        'clasp': 'Cierre',
+        // Productos
+        'metal': 'Metal',
+        'piedra': 'Piedra',
+        'cuero': 'Cuero',
+        'cristal': 'Cristal',
+        'plástico': 'Plástico',
+        'otro-material': 'Otro material',
+        // Materias primas
+        'rollo': 'Rollo',
+        'lingote': 'Lingote',
+        'pieza': 'Pieza',
+        // Movimiento
+        'venta': 'Venta',
+        'exhibición': 'Exhibición',
+        'producción': 'Producción',
+        'otro': 'Otro',
+        // Estado
+        'disponible': 'Disponible',
+        'agotado': 'Agotado',
+        'en producción': 'En Producción',
+        'descontinuado': 'Descontinuado',
+        // Usuario
+        'admin': 'Administrador',
+        'employee': 'Empleado',
+        'customer': 'Cliente',
+        // Badge/otros
+        'active': 'Activo',
+        'inactive': 'Inactivo',
+        'pending': 'Pendiente',
+        'completed': 'Completado',
+        'true': 'Sí',
+        'false': 'No',
+        // Método de pago y/o reembolso
+        'transferencia bancaria': 'Transferencia Bancaria',
+        'efectivo contra entrega': 'Efectivo contra entrega',
+      }
+      return <span className="text-sm text-[#3d1609]">{typeLabels[value] || value}</span>
+    }
     switch (column.type) {
       case 'badge':
         // Muestra badges de estado/color
@@ -47,7 +129,7 @@ const DataTable = ({data = [], columns = [], isLoading = false,
         const badgeColors = {
           // Estados generales
           active: 'bg-green-100 text-green-800',
-          inactive: 'bg-red-100 text-red-800', 
+          inactive: 'bg-red-100 text-red-800',
           pending: 'bg-yellow-100 text-yellow-800',
           'pendiente': 'bg-yellow-100 text-yellow-800',
           completed: 'bg-blue-100 text-blue-800',
@@ -112,7 +194,7 @@ const DataTable = ({data = [], columns = [], isLoading = false,
         // Muestra imagen si existe
         if (value && typeof value === 'string') {
           return (
-            <img src={value} alt="Imagen" className="w-12 h-12 object-contain rounded-lg border" onError={(e) => { e.target.style.display = 'none' }}/>
+            <img src={value} alt="Imagen" className="w-12 h-12 object-contain rounded-lg border" onError={(e) => { e.target.style.display = 'none' }} />
           )
         }
         return <span className="text-gray-400 text-xs">Sin imagen</span>
@@ -122,7 +204,7 @@ const DataTable = ({data = [], columns = [], isLoading = false,
           return (
             <div className="flex -space-x-2">
               {value.slice(0, 3).map((img, index) => (
-                <img key={index} src={img} alt={`Imagen ${index + 1}`} className="w-8 h-8 object-cover rounded-full border-2 border-white" onError={(e) => { e.target.style.display = 'none' }}/>
+                <img key={index} src={img} alt={`Imagen ${index + 1}`} className="w-8 h-8 object-cover rounded-full border-2 border-white" onError={(e) => { e.target.style.display = 'none' }} />
               ))}
               {value.length > 3 && (
                 <div className="w-8 h-8 bg-gray-200 rounded-full border-2 border-white flex items-center justify-center">
@@ -145,7 +227,7 @@ const DataTable = ({data = [], columns = [], isLoading = false,
                 if (orderItem.itemId) {
                   product = orderItem.itemId;
                 }
-                
+
                 if (typeof product === 'object') {
                   if (product.name && product.price) {
                     displayText = `${product.name} - $${product.price}`
@@ -154,7 +236,7 @@ const DataTable = ({data = [], columns = [], isLoading = false,
                   } else {
                     displayText = 'Producto'
                   }
-                  
+
                   // Agregar cantidad si existe
                   if (orderItem.quantity) {
                     displayText += ` (x${orderItem.quantity})`
@@ -240,10 +322,31 @@ const DataTable = ({data = [], columns = [], isLoading = false,
         }
         // Para campos normales que pueden contener objetos
         if (value && typeof value === 'object') {
-          // ✅ CLIENTE: Mostrar nombre completo
-          if ((column.key === 'customer') && value.name && value.lastName) {
-            return `${value.name} ${value.lastName}`
-          }
+          /* ✅ CLIENTE: Mostrar nombre de usuario, correo y teléfono
+          if ((column.key === 'customer')) {
+            const parts = []
+            if (value.username) parts.push({ text: value.username, icon: User, color: 'text-blue-700' })
+            if (value.email) parts.push({ text: value.email, icon: Mail, color: 'text-gray-600' })
+            if (value.phoneNumber) parts.push({ text: value.phoneNumber, icon: Smartphone, color: 'text-green-600' })
+            
+            if (parts.length > 0) {
+              return (
+                <div className="flex flex-col gap-1 py-1">
+                  {parts.map((part, idx) => (
+                    <div key={idx} className="flex items-center gap-1.5">
+                      <span className="text-xs">{part.icon}</span>
+                      <span className={`text-xs font-medium ${part.color}`}>
+                        {part.text}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )
+            }
+            
+            // Fallback si no hay ninguno de los campos esperados
+            return value.name && value.lastName ? `${value.name} ${value.lastName}` : 'Cliente'
+          } */
           // ✅ PRODUCTO: Mostrar nombre y precio
           if ((column.key === 'product' || column.key === 'items') && value.name) {
             return value.price ? `${value.name} - $${value.price}` : value.name
@@ -284,7 +387,7 @@ const DataTable = ({data = [], columns = [], isLoading = false,
                 <div className="flex flex-wrap gap-1">
                   {value.slice(0, 2).map((item, idx) => {
                     let displayText = `Producto ${idx + 1}`
-                    
+
                     // ✅ ESTRUCTURA ANIDADA
                     if (item.itemId && typeof item.itemId === 'object') {
                       const product = item.itemId
@@ -293,12 +396,12 @@ const DataTable = ({data = [], columns = [], isLoading = false,
                       } else if (product.name) {
                         displayText = product.name
                       }
-                      
+
                       if (item.quantity) {
                         displayText += ` (x${item.quantity})`
                       }
                     }
-                    
+
                     return (
                       <span key={idx} className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
                         {displayText}
@@ -318,6 +421,7 @@ const DataTable = ({data = [], columns = [], isLoading = false,
           // ✅ FALLBACK: Usar propiedades útiles, NUNCA _id
           if (value.name) return value.name
           if (value.username) return value.username
+          if (value.phoneNumber) return value.phoneNumber
           if (value.orderCode) return value.orderCode
           if (value.codeProduct) return value.codeProduct
           if (value.description) return value.description
@@ -351,7 +455,7 @@ const DataTable = ({data = [], columns = [], isLoading = false,
             <tr>
               {/* Renderiza encabezados de columnas */}
               {columns.map((column) => (
-                <th key={column.key} className={`px-6 py-4 text-left text-xs font-medium text-[#5d1700] uppercase tracking-wider font-[Quicksand] ${ column.sortable ? 'cursor-pointer hover:bg-gray-100 select-none' : '' }`} onClick={() => handleSort(column.key)}>
+                <th key={column.key} className={`px-6 py-4 text-left text-xs font-medium text-[#5d1700] uppercase tracking-wider font-[Quicksand] ${column.sortable ? 'cursor-pointer hover:bg-gray-100 select-none' : ''}`} onClick={() => handleSort(column.key)}>
                   <div className="flex items-center gap-1">
                     {column.label}
                     {column.sortable && renderSortIcon(column.key)}
@@ -384,13 +488,13 @@ const DataTable = ({data = [], columns = [], isLoading = false,
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex justify-end gap-2">
                       {onView && (
-                        <ActionButton variant="ghost" size="icon" icon={Eye} onClick={() => onView(item)}/>
+                        <ActionButton variant="ghost" size="icon" icon={Eye} onClick={() => onView(item)} />
                       )}
                       {onEdit && (
-                        <ActionButton variant="ghost" size="icon" icon={Edit} onClick={() => onEdit(item)}/>
+                        <ActionButton variant="ghost" size="icon" icon={Edit} onClick={() => onEdit(item)} />
                       )}
                       {onDelete && (
-                        <ActionButton variant="ghost" size="icon" icon={Trash2} onClick={() => onDelete(item)}/>
+                        <ActionButton variant="ghost" size="icon" icon={Trash2} onClick={() => onDelete(item)} />
                       )}
                     </div>
                   </td>
@@ -415,23 +519,23 @@ const DataTable = ({data = [], columns = [], isLoading = false,
               <option value={25}>25 por página</option>
               <option value={50}>50 por página</option>
             </select>
-          </div> 
+          </div>
           {/* Navegación de páginas */}
           <div className="flex items-center gap-2">
-            <ActionButton variant="ghost" size="icon" icon={ChevronLeft} disabled={pagination.page === 1} onClick={() => onPageChange?.(pagination.page - 1)}/>
+            <ActionButton variant="ghost" size="icon" icon={ChevronLeft} disabled={pagination.page === 1} onClick={() => onPageChange?.(pagination.page - 1)} />
             {/* Números de página */}
             <div className="flex gap-1">
               {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                 const pageNum = Math.max(1, pagination.page - 2) + i
                 if (pageNum > totalPages) return null
                 return (
-                  <button key={pageNum} onClick={() => onPageChange?.(pageNum)} className={`px-3 py-1 text-sm rounded font-[Alexandria] transition-colors ${ pageNum === pagination.page ? 'bg-[#A73249] text-white' : 'text-[#5d1700] hover:bg-gray-100'}`}>
+                  <button key={pageNum} onClick={() => onPageChange?.(pageNum)} className={`px-3 py-1 text-sm rounded font-[Alexandria] transition-colors ${pageNum === pagination.page ? 'bg-[#A73249] text-white' : 'text-[#5d1700] hover:bg-gray-100'}`}>
                     {pageNum}
                   </button>
                 )
               })}
-            </div>    
-            <ActionButton variant="ghost" size="icon" icon={ChevronRight} disabled={pagination.page === totalPages} onClick={() => onPageChange?.(pagination.page + 1)}/>
+            </div>
+            <ActionButton variant="ghost" size="icon" icon={ChevronRight} disabled={pagination.page === totalPages} onClick={() => onPageChange?.(pagination.page + 1)} />
           </div>
         </div>
       )}
