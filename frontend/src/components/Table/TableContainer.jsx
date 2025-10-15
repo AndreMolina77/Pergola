@@ -140,7 +140,7 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onExport, i
           ...field,
           options: designElementsData.designElements.map(designElement => ({
             value: designElement._id,
-            label: `${designElement.name} ${designElement.description}`
+            label: `${designElement.name} - ${designElement.type}`
           }))
         }
       }
