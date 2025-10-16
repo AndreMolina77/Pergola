@@ -72,7 +72,7 @@ const WishlistScreen = ({ navigation }) => {
           { text: 'Seguir comprando', style: 'cancel' },
           { 
             text: 'Ver carrito', 
-            onPress: () => navigation.navigate('Cart')
+            onPress: () => navigation.navigate('Home', { screen: 'Cart' })
           }
         ]
       );
