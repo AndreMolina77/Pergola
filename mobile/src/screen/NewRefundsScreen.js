@@ -44,21 +44,37 @@ const NewRefundScreen = ({ navigation }) => {
 
   const loadUserOrders = async () => {
     try {
+      console.log('🔄 Cargando pedidos del usuario:', user?.id);
       const response = await fetchWithAuth(`${API}/orders`);
+      
       if (response.ok) {
         const data = await response.json();
-        // Filtrar pedidos del usuario que estén entregados (elegibles para devolución)
+        console.log('📦 Datos de pedidos recibidos:', data);
+        
+        // Filtrar pedidos del usuario que estén entregados
         const userOrders = Array.isArray(data)
-          ? data.filter(order =>
-              (order.customer === user.id || order.customer?._id === user.id) &&
-              order.status === 'entregado'
-            )
+          ? data.filter(order => {
+              console.log('🔍 Verificando pedido:', {
+                orderId: order._id,
+                customerId: order.customer,
+                userId: user.id,
+                status: order.status
+              });
+              
+              return (order.customer === user.id || order.customer?._id === user.id) &&
+                     order.status === 'entregado';
+            })
           : [];
+          
+        console.log('✅ Pedidos filtrados:', userOrders.length);
         setOrders(userOrders);
+      } else {
+        console.error('❌ Error en respuesta:', response.status);
       }
     } catch (err) {
+      console.error('💥 Error loading orders:', err);
       if (err.message !== 'SESSION_EXPIRED') {
-        console.error('Error loading orders:', err);
+        Alert.alert('Error', 'No se pudieron cargar los pedidos');
       }
     } finally {
       setLoading(false);
@@ -130,24 +146,37 @@ const NewRefundScreen = ({ navigation }) => {
       const refundCode = generateRefundCode();
       const amount = calculateRefundAmount();
 
+      // CORREGIDO: Estructura de datos mejorada y logging
       const refundData = {
         refundCode,
         order: selectedOrder._id,
         customer: user.id,
         reason: reason.trim(),
         comments: comments.trim() || undefined,
-        items: selectedItems,
+        items: selectedItems, // Array de IDs de productos
         status: 'pendiente',
         amount,
-        refundMethod
+        refundMethod,
+        requestDate: new Date().toISOString() // Fecha explícita
       };
 
+      console.log('📤 Enviando datos de reembolso:', JSON.stringify(refundData, null, 2));
+
+      // CORREGIDO: Usar el endpoint correcto según tu backend
       const response = await fetchWithAuth(`${API}/refunds`, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(refundData)
       });
 
+      console.log('📥 Respuesta del servidor:', response.status);
+
       if (response.ok) {
+        const responseData = await response.json();
+        console.log('✅ Reembolso creado exitosamente:', responseData);
+        
         Alert.alert(
           'Solicitud enviada',
           `Tu solicitud de devolución ${refundCode} ha sido enviada exitosamente`,
@@ -159,13 +188,29 @@ const NewRefundScreen = ({ navigation }) => {
           ]
         );
       } else {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Error al crear la solicitud');
+        // CORREGIDO: Mejor manejo de errores
+        let errorMessage = 'Error al crear la solicitud';
+        
+        try {
+          const errorData = await response.json();
+          console.log('❌ Error del servidor:', errorData);
+          errorMessage = errorData.message || errorData.error || errorMessage;
+        } catch (e) {
+          console.log('❌ Error parseando respuesta de error');
+        }
+        
+        throw new Error(errorMessage);
       }
     } catch (error) {
+      console.error('💥 Error submitting refund:', error);
+      
       if (error.message !== 'SESSION_EXPIRED') {
-        console.error('Error submitting refund:', error);
-        Alert.alert('Error', error.message || 'No se pudo procesar la solicitud');
+        Alert.alert(
+          'Error',
+          error.message === 'Failed to fetch' 
+            ? 'Error de conexión. Verifica tu internet.'
+            : error.message || 'No se pudo procesar la solicitud'
+        );
       }
     } finally {
       setSubmitting(false);
@@ -187,15 +232,21 @@ const NewRefundScreen = ({ navigation }) => {
         selectedOrder?._id === item._id && styles.orderItemSelected
       ]}
       onPress={() => {
+        console.log('📦 Seleccionando pedido:', item._id, 'con', item.items?.length, 'productos');
         setSelectedOrder(item);
         setSelectedItems([]);
       }}
     >
-      <Text style={styles.orderCode}>Pedido #{item.orderCode}</Text>
+      <Text style={styles.orderCode}>
+        Pedido #{item.orderCode || item._id.slice(-6)}
+      </Text>
       <Text style={styles.orderDate}>
         {item.createdAt ? new Date(item.createdAt).toLocaleDateString('es-ES') : 'N/A'}
       </Text>
       <Text style={styles.orderTotal}>Total: {formatPrice(item.total)}</Text>
+      <Text style={styles.orderItems}>
+        {item.items?.length || 0} producto{(item.items?.length || 0) !== 1 ? 's' : ''}
+      </Text>
     </TouchableOpacity>
   );
 
@@ -208,7 +259,10 @@ const NewRefundScreen = ({ navigation }) => {
           styles.productItem,
           isSelected && styles.productItemSelected
         ]}
-        onPress={() => toggleItemSelection(item.itemId._id)}
+        onPress={() => {
+          console.log('🛍️ Toggling producto:', item.itemId._id, item.itemId.name);
+          toggleItemSelection(item.itemId._id);
+        }}
       >
         <View style={styles.productInfo}>
           <Text style={styles.productName}>{item.itemId.name}</Text>
@@ -233,6 +287,9 @@ const NewRefundScreen = ({ navigation }) => {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#A73249" />
+        <Text style={styles.loadingText}>
+          {loading ? 'Cargando pedidos...' : 'Cargando fuentes...'}
+        </Text>
       </View>
     );
   }
@@ -263,6 +320,12 @@ const NewRefundScreen = ({ navigation }) => {
               <Text style={styles.emptyText}>
                 No tienes pedidos entregados elegibles para devolución
               </Text>
+              <TouchableOpacity 
+                style={styles.refreshButton}
+                onPress={loadUserOrders}
+              >
+                <Text style={styles.refreshButtonText}>Actualizar</Text>
+              </TouchableOpacity>
             </View>
           ) : (
             <FlatList
@@ -285,12 +348,18 @@ const NewRefundScreen = ({ navigation }) => {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Productos a Devolver</Text>
             
-            <FlatList
-              data={selectedOrder.items}
-              renderItem={renderProductItem}
-              keyExtractor={(item) => item.itemId._id}
-              scrollEnabled={false}
-            />
+            {selectedOrder.items && selectedOrder.items.length > 0 ? (
+              <FlatList
+                data={selectedOrder.items}
+                renderItem={renderProductItem}
+                keyExtractor={(item) => item.itemId._id}
+                scrollEnabled={false}
+              />
+            ) : (
+              <Text style={styles.emptyText}>
+                Este pedido no tiene productos válidos
+              </Text>
+            )}
             
             {errors.items && (
               <Text style={styles.errorText}>{errors.items}</Text>
@@ -398,9 +467,12 @@ const NewRefundScreen = ({ navigation }) => {
       {/* Footer con botón de envío */}
       <View style={styles.footer}>
         <TouchableOpacity
-          style={[styles.submitButton, submitting && styles.submitButtonDisabled]}
+          style={[
+            styles.submitButton, 
+            (submitting || orders.length === 0 || selectedItems.length === 0) && styles.submitButtonDisabled
+          ]}
           onPress={handleSubmitRefund}
-          disabled={submitting || orders.length === 0}
+          disabled={submitting || orders.length === 0 || selectedItems.length === 0}
         >
           {submitting ? (
             <ActivityIndicator color="#FFFFFF" />
@@ -426,6 +498,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#E3C6B8',
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    fontFamily: 'Nunito-Regular',
+    color: '#3D1609',
   },
   header: {
     flexDirection: 'row',
@@ -474,6 +552,18 @@ const styles = StyleSheet.create({
     fontFamily: 'Nunito-Regular',
     color: '#666666',
     textAlign: 'center',
+    marginBottom: 12,
+  },
+  refreshButton: {
+    backgroundColor: '#A73249',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  refreshButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontFamily: 'Nunito-SemiBold',
   },
   ordersList: {
     marginBottom: 8,
@@ -507,6 +597,12 @@ const styles = StyleSheet.create({
     fontFamily: 'Nunito-Bold',
     fontSize: 13,
     color: '#3D1609',
+    marginBottom: 2,
+  },
+  orderItems: {
+    fontFamily: 'Nunito-Regular',
+    fontSize: 11,
+    color: '#666666',
   },
   productItem: {
     flexDirection: 'row',
@@ -690,4 +786,5 @@ const styles = StyleSheet.create({
     fontFamily: 'Quicksand-Bold',
   },
 });
+
 export default NewRefundScreen;

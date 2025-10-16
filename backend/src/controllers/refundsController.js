@@ -46,7 +46,7 @@ refundsController.postRefunds = async (req, res) => {
     // Guardar la devolución
     await newRefund.save();
     // ESTADO DE CREACIÓN
-    res.status(201).json({ message: "Devolución creada con éxito", data: newOrder });
+    res.status(201).json({ message: "Devolución creada con éxito", data: newRefund });
   } catch (error) {
     // ESTADO DE ERROR EN INPUT DEL CLIENTE
     res.status(400).json({ message: "Error al crear devolución", error: error.message });
