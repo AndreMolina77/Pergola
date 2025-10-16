@@ -186,7 +186,7 @@ const RefundsScreen = ({ navigation }) => {
         </View>
       ) : refunds.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Ionicons name="return-down-back-outline" size={80} color="#CCCCCC" />
+          <Ionicons name="return-down-back-outline" size={80} color="#3D1609" />
           <Text style={styles.emptyTitle}>No tienes devoluciones</Text>
           <Text style={styles.emptyText}>
             Aquí aparecerán tus solicitudes de devolución
