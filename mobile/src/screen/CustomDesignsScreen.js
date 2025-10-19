@@ -212,7 +212,7 @@ const CustomDesignsScreen = () => {
       };
 
       // Aquí iría la llamada al API
-      const response = await fetch('https://pergola-production.up.railway.app/api/public/customdesigns', {
+      const response = await fetch('https://pergola.onrender.com/api/public/customdesigns', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

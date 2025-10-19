@@ -6,7 +6,7 @@ const useOrders = (authToken) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const API_URL = "https://your-api-url.com/api/orders";
+  const API_URL = "https://pergola.onrender.com/api/public/orders";
 
   const getHeaders = (contentType = "application/json") => ({
     "Content-Type": contentType,

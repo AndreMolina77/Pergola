@@ -47,7 +47,7 @@ const SubcategoryDetailScreen = () => {
         setError(null);
 
         // Hacer petición a la API para obtener todas las subcategorías
-        const response = await fetch('https://pergola-production.up.railway.app/api/public/subcategories');
+        const response = await fetch('https://pergola.onrender.com/api/public/subcategories');
 
         if (!response.ok) {
           throw new Error(`Error: ${response.status}`);

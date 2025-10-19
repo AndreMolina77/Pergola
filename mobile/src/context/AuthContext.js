@@ -9,7 +9,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [authToken, setAuthToken] = useState(null);
   const [loading, setLoading] = useState(true); // Cambiar a true inicialmente
-  const API_URL = "https://pergola-production.up.railway.app/api";
+  const API_URL = "https://pergola.onrender.com/api";
 
   // Función para validar la sesión con el backend
   const validateSession = async (userData) => {

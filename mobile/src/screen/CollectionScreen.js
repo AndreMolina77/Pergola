@@ -47,7 +47,7 @@ const CollectionDetailScreen = () => {
         setError(null);
 
         // Hacer petición a la API para obtener todas las colecciones
-        const response = await fetch('https://pergola-production.up.railway.app/api/public/collections');
+        const response = await fetch('https://pergola.onrender.com/api/public/collections');
 
         if (!response.ok) {
           throw new Error(`Error: ${response.status}`);

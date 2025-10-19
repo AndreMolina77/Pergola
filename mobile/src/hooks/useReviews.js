@@ -5,7 +5,7 @@ const useReviews = (authToken) => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const API_URL = "https://your-api-url.com/api/reviews";
+  const API_URL = "https://pergola.onrender.com/api/reviews";
 
   const getHeaders = (contentType = "application/json") => ({
     "Content-Type": contentType,

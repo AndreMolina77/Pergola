@@ -47,7 +47,7 @@ const CategoryDetailScreen = () => {
         setError(null);
 
         // Hacer petición a la API para obtener todas las categorías
-        const response = await fetch('https://pergola-production.up.railway.app/api/public/categories');
+        const response = await fetch('https://pergola.onrender.com/api/public/categories');
 
         if (!response.ok) {
           throw new Error(`Error: ${response.status}`);

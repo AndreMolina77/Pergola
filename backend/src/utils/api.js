@@ -1,1 +1,1 @@
-export const API = "https://pergola-production.up.railway.app/api"
+export const API = "https://pergola.onrender.com/api"
