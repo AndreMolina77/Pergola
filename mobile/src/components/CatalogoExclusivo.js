@@ -21,7 +21,7 @@ const CatalogoExclusivo = () => {
   useEffect(() => {
     const fetchColecciones = async () => {
       try {
-        const response = await fetch('https://pergola-production.up.railway.app/api/public/subcategories');
+        const response = await fetch('https://pergola.onrender.com/api/public/subcategories');
         
         if (!response.ok) {
           throw new Error(`Error: ${response.status}`);
