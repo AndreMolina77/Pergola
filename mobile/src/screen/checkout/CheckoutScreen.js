@@ -44,7 +44,7 @@ const CheckoutScreen = ({ navigation }) => {
     timetable: '',
     mailingAddress: '',
     paymentMethod: 'efectivo contra entrega',
-    deliveryDate: ''
+    receiptDate: ''
   });
 
   // Estado para el DatePicker
@@ -75,7 +75,7 @@ const CheckoutScreen = ({ navigation }) => {
       if (response.ok) {
         const data = await response.json();
         setCustomerData(data);
-        
+
         // Pre-llenar el formulario con datos del cliente
         setFormData(prev => ({
           ...prev,
@@ -94,11 +94,11 @@ const CheckoutScreen = ({ navigation }) => {
   const formatPhoneNumber = (text) => {
     const prefix = "+503-";
     let numbers = text.replace(/\D/g, '');
-    
+
     if (!text.startsWith(prefix)) {
       numbers = numbers.slice(3);
     }
-    
+
     numbers = numbers.slice(0, 8);
     return prefix + numbers;
   };
@@ -107,7 +107,7 @@ const CheckoutScreen = ({ navigation }) => {
   const formatDate = (text) => {
     let numbers = text.replace(/\D/g, '');
     numbers = numbers.slice(0, 8);
-    
+
     if (numbers.length >= 5) {
       return numbers.slice(0, 2) + '/' + numbers.slice(2, 4) + '/' + numbers.slice(4);
     } else if (numbers.length >= 3) {
@@ -139,24 +139,31 @@ const CheckoutScreen = ({ navigation }) => {
         newErrors.mailingAddress = 'La dirección no puede exceder los 200 caracteres';
       }
 
-      // Validar horario (opcional)
+      // Validar horario 
       if (formData.timetable && formData.timetable.trim().length > 100) {
         newErrors.timetable = 'El horario no puede exceder los 100 caracteres';
       }
+      if (!formData.timetable || typeof formData.timetable !== 'string' || formData.timetable.trim() === '') {
+        newErrors.timetable = 'El horario es obligatorio';
+      }
 
-      // Validar fecha de entrega (opcional)
-      if (formData.deliveryDate) {
-        const [day, month, year] = formData.deliveryDate.split('/');
+      // Validar fecha de recepción (ahora obligatorio)
+      if (!formData.receiptDate || formData.receiptDate.trim() === '') {
+        newErrors.receiptDate = 'La fecha de recepción es obligatoria';
+      } else {
+        const [day, month, year] = formData.receiptDate.split('/');
         if (day && month && year && year.length === 4) {
           const selectedDate = new Date(year, month - 1, day);
           const today = new Date();
           today.setHours(0, 0, 0, 0);
-          
-          if (selectedDate < today) {
-            newErrors.deliveryDate = 'La fecha de entrega debe ser futura';
+          selectedDate.setHours(0, 0, 0, 0);
+          if (isNaN(selectedDate.getTime())) {
+            newErrors.receiptDate = 'La fecha de recepción no es válida';
+          } else if (selectedDate < today) {
+            newErrors.receiptDate = 'La fecha de recepción debe ser futura o igual a hoy';
           }
-        } else if (formData.deliveryDate.trim() !== '') {
-          newErrors.deliveryDate = 'Formato de fecha inválido (DD/MM/AAAA)';
+        } else {
+          newErrors.receiptDate = 'Formato de fecha inválido (DD/MM/AAAA)';
         }
       }
     }
@@ -198,14 +205,14 @@ const CheckoutScreen = ({ navigation }) => {
     if (Platform.OS === 'android') {
       setShowDatePicker(false);
     }
-    
+
     if (date) {
       const day = String(date.getDate()).padStart(2, '0');
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const year = date.getFullYear();
       const formattedDate = `${day}/${month}/${year}`;
-      
-      setFormData(prev => ({ ...prev, deliveryDate: formattedDate }));
+
+      setFormData(prev => ({ ...prev, receiptDate: formattedDate }));
       setSelectedDate(date);
     }
   };
@@ -246,10 +253,10 @@ const CheckoutScreen = ({ navigation }) => {
   // Enviar el pedido a la API
   const submitOrder = async () => {
     setSubmitting(true);
-    
+
     try {
       const orderCode = generateOrderCode();
-      
+
       // Mapear items del carrito
       const items = cart.map(item => ({
         itemId: item._id,
@@ -258,11 +265,11 @@ const CheckoutScreen = ({ navigation }) => {
       }));
 
       // Convertir fecha a formato ISO si existe
-      let deliveryDateISO = null;
-      if (formData.deliveryDate && formData.deliveryDate.trim()) {
-        const [day, month, year] = formData.deliveryDate.split('/');
+      let receiptDateISO = null;
+      if (formData.receiptDate && formData.receiptDate.trim()) {
+        const [day, month, year] = formData.receiptDate.split('/');
         if (day && month && year) {
-          deliveryDateISO = new Date(year, month - 1, day).toISOString();
+          receiptDate = new Date(year, month - 1, day).toISOString();
         }
       }
 
@@ -271,12 +278,12 @@ const CheckoutScreen = ({ navigation }) => {
         orderCode,
         customer: user.id,
         receiver: formData.receiver.trim(),
-        timetable: formData.timetable.trim() || undefined,
+        timetable: formData.timetable.trim(),
         mailingAddress: formData.mailingAddress.trim(),
         paymentMethod: formData.paymentMethod,
         status: 'pendiente',
         paymentStatus: 'pendiente',
-        deliveryDate: deliveryDateISO,
+        receiptDate: receiptDateISO,
         items,
         subtotal: cartSubtotal,
         total: cartTotal
@@ -290,10 +297,10 @@ const CheckoutScreen = ({ navigation }) => {
 
       if (response.ok) {
         const result = await response.json();
-        
+
         // Limpiar el carrito
         await clearCart();
-        
+
         Alert.alert(
           'Pedido realizado',
           `Tu pedido ${orderCode} ha sido creado exitosamente`,
@@ -304,11 +311,11 @@ const CheckoutScreen = ({ navigation }) => {
             }
           ]
         );
-        
+
         // Navegar a pantalla de éxito
-        navigation.navigate('OrderSuccess', { 
+        navigation.navigate('OrderSuccess', {
           orderId: result.data._id,
-          orderCode: orderCode 
+          orderCode: orderCode
         });
       } else {
         const errorData = await response.json();
@@ -349,9 +356,9 @@ const CheckoutScreen = ({ navigation }) => {
         >
           <Ionicons name="arrow-back" size={24} color="#3D1609" />
         </TouchableOpacity>
-        
+
         <Text style={styles.headerTitle}>Finalizar Compra</Text>
-        
+
         <View style={{ width: 40 }} />
       </View>
       {/* Stepper mejorado */}
@@ -407,7 +414,7 @@ const CheckoutScreen = ({ navigation }) => {
         </View>
       </View>
       {/* Contenido con scroll - Mostrar solo el paso actual */}
-      <ScrollView 
+      <ScrollView
         style={styles.content}
         showsVerticalScrollIndicator={false}
       >
@@ -415,7 +422,7 @@ const CheckoutScreen = ({ navigation }) => {
         {currentStep === STEPS.DELIVERY && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Información de Entrega</Text>
-            
+
             <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>Nombre del Receptor *</Text>
               <TextInput
@@ -447,7 +454,7 @@ const CheckoutScreen = ({ navigation }) => {
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Horario de Entrega (opcional)</Text>
+              <Text style={styles.inputLabel}>Programa un Horario de Entrega</Text>
               <TextInput
                 style={[styles.input, errors.timetable && styles.inputError]}
                 value={formData.timetable}
@@ -461,17 +468,17 @@ const CheckoutScreen = ({ navigation }) => {
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Programa una Fecha de Entrega Deseada (opcional)</Text>
+              <Text style={styles.inputLabel}>Programa una Fecha de Entrega</Text>
               <TouchableOpacity
-                style={[styles.input, styles.datePickerButton, errors.deliveryDate && styles.inputError]}
+                style={[styles.input, styles.datePickerButton, errors.receiptDate && styles.inputError]}
                 onPress={openDatePicker}
               >
-                <Text style={[styles.input, { color: formData.deliveryDate ? '#3D1609' : '#999999' }]}>
-                  {formData.deliveryDate || 'DD/MM/AAAA'}
+                <Text style={[styles.input, { color: formData.receiptDate ? '#3D1609' : '#999999' }]}>
+                  {formData.receiptDate || 'DD/MM/AAAA'}
                 </Text>
               </TouchableOpacity>
-              {errors.deliveryDate && (
-                <Text style={styles.errorText}>{errors.deliveryDate}</Text>
+              {errors.receiptDate && (
+                <Text style={styles.errorText}>{errors.receiptDate}</Text>
               )}
             </View>
 
@@ -492,7 +499,7 @@ const CheckoutScreen = ({ navigation }) => {
         {currentStep === STEPS.PAYMENT && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Método de Pago</Text>
-            
+
             {['efectivo contra entrega', 'transferencia bancaria'].map((method) => (
               <TouchableOpacity
                 key={method}
@@ -525,14 +532,14 @@ const CheckoutScreen = ({ navigation }) => {
         {currentStep === STEPS.REVIEW && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Resumen del Pedido</Text>
-            
+
             <View style={styles.summaryCard}>
               {cart.map((item) => {
-                const itemPrice = item.discount > 0 
-                  ? item.price * (1 - item.discount) 
+                const itemPrice = item.discount > 0
+                  ? item.price * (1 - item.discount)
                   : item.price;
                 const itemTotal = itemPrice * item.quantity;
-                
+
                 return (
                   <View key={item._id} style={styles.summaryItem}>
                     <View style={styles.summaryItemInfo}>
@@ -590,7 +597,7 @@ const CheckoutScreen = ({ navigation }) => {
             <Text style={styles.footerLabel}>Total a pagar</Text>
             <Text style={styles.footerTotal}>{formatPrice(cartTotal)}</Text>
           </View>
-          
+
           {/* Botón Anterior (solo si no estamos en el primer paso) */}
           {currentStep > STEPS.DELIVERY && (
             <TouchableOpacity
@@ -614,10 +621,10 @@ const CheckoutScreen = ({ navigation }) => {
                 <Text style={styles.submitButtonText}>
                   {currentStep === STEPS.REVIEW ? 'Confirmar Pedido' : 'Siguiente'}
                 </Text>
-                <Ionicons 
-                  name={currentStep === STEPS.REVIEW ? "checkmark-circle" : "arrow-forward"} 
-                  size={22} 
-                  color="#FFFFFF" 
+                <Ionicons
+                  name={currentStep === STEPS.REVIEW ? "checkmark-circle" : "arrow-forward"}
+                  size={22}
+                  color="#FFFFFF"
                 />
               </>
             )}

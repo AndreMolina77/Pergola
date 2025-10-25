@@ -184,7 +184,10 @@ export function validateEmployee(data) {
   if (!birthDate) return "La fecha de nacimiento es obligatoria";
   const birth = new Date(birthDate);
   if (isNaN(birth.getTime())) return "La fecha de nacimiento no es válida";
-  if (birth > new Date()) return "La fecha de nacimiento debe ser anterior a la actual";
+  const today = new Date();
+  if (birth > today) return "La fecha de nacimiento debe ser anterior a la actual";
+  const maxBirthDate = new Date(today.getFullYear() - 120, today.getMonth(), today.getDate());
+  if (birth < maxBirthDate) return "La fecha de nacimiento no puede ser anterior a 120 años";
   // DUI
   if (!DUI || DUI.trim() === "") return "El DUI es obligatorio";
   if (!/^\d{8}-\d$/.test(DUI.trim())) return "El DUI debe tener formato 12345678-9";
@@ -216,7 +219,7 @@ export function validateEmployee(data) {
 }
 // Función para validar un cliente
 export function validateCustomer(data) {
-  const { name, lastName, username, email, phoneNumber, birthDate, DUI, password, profilePic, address, isVerified, preferredColors, preferredMateriales, preferredJewelStyle, purchaseOpportunity, allergies, jewelSize, budget } = data;
+  const { name, lastName, username, email, phoneNumber, birthDate, DUI, password, profilePic, address, isVerified, preferredColors, preferredMaterials, preferredJewelStyle, purchaseOpportunity, allergies, jewelSize, budget } = data;
   // Nombre
   if (!name || name.trim() === "") return "El nombre es obligatorio";
   if (name.trim().length < 2) return "El nombre debe tener al menos 2 caracteres";
@@ -239,7 +242,10 @@ export function validateCustomer(data) {
   if (!birthDate) return "La fecha de nacimiento es obligatoria";
   const birth = new Date(birthDate);
   if (isNaN(birth.getTime())) return "La fecha de nacimiento no es válida";
-  if (birth > new Date()) return "La fecha de nacimiento debe ser anterior a la fecha actual";
+  const today = new Date();
+  if (birth > today) return "La fecha de nacimiento debe ser anterior a la actual";
+  const maxBirthDate = new Date(today.getFullYear() - 120, today.getMonth(), today.getDate());
+  if (birth < maxBirthDate) return "La fecha de nacimiento no puede ser anterior a 120 años";
   // DUI
   if (!DUI || DUI.trim() === "") return "El DUI es obligatorio";
   if (!/^\d{8}-\d$/.test(DUI.trim())) return "El DUI debe tener formato 12345678-9";
@@ -427,7 +433,7 @@ export function validateReview(data) {
 }
 // Función para validar pedidos
 export function validateOrder(data) {
-  const { orderCode, customer, receiver, timetable, mailingAddress, paymentMethod, status, paymentStatus, deliveryDate, items, subtotal } = data;
+  const { orderCode, customer, receiver, timetable, mailingAddress, paymentMethod, status, paymentStatus, receiptDate, items, subtotal } = data;
   // Código de pedido
   if (!orderCode || orderCode.trim() === "") return "El código de pedido es obligatorio";  
   if (!/^[A-Z0-9-]+$/.test(orderCode.trim())) return "El código solo puede contener letras mayúsculas, números y guiones";
@@ -462,16 +468,14 @@ export function validateOrder(data) {
   const validPaymentStatuses = ["pendiente", "pagado", "reembolsado", "fallido"];
   if (!paymentStatus || paymentStatus.trim() === "") return "El estado del pago es obligatorio";
   if (!validPaymentStatuses.includes(paymentStatus.trim())) return "Estado de pago no válido";
-  // Fecha de entrega (si se da, debe ser futura)
-  if (deliveryDate) {
-    const dateValue = new Date(deliveryDate);
-    if (isNaN(dateValue.getTime())) {
-      return "La fecha de entrega no es válida";
-    }
-    if (dateValue < new Date()) {
-      return "La fecha de entrega debe ser futura";
-    }
-  }
+  // Fecha de recepción
+  if (!receiptDate) return "La fecha de recepción es obligatoria";
+  const dateValue = new Date(receiptDate);
+  if (isNaN(dateValue.getTime())) return "La fecha de recepción no es válida";
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  dateValue.setHours(0, 0, 0, 0);
+  if (dateValue < today)  return "La fecha de recepción debe ser futura";
   // Items (al menos uno)
   if (!Array.isArray(items) || items.length === 0) return "Al menos un producto es obligatorio";
   // Subtotal
