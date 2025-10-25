@@ -90,20 +90,20 @@ const ordersSchema = new Schema({
       message: "El estado del pago no puede estar vacío"
     }
   },
-  // receiptDate es opcional: si se proporciona debe ser una fecha válida y futura
-  receiptDate: {
+  deliveryDate: {
     type: Date,
+    required: [true, "La fecha de entrega es obligatoria"],
     validate: {
       validator: function (v) {
-        if (!v) return true; // permitir valores vacíos/null/undefined
+        // Convertir a Date para asegurar comparación precisa
         const dateValue = new Date(v);
-        if (isNaN(dateValue.getTime())) return false;
         const today = new Date();
+        // Comparar solo la fecha (ignorar horas para mayor flexibilidad)
         today.setHours(0, 0, 0, 0);
         dateValue.setHours(0, 0, 0, 0);
-        return dateValue >= today;
+        return !isNaN(dateValue.getTime()) && dateValue >= today;
       },
-      message: "La fecha de recepción debe ser una fecha válida y futura"
+      message: "La fecha de entrega debe ser una fecha válida y futura"
     }
   },
   items: [{
