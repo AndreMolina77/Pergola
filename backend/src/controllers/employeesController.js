@@ -16,13 +16,13 @@ cloudinary.config({
 employeesController.postEmployees = async (req, res) => {
   try {
     const { name, lastName, username, email, phoneNumber, birthDate, DUI, password, hireDate, isVerified } = req.body;
-    /* // Validación extra de la foto de perfil (porque viene en req.file, no en body)
+    // Validación extra de la foto de perfil (porque viene en req.file, no en body)
     if (req.file) {
       const allowedFormats = ["image/jpeg", "image/png", "image/webp", "image/svg+xml", "image/jpg", "image/gif"];
       if (!allowedFormats.includes(req.file.mimetype)) {
         return res.status(400).json({ message: "Formato de imagen no válido (solo jpg, jpeg, png, webp, svg), gif" });
       }
-    } */
+    } 
     // Link de imagen
     let profilePicURL = "";
     // Subir imagen a cloudinary si se proporciona una imagen en la solicitud
@@ -33,11 +33,11 @@ employeesController.postEmployees = async (req, res) => {
       });
       profilePicURL = result.secure_url;
     }
-    /* Validar lo que venga en req.body
+    // Validar lo que venga en req.body
     const validationError = validateEmployee({name, lastName, username, email, phoneNumber, birthDate, DUI, password, profilePic: profilePicURL, hireDate, isVerified});
     if (validationError) {
       return res.status(400).json({ message: validationError });
-    } */
+    } 
     const newEmployee = new Employees({ name, lastName, username, email, phoneNumber, birthDate: new Date(birthDate), DUI, password, profilePic: profilePicURL, hireDate: new Date(hireDate), isVerified: isVerified || false });
     // Guardar empleado
     await newEmployee.save();
