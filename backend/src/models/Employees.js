@@ -64,8 +64,17 @@ const employeesSchema = new Schema({
     type: Date,
     required: [true, "La fecha de nacimiento es obligatoria"],
     validate: {
-      validator: v => v <= new Date(),
-      message: "La fecha debe ser anterior a la actual"
+      validator: function (value) {
+        // Obtener la fecha actual
+        const today = new Date();
+        // Calcular la fecha máxima permitida (por ejemplo, 120 años atrás)
+        const maxBirthDate = new Date(today.getFullYear() - 120, today.getMonth(), today.getDate());
+        // Calcular la fecha mínima permitida (18 años de edad)
+        const minBirthDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+        // Validar que la fecha no sea futura, que no sea anterior a 120 años y que sea menor a 18 años de edad
+        return value <= today && value >= maxBirthDate && value <= minBirthDate;
+      },
+      message: "La fecha de nacimiento no es válida. Debe ser una fecha en el pasado, no anterior a 120 años y el usuario debe tener al menos 18 años."
     }
   },
   DUI: {
