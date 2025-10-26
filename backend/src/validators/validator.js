@@ -210,10 +210,6 @@ export function validateEmployee(data) {
   const hire = new Date(hireDate);
   if (isNaN(hire.getTime())) return "La fecha de contratación no es válida";
   if (hire > new Date()) return "La fecha de contratación no puede estar en el futuro";
-  // isVerified
-  if (isVerified !== undefined && typeof isVerified !== "boolean") {
-    return "El campo 'isVerified' debe ser booleano";
-  }
   // Si pasa todo
   return null;
 }

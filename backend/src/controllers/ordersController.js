@@ -14,7 +14,7 @@ ordersController.postOrders = async (req, res) => {
     console.log('🔵 [POST ORDERS] Inicio de creación de pedido');
     console.log('📦 Body recibido:', JSON.stringify(req.body, null, 2));
     
-    const { orderCode, customer, receiver, timetable, mailingAddress, paymentMethod, status, paymentStatus, deliveryDate, items, subtotal, total } = req.body;
+    const { orderCode, customer, receiver, timetable, mailingAddress, paymentMethod, status, paymentStatus, receiptDate, items, subtotal, total } = req.body;
     
     // Log de items recibidos
     console.log('📋 Items recibidos:', JSON.stringify(items, null, 2));
@@ -84,7 +84,7 @@ ordersController.postOrders = async (req, res) => {
       paymentMethod,
       status: status || "pendiente",
       paymentStatus: paymentStatus || "pendiente",
-      deliveryDate: deliveryDate ? new Date(deliveryDate) : null,
+      receiptDate: receiptDate ? new Date(receiptDate) : null,
       items: processedItems,
       subtotal: Number(subtotal) || 0,
       total: Number(total) || 0

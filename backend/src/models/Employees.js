@@ -115,11 +115,15 @@ const employeesSchema = new Schema({
     type: Date, 
     required: [true, "La fecha de contratación es obligatoria"],
     validate: {
-      validator: v => v <= new Date(),
+      validator: function (value) {
+        // Obtener la fecha actual
+        const today = new Date();
+        // Validar que la fecha no sea futura
+        return value <= today;
+      },
       message: "La fecha de contratación no puede estar en el futuro"
     }
   },
-  isVerified: { type: Boolean, default: false },
   loginAttempts: { type: Number, default: 0 },
   timeOut: { type: Date, default: null }
 }, {

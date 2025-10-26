@@ -15,7 +15,7 @@ cloudinary.config({
 // CREATE (POST)
 employeesController.postEmployees = async (req, res) => {
   try {
-    const { name, lastName, username, email, phoneNumber, birthDate, DUI, password, hireDate, isVerified } = req.body;
+    const { name, lastName, username, email, phoneNumber, birthDate, DUI, password, hireDate } = req.body;
     // Validación extra de la foto de perfil (porque viene en req.file, no en body)
     if (req.file) {
       const allowedFormats = ["image/jpeg", "image/png", "image/webp", "image/svg+xml", "image/jpg", "image/gif"];
@@ -34,11 +34,11 @@ employeesController.postEmployees = async (req, res) => {
       profilePicURL = result.secure_url;
     }
     // Validar lo que venga en req.body
-    const validationError = validateEmployee({name, lastName, username, email, phoneNumber, birthDate, DUI, password, profilePic: profilePicURL, hireDate, isVerified});
+    const validationError = validateEmployee({name, lastName, username, email, phoneNumber, birthDate, DUI, password, profilePic: profilePicURL, hireDate});
     if (validationError) {
       return res.status(400).json({ message: validationError });
     } 
-    const newEmployee = new Employees({ name, lastName, username, email, phoneNumber, birthDate: new Date(birthDate), DUI, password, profilePic: profilePicURL, hireDate: new Date(hireDate), isVerified: isVerified || false });
+    const newEmployee = new Employees({ name, lastName, username, email, phoneNumber, birthDate: new Date(birthDate), DUI, password, profilePic: profilePicURL, hireDate: new Date(hireDate) });
     // Guardar empleado
     await newEmployee.save();
     // ESTADO DE CREACIÓN
