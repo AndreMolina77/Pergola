@@ -6,11 +6,11 @@ logoutController.logout = async (req, res) => {
     // Borrar la cookie con las MISMAS opciones que se usaron al crearla
     res.clearCookie("authToken", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/' // Asegurar que se borre desde la ruta raíz
+      secure: process.env.NODE_ENV === 'production', // ← MISMAS CONDICIONES
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // ← MISMAS CONDICIONES
+      path: '/'
     })
-      
+          
     console.log("✅ Cookie authToken eliminada correctamente")
     res.status(200).json({message: "Sesión cerrada correctamente"})
   } catch (error) {
