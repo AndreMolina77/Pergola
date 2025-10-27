@@ -1,47 +1,51 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { toast } from "react-hot-toast"
 
-// Hook para manejar productos y sus datos relacionados
+// Hook personalizado para manejar datos de productos
 const useDataProducts = () => {
-  const API = "https://pergola-production.up.railway.app/api/products"
-  const [products, setProducts] = useState([]) // Lista de productos
-  const [categories, setCategories] = useState([]) // Lista de categorías
-  const [subcategories, setSubategories] = useState([]) // Lista de subcategorías
-  const [collections, setCollections] = useState([]) // Lista de colecciones
-  const [rawmaterials, setRawMaterials] = useState([]) // Lista de materias primas
-  const [loading, setLoading] = useState(true) // Estado de carga
+  const API = "https://pergola.onrender.com/api/products"
+  // Estado para almacenar producto, categoría, subcategoría, colección, materia prima, proveedor y estado de carga
+  const [products, setProducts] = useState([])
+  const [categories, setCategories] = useState([])
+  const [subcategories, setSubategories] = useState([])
+  const [collections, setCollections] = useState([])
+  const [rawmaterials, setRawMaterials] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  // Cargar productos desde el servidor
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
-      const response = await fetch(API, {
-        credentials: "include" // Incluye sesión
+      setLoading(true)
+      const response = await window.fetch(API, {
+        credentials: "include"
       })
+      
       if (response.status === 403) {
-        console.log("⚠️ Sin permisos para productos - usuario no autorizado")
+        console.log("Sin permisos para productos")
         setProducts([])
         setLoading(false)
         return
       }
+      
       if (!response.ok) {
         throw new Error("Hubo un error al obtener los productos")
       }
+      
       const data = await response.json()
       setProducts(data)
-      setLoading(false)
     } catch (error) {
       console.error("Error al obtener productos:", error)
       if (!error.message.includes("403") && !error.message.includes("sin permisos")) {
         toast.error("Error al cargar artículos")
       }
+      setProducts([])
+    } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
-  // Cargar colecciones
-  const fetchCollections = async () => {
+  const fetchCollections = useCallback(async () => {
     try {
-      const response = await fetch("https://pergola-production.up.railway.app/api/collections", {
+      const response = await window.fetch("https://pergola.onrender.com/api/collections", {
         credentials: "include"
       })
       if (!response.ok) {
@@ -51,13 +55,13 @@ const useDataProducts = () => {
       setCollections(data)
     } catch (error) {
       console.error("Error al obtener colecciones:", error)
+      setCollections([])
     }
-  }
+  }, [])
 
-  // Cargar categorías
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
-      const response = await fetch("https://pergola-production.up.railway.app/api/categories", {
+      const response = await window.fetch("https://pergola.onrender.com/api/categories", {
         credentials: "include"
       })
       if (!response.ok) {
@@ -67,13 +71,13 @@ const useDataProducts = () => {
       setCategories(data)
     } catch (error) {
       console.error("Error al obtener categorías:", error)
+      setCategories([])
     }
-  }
+  }, [])
 
-  // Cargar subcategorías
-  const fetchSubcategories = async () => {
+  const fetchSubcategories = useCallback(async () => {
     try {
-      const response = await fetch("https://pergola-production.up.railway.app/api/subcategories", {
+      const response = await window.fetch("https://pergola.onrender.com/api/subcategories", {
         credentials: "include"
       })
       if (!response.ok) {
@@ -83,40 +87,68 @@ const useDataProducts = () => {
       setSubategories(data)
     } catch (error) {
       console.error("Error al obtener subcategorías:", error)
+      setSubategories([])
     }
-  }
+  }, [])
 
-  // Cargar materias primas
-  const fetchRawMaterials = async () => {
+  const fetchRawMaterials = useCallback(async () => {
     try {
-      const response = await fetch("https://pergola-production.up.railway.app/api/rawmaterials", {
+      const response = await window.fetch("https://pergola.onrender.com/api/rawmaterials", {
         credentials: "include"
       })
       if (!response.ok) {
-        throw new Error("Error al obtener las materias primas")
+        throw new Error("Error al obtener materias primas")
       }
       const data = await response.json()
       setRawMaterials(data)
     } catch (error) {
       console.error("Error al obtener materias primas:", error)
+      setRawMaterials([])
     }
-  }
-
-  // Cargar todo cuando el componente se monta
-  useEffect(() => {
-    fetchProducts()
-    fetchCollections()
-    fetchCategories()
-    fetchSubcategories()
-    fetchRawMaterials()
   }, [])
 
-  // Funciones para agregar, editar y eliminar productos
-  const createHandlers = (API) => ({
-    data: products, // Devuelve los productos
-    loading, // Devuelve si está cargando
+  useEffect(() => {
+    let mounted = true
+    
+    const loadData = async () => {
+      if (mounted) {
+        await Promise.all([
+          fetchProducts(),
+          fetchCategories(),
+          fetchSubcategories(),
+          fetchCollections(),
+          fetchRawMaterials()
+        ])
+      }
+    }
 
-    // Agregar producto
+    loadData()
+    
+    return () => {
+      mounted = false
+    }
+  }, [])
+
+  // Función fetch unificada con protección contra errores
+  const refreshData = useCallback(async () => {
+    try {
+      await Promise.all([
+        fetchProducts(),
+        fetchCategories(),
+        fetchSubcategories(),
+        fetchCollections(),
+        fetchRawMaterials()
+      ])
+    } catch (error) {
+      console.error("Error en fetch unificado:", error)
+    }
+  }, [fetchProducts, fetchCategories, fetchSubcategories, fetchCollections, fetchRawMaterials])
+
+  // Crea los handlers para agregar, editar y eliminar productos
+  const createHandlers = useCallback((API) => ({
+    data: products,
+    loading,
+    // Handler para agregar producto
     onAdd: async (data) => {
       try {
         let body
@@ -141,17 +173,19 @@ const useDataProducts = () => {
           headers["Content-Type"] = "application/json"
           body = JSON.stringify(data)
         }
-
+        
         const response = await fetch(`${API}/products`, {
           method: "POST",
           headers,
           credentials: "include",
           body
         })
+        
         if (!response.ok) {
           const errorData = await response.json()
           throw new Error(errorData.message || "Error al registrar producto")
         }
+        
         toast.success('Producto registrado exitosamente')
         fetchProducts()
       } catch (error) {
@@ -160,8 +194,7 @@ const useDataProducts = () => {
         throw error
       }
     },
-
-    // Editar producto
+    // Handler para editar producto
     onEdit: async (id, data) => {
       try {
         let body
@@ -193,10 +226,12 @@ const useDataProducts = () => {
           credentials: "include",
           body
         })
+        
         if (!response.ok) {
           const errorData = await response.json()
-          throw new Error(errorData.message || "Error al actualizar artículo")
+          throw new Error(errorData.message || "Error al actualizar producto")
         }
+        
         toast.success('Producto actualizado exitosamente')
         fetchProducts()
       } catch (error) {
@@ -205,32 +240,27 @@ const useDataProducts = () => {
         throw error
       }
     },
-
-    onDelete: deleteProduct // Usa la función para borrar producto
-  })
-
-  // Eliminar producto por ID
-  const deleteProduct = async (id) => {
-    try {
-      const response = await fetch(`${API}/${id}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        credentials: "include"
-      })
-      if (!response.ok) {
-        throw new Error("Hubo un error al eliminar el producto")
+    // Handler para eliminar producto
+    onDelete: async (id) => {
+      try {
+        const response = await window.fetch(`${API}/products/${id}`, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include"
+        })
+        
+        if (!response.ok) throw new Error("Hubo un error al eliminar los productos")
+        
+        toast.success('Producto eliminado exitosamente')
+        await fetchProducts()
+      } catch (error) {
+        console.error("Error al eliminar producto:", error)
+        toast.error("Error al eliminar producto")
+        throw error
       }
-      toast.success('Producto eliminado exitosamente')
-      fetchProducts()
-    } catch (error) {
-      console.error("Error al eliminar producto:", error)
-      toast.error("Error al eliminar producto")
     }
-  }
+  }), [products, loading, fetchProducts])
 
-  // Devuelve los datos y funciones listas para usar
   return {
     products,
     categories,
@@ -238,15 +268,14 @@ const useDataProducts = () => {
     collections,
     rawmaterials,
     loading,
+    fetch: refreshData,
     fetchProducts,
-    fetchCollections,
     fetchCategories,
     fetchSubcategories,
+    fetchCollections,
     fetchRawMaterials,
-    deleteProduct,
     createHandlers
   }
 }
-
 // Exporta el hook para su uso en otros componentes
 export default useDataProducts

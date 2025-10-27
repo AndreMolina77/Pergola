@@ -7,7 +7,6 @@ const getDisplayFromObject = (obj) => {
   // Preferencias por tipo de entidad/referencia
   if (obj.orderCode) return obj.orderCode
   if (obj.codeProduct) return obj.codeProduct
-  if (obj.transactionCode) return obj.transactionCode
   if (obj.refundCode) return obj.refundCode
   if (obj.name && obj.lastName) return `${obj.name} ${obj.lastName}`
   if (obj.name) return obj.name
@@ -44,7 +43,7 @@ const isDateKey = (key) => {
   // Claves específicas que son fechas
   const dateKeys = [
     'createdat', 'updatedat', 'date', 'birthdate', 'hiredate', 
-    'purchasedate', 'requestdate', 'deliverydate'
+    'purchasedate', 'requestdate', 'receiptDate'
   ]
   
   // Verificar si es una clave de fecha específica
@@ -226,7 +225,7 @@ export const exportToExcel = (data, filename = 'datos') => {
     paymentMethod: 'Método de Pago',
     subtotal: 'Subtotal',
     paymentStatus: 'Estado de Pago',
-    deliveryDate: 'Fecha de Entrega',
+    receiptDate: 'Fecha de Entrega',
     // Reviews
     response: 'Respuesta',
     // Custom Designs
@@ -244,8 +243,6 @@ export const exportToExcel = (data, filename = 'datos') => {
     comments: 'Comentarios',
     amount: 'Monto',
     refundMethod: 'Método de Reembolso',
-    // Transactions
-    transactionCode: 'Código de Transacción'
   }
   // Crear CSV con headers en español
   const headers = Object.keys(processedData[0])
@@ -324,12 +321,11 @@ export const exportToPDF = (data, filename = 'datos', title = 'Reporte de Datos'
     // Extras por dominio
     orderCode: 'Código de Pedido',
     refundCode: 'Código de Reembolso',
-    transactionCode: 'Código de Transacción',
     amount: 'Monto'
   }
   // Seleccionar solo las columnas más importantes para PDF
   const preferredOrder = [
-    'transactionCode','refundCode','orderCode','codeProduct','name','customer','order','price','amount','subtotal','total','status','paymentStatus','createdAt'
+    'refundCode','orderCode','codeProduct','name','customer','order','price','amount','subtotal','total','status','paymentStatus','createdAt'
   ]
   const keys = Object.keys(processedData[0]).filter(k => k !== '__v')
   const importantColumns = [

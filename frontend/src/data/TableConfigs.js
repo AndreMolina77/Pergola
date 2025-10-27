@@ -26,6 +26,7 @@ export const customersConfig = {
     canAdd: true,
     canEdit: true,
     canDelete: true,
+    canUpdate: true,
     canExport: true,
     canView: true,
     canToggleColumns: true // Nueva funcionalidad para mostrar/ocultar columnas
@@ -65,7 +66,6 @@ export const employeesConfig = {
     { key: 'lastName', label: 'Apellido', sortable: true, searchable: true, priority: 1 },
     { key: 'email', label: 'Email', sortable: true, searchable: true, priority: 1 },
     { key: 'hireDate', label: 'F. Contrato', sortable: true, type: 'date', priority: 2 },
-    { key: 'isVerified', label: 'Verificado', sortable: true, type: 'boolean', priority: 2 },
     // Campos ocultos por defecto
     { key: 'username', label: 'Usuario', sortable: true, searchable: true, hidden: true },
     { key: 'phoneNumber', label: 'Teléfono', searchable: true, hidden: true },
@@ -78,6 +78,7 @@ export const employeesConfig = {
     canAdd: true,
     canEdit: true,
     canDelete: true,
+    canUpdate: true,
     canExport: true,
     canView: true,
     canToggleColumns: true
@@ -89,11 +90,10 @@ export const employeesConfig = {
     { name: 'email', type: 'email', label: 'Correo Electrónico', required: true, placeholder: 'correo@ejemplo.com' },
     { name: 'phoneNumber', type: 'tel', label: 'Teléfono', required: true, placeholder: 'Ej: +503-7123-4567', helperText: 'Formato: +503 seguido de 8 dígitos (ej: +503-7123-4567)' },
     { name: 'birthDate', type: 'date', label: 'Fecha de Nacimiento', required: true },
-    { name: 'DUI', type: 'text', label: 'DUI', required: true, placeholder: '12345678-9' },
+    { name: 'DUI', type: 'dui', label: 'DUI', required: true, placeholder: '12345678-9' },
     { name: 'password', type: 'password', label: 'Contraseña', required: true, placeholder: '********' },
     { name: 'hireDate', type: 'date', label: 'Fecha de Contratación', required: true },
-    { name: 'profilePic', type: 'image', label: 'Foto de Perfil', accept: 'image/*', placeholder: 'Seleccionar imagen' },
-    { name: 'isVerified', type: 'checkbox', label: 'Verificado' }
+    { name: 'profilePic', type: 'image', label: 'Foto de Perfil', accept: 'image/*', placeholder: 'Seleccionar imagen' }
   ]
 }
 
@@ -112,6 +112,7 @@ export const categoriesConfig = {
     canAdd: true,
     canEdit: true,
     canDelete: true,
+    canUpdate: true,
     canExport: true,
     canView: true,
     canToggleColumns: true
@@ -138,6 +139,7 @@ export const subcategoriesConfig = {
     canAdd: true,
     canEdit: true,
     canDelete: true,
+    canUpdate: true,
     canExport: true,
     canView: true,
     canToggleColumns: true
@@ -164,6 +166,7 @@ export const collectionsConfig = {
     canAdd: true,
     canEdit: true,
     canDelete: true,
+    canUpdate: true,
     canExport: true,
     canView: true,
     canToggleColumns: true
@@ -191,6 +194,7 @@ export const suppliersConfig = {
     canAdd: true,
     canEdit: true,
     canDelete: true,
+    canUpdate: true,
     canExport: true,
     canView: true,
     canToggleColumns: true
@@ -233,6 +237,7 @@ export const productsConfig = {
     canAdd: true,
     canEdit: true,
     canDelete: true,
+    canUpdate: true,
     canExport: true,
     canView: true,
     canToggleColumns: true
@@ -303,6 +308,7 @@ export const rawMaterialsConfig = {
     canAdd: true,
     canEdit: true,
     canDelete: true,
+    canUpdate: true,
     canExport: true,
     canView: true,
     canToggleColumns: true
@@ -346,6 +352,7 @@ export const reviewsConfig = {
     canAdd: true,
     canEdit: true,
     canDelete: true,
+    canUpdate: true,
     canExport: true,
     canView: true,
     canToggleColumns: true
@@ -377,6 +384,7 @@ export const customDesignsConfig = {
     canAdd: true,
     canEdit: true,
     canDelete: true,
+    canUpdate: true,
     canExport: true,
     canView: true,
     canToggleColumns: true
@@ -412,6 +420,7 @@ export const designElementsConfig = {
     canAdd: true,
     canEdit: true,
     canDelete: true,
+    canUpdate: true,
     canExport: true,
     canView: true,
     canToggleColumns: true
@@ -438,7 +447,7 @@ export const ordersConfig = {
     { key: 'total', label: 'Total', sortable: true, type: 'currency', priority: 1, width: 100 },
     { key: 'status', label: 'Estado', sortable: true, type: 'badge', priority: 1, width: 110 },
     { key: 'paymentStatus', label: 'Pago', sortable: true, type: 'badge', priority: 1, width: 100 },
-    { key: 'createdAt', label: 'Fecha', sortable: true, type: 'date', priority: 2, width: 120 },
+    { key: 'createdAt', label: 'Fecha', sortable: true, type: 'date', priority: 1, width: 120 },
     // Campos ocultos
     { key: 'receiver', label: 'Receptor', sortable: true, searchable: true, hidden: true },
     { key: 'timetable', label: 'Horario', sortable: true, searchable: true, hidden: true },
@@ -446,12 +455,13 @@ export const ordersConfig = {
     { key: 'paymentMethod', label: 'Método Pago', sortable: true, searchable: true, hidden: true },
     { key: 'items', label: 'Items', type: 'badge-list', hidden: true },
     { key: 'subtotal', label: 'Subtotal', sortable: true, type: 'currency', hidden: true },
-    { key: 'deliveryDate', label: 'F. Entrega', sortable: true, type: 'date', hidden: true }
+    { key: 'receiptDate', label: 'F. Recepción', sortable: true, type: 'date', hidden: true }
   ],
   actions: {
     canAdd: true,
     canEdit: true,
     canDelete: true,
+    canUpdate: true,
     canExport: true,
     canView: true,
     canToggleColumns: true
@@ -468,7 +478,7 @@ export const ordersConfig = {
         { value: 'transferencia bancaria', label: 'Transferencia' }
       ]
     },
-    { name: 'items', type: 'order-items', label: 'Productos del Pedido', required: true },
+    { name: 'items', type: 'order-items', label: 'Productos del Pedido', required: true, fullWidth: true, useProductsData: true },
     { name: 'subtotal', type: 'number', label: 'Subtotal', required: true, placeholder: '0.00', min: 0.01, step: 0.01 },
     { name: 'total', type: 'number', label: 'Total', required: true, placeholder: '0.00', min: 0.01, step: 0.01 },
     { name: 'status', type: 'select', label: 'Estado', required: true,
@@ -488,7 +498,7 @@ export const ordersConfig = {
         { value: 'fallido', label: 'Fallido' }
       ]
     },
-    { name: 'deliveryDate', type: 'date', label: 'Fecha de Entrega', required: true }
+    { name: 'receiptDate', type: 'date', label: 'Fecha de Recepción', required: true }
   ]
 }
 
@@ -501,6 +511,7 @@ export const refundsConfig = {
     { key: 'amount', label: 'Monto', sortable: true, type: 'currency', priority: 1, width: 100 },
     { key: 'status', label: 'Estado', sortable: true, type: 'badge', priority: 1, width: 100 },
     { key: 'requestDate', label: 'F. Solicitud', sortable: true, type: 'date', priority: 2, width: 120 },
+    { key: 'createdAt', label: 'Creada En', sortable: true, type: 'date', priority: 2, width: 120 },
     // Campos ocultos
     { key: 'order', label: 'Pedido', sortable: true, searchable: true, hidden: true },
     { key: 'reason', label: 'Motivo', sortable: true, searchable: true, hidden: true },
@@ -512,6 +523,7 @@ export const refundsConfig = {
     canAdd: true,
     canEdit: true,
     canDelete: true,
+    canUpdate: true,
     canExport: true,
     canView: true,
     canToggleColumns: true
@@ -540,57 +552,6 @@ export const refundsConfig = {
     }
   ]
 }
-
-// Configuración optimizada para Transacciones
-export const transactionsConfig = {
-  title: "Transacciones",
-  columns: [
-    { key: 'transactionCode', label: 'Código', sortable: true, searchable: true, priority: 1, width: 130 },
-    { key: 'customer', label: 'Cliente', sortable: true, searchable: true, priority: 1, width: 150 },
-    { key: 'amount', label: 'Monto', sortable: true, type: 'currency', priority: 1, width: 100 },
-    { key: 'type', label: 'Tipo', sortable: true, searchable: true, priority: 1, width: 100 },
-    { key: 'status', label: 'Estado', sortable: true, type: 'badge', priority: 1, width: 100 },
-    { key: 'createdAt', label: 'Fecha', sortable: true, type: 'date', priority: 2, width: 120 },
-    // Campos ocultos
-    { key: 'order', label: 'Pedido', sortable: true, searchable: true, hidden: true },
-    { key: 'paymentMethod', label: 'Método Pago', sortable: true, searchable: true, hidden: true }
-  ],
-  actions: {
-    canAdd: true,
-    canEdit: true,
-    canDelete: true,
-    canExport: true,
-    canView: true,
-    canToggleColumns: true
-  },
-  formFields: [
-    { name: 'transactionCode', type: 'text', label: 'Código de Transacción', required: true, placeholder: 'Ej: 001' },
-    { name: 'order', type: 'select', label: 'Pedido', required: true, options: 'orders' },
-    { name: 'customer', type: 'select', label: 'Cliente', required: true, options: 'customers' },
-    { name: 'amount', type: 'number', label: 'Monto', required: true, placeholder: '0.00', min: 0.01, step: 0.01 },
-    { name: 'type', type: 'select', label: 'Tipo', required: true,
-      options: [
-        { value: 'pago', label: 'Pago' },
-        { value: 'reembolso', label: 'Reembolso' },
-        { value: 'ajuste', label: 'Ajuste' }
-      ]
-    },
-    { name: 'status', type: 'select', label: 'Estado', required: true,
-      options: [
-        { value: 'pendiente', label: 'Pendiente' },
-        { value: 'completado', label: 'Completado' },
-        { value: 'cancelado', label: 'Cancelado' }
-      ]
-    },
-    { name: 'paymentMethod', type: 'select', label: 'Método de Pago', required: true,
-      options: [
-        { value: 'efectivo contra entrega', label: 'Efectivo' },
-        { value: 'transferencia bancaria', label: 'Transferencia' }
-      ]
-    }
-  ]
-}
-
 // Configuración de visualización por defecto
 export const defaultTableSettings = {
   // Número máximo de columnas visibles por defecto

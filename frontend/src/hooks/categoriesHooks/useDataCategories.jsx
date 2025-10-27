@@ -1,49 +1,83 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { toast } from "react-hot-toast"
 
 // Hook personalizado para manejar datos de categorías
 const useDataCategories = () => {
-  const API = "https://pergola-production.up.railway.app/api/categories"
+  const API = "https://pergola.onrender.com/api/categories"
   // Estado para almacenar categorías y estado de carga
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
 
-  // Función para obtener las categorías desde la API
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
-      const response = await fetch(API, {
-        credentials: "include"
-      })
-      // Si la respuesta es 403, usuario no autorizado
+      setLoading(true)
+      const response = await window.fetch(API, { credentials: "include" })
+      
       if (response.status === 403) {
-        console.log("⚠️ Sin permisos para categorías - usuario no autorizado")
+        console.log("Sin permisos para categorías")
         setCategories([])
-        setLoading(false)
         return
       }
-      if (!response.ok) {
-        throw new Error("Hubo un error al obtener las categorías")
-      }
+      
+      if (!response.ok) throw new Error("Hubo un error al obtener las categorías")
+      
       const data = await response.json()
       setCategories(data)
-      setLoading(false)
     } catch (error) {
       console.error("Error al obtener categorías:", error)
-      // Solo muestra toast si no es error de permisos
-      if (!error.message.includes("403") && !error.message.includes("sin permisos")) {
+      if (!error.message.includes("403")) {
         toast.error("Error al cargar categorías")
       }
+      setCategories([])
+    } finally {
       setLoading(false)
     }
-  }
+  }, []) 
 
-  // Obtiene las categorías al montar el componente
   useEffect(() => {
-    fetchCategories()
-  }, [])
+    let mounted = true 
+    
+    const loadData = async () => {
+      if (mounted) {
+        await fetchCategories()
+      }
+    }
+
+    loadData()
+    
+    return () => {
+      mounted = false 
+    }
+  }, []) 
+
+  // Función fetch unificada con protección contra errores
+  const refreshData = useCallback(async () => {
+    try {
+      await fetchCategories()
+    } catch (error) {
+      console.error("Error en refresh:", error)
+    }
+  }, [fetchCategories])
+
+  // Borra categoría por ID con useCallback
+  const deleteCategory = useCallback(async (id) => {
+    try {
+      const response = await window.fetch(`${API}/${id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include"
+      })
+      if (!response.ok) throw new Error("Hubo un error al eliminar la categoría")
+      toast.success('Categoría eliminada exitosamente')
+      await fetchCategories()
+    } catch (error) {
+      console.error("Error al eliminar categoría:", error)
+      toast.error("Error al eliminar categoría")
+    }
+  }, [fetchCategories])
 
   // Crea los handlers para agregar, editar y eliminar categorías
-  const createHandlers = (API) => ({
+  const createHandlers = useCallback((API) => ({
     data: categories,
     loading,
     // Handler para agregar categoría
@@ -64,7 +98,7 @@ const useDataCategories = () => {
           headers["Content-Type"] = "application/json"
           body = JSON.stringify(data)
         }
-        const response = await fetch(`${API}/categories`, {
+        const response = await window.fetch(`${API}/categories`, {
           method: "POST",
           headers, // No forzado
           credentials: "include",
@@ -72,13 +106,13 @@ const useDataCategories = () => {
         })
         if (!response.ok) {
           const errorData = await response.json()
-          throw new Error(errorData.message || "Error al registrar categoría")
+          throw new Error(errorData.message || "Error al crear categoría")
         }
-        toast.success('Categoría registrada exitosamente')
-        fetchCategories()
+        toast.success('Categoría creada exitosamente')
+        await fetchCategories()
       } catch (error) {
         console.error("Error:", error)
-        toast.error(error.message || "Error al registrar categoría")
+        toast.error(error.message || "Error al crear categoría")
         throw error
       }
     },
@@ -98,9 +132,9 @@ const useDataCategories = () => {
           headers["Content-Type"] = "application/json"
           body = JSON.stringify(data)
         }
-        const response = await fetch(`${API}/categories/${id}`, {
+        const response = await window.fetch(`${API}/categories/${id}`, {
           method: "PUT",
-          headers: headers, // No forzado
+          headers, // No forzado
           credentials: "include",
           body
         })
@@ -109,7 +143,7 @@ const useDataCategories = () => {
           throw new Error(errorData.message || "Error al actualizar categoría")
         }
         toast.success('Categoría actualizada exitosamente')
-        fetchCategories()
+        await fetchCategories()
       } catch (error) {
         console.error("Error:", error)
         toast.error(error.message || "Error al actualizar categoría")
@@ -118,33 +152,13 @@ const useDataCategories = () => {
     },
     // Handler para eliminar categoría
     onDelete: deleteCategory
-  })
-
-  // Función para eliminar una categoría
-  const deleteCategory = async (id) => {
-    try {
-      const response = await fetch(`${API}/${id}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        credentials: "include"
-      })
-      if (!response.ok) {
-        throw new Error("Hubo un error al eliminar la categoría")
-      }
-      toast.success('Categoría eliminada exitosamente')
-      fetchCategories()
-    } catch (error) {
-      console.error("Error al eliminar categoría:", error)
-      toast.error("Error al eliminar categoría")
-    }
-  }
+  }), [categories, loading, fetchCategories, deleteCategory])
 
   // Retorna los datos y handlers para usar en componentes
   return {
     categories,
     loading,
+    fetch: refreshData,
     deleteCategory,
     fetchCategories,
     createHandlers

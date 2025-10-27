@@ -1,147 +1,144 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { toast } from "react-hot-toast"
 
-// Hook personalizado para manejar la lógica relacionada con proveedores
+// Hook personalizado para manejar datos de proveedor
 const useDataSuppliers = () => {
-  const API = "https://pergola-production.up.railway.app/api/suppliers" // URL base para la API de proveedores
-
-  // Estado para almacenar la lista de proveedores
+  const API = "https://pergola.onrender.com/api/suppliers"
+  // Estado para almacenar proveedor y estado de carga
   const [suppliers, setSuppliers] = useState([])
-
-  // Estado para indicar si los datos están cargando
   const [loading, setLoading] = useState(true)
 
-  // Función para obtener proveedores desde la API
-  const fetchSuppliers = async () => {
+  const fetchSuppliers = useCallback(async () => {
     try {
-      const response = await fetch(API, {
-        credentials: "include" // Incluir cookies (autenticación)
+      setLoading(true)
+      const response = await window.fetch(API, { 
+        credentials: "include"
       })
-
-      // Si el usuario no tiene permisos, no lanzar error
+      
       if (response.status === 403) {
-        console.log("⚠️ Sin permisos para proveedores - usuario no autorizado")
+        console.log("Sin permisos para proveedores")
         setSuppliers([])
-        setLoading(false)
         return
       }
-
-      // Si la respuesta no fue exitosa, lanzar error
+      
       if (!response.ok) {
-        throw new Error("Hubo un error al obtener proveedores")
+        throw new Error("Hubo un error al obtener los proveedores")
       }
-
-      // Guardar los proveedores obtenidos
+      
       const data = await response.json()
       setSuppliers(data)
-      setLoading(false)
     } catch (error) {
       console.error("Error al obtener proveedores:", error)
-
-      // Mostrar toast solo si el error no es por falta de permisos
-      if (!error.message.includes("403") && !error.message.includes("sin permisos")) {
+      if (!error.message.includes("403")) {
         toast.error("Error al cargar proveedores")
       }
-
+      setSuppliers([])
+    } finally {
       setLoading(false)
     }
-  }
-
-  // Ejecutar `fetchSuppliers` una vez al montar el componente
+  }, []) 
   useEffect(() => {
-    fetchSuppliers()
+    let mounted = true
+    
+    const loadData = async () => {
+      if (mounted) {
+        await fetchSuppliers()
+      }
+    }
+
+    loadData()
+    
+    return () => {
+      mounted = false
+    }
   }, [])
 
-  // Función para manejar la lógica de crear, editar y eliminar proveedores
-  const createHandlers = (API) => ({
+  // Función fetch unificada con protección contra errores
+  const refreshData = useCallback(async () => {
+    try {
+      await fetchSuppliers()
+    } catch (error) {
+      console.error("Error en refresh:", error)
+    }
+  }, [fetchSuppliers])
+
+  // Borra proveedor por ID con useCallback
+  const deleteSuppliers = useCallback(async (id) => {
+    try {
+      const response = await window.fetch(`${API}/${id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include"
+      })
+      if (!response.ok) {
+        throw new Error("Hubo un error al eliminar el proveedor")
+      }
+      toast.success('Proveedor eliminado exitosamente')
+      await fetchSuppliers()
+    } catch (error) {
+      console.error("Error al eliminar proveedor:", error)
+      toast.error("Error al eliminar proveedor")
+    }
+  }, [fetchSuppliers]) 
+
+  // Crea los handlers para agregar, editar y eliminar proveedores
+  const createHandlers = useCallback((API) => ({
     data: suppliers,
     loading,
-
-    // Agregar un nuevo proveedor
+    // Handler para agregar proveedor
     onAdd: async (data) => {
       try {
-        const response = await fetch(`${API}/suppliers`, {
+        const response = await window.fetch(`${API}/suppliers`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body: JSON.stringify(data) // Enviar datos en formato JSON
+          body: JSON.stringify(data)
         })
-
-        // Validar respuesta
         if (!response.ok) {
           const errorData = await response.json()
           throw new Error(errorData.message || "Error al registrar proveedor")
         }
-
-        toast.success("Proveedor registrado exitosamente")
-        fetchSuppliers() // Recargar lista
+        toast.success('Proveedor registrado exitosamente')
+        await fetchSuppliers()
       } catch (error) {
         console.error("Error:", error)
         toast.error(error.message || "Error al registrar proveedor")
         throw error
       }
     },
-
-    // Editar proveedor existente
+    // Handler para editar proveedor
     onEdit: async (id, data) => {
       try {
-        const response = await fetch(`${API}/suppliers/${id}`, {
+        const response = await window.fetch(`${API}/suppliers${id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
           body: JSON.stringify(data)
         })
-
         if (!response.ok) {
           const errorData = await response.json()
-          throw new Error(errorData.message || "Error al actualizar proveedor")
+          throw new Error(errorData.message || "Error al registrar proveedor")
         }
-
-        toast.success("Proveedor actualizado exitosamente")
-        fetchSuppliers()
+        toast.success('Proveedor registrado exitosamente')
+        await fetchSuppliers()
       } catch (error) {
         console.error("Error:", error)
         toast.error(error.message || "Error al actualizar proveedor")
         throw error
       }
     },
+  // Handler para eliminar proveedor
+  onDelete: deleteSuppliers
+  }), [suppliers, loading, fetchSuppliers, deleteSuppliers])
 
-    // Eliminar proveedor
-    onDelete: deleteSuppliers
-  })
-
-  // Función para eliminar proveedor por ID
-  const deleteSuppliers = async (id) => {
-    try {
-      const response = await fetch(`${API}/${id}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        credentials: "include"
-      })
-
-      // Si la respuesta no fue exitosa, lanzar error
-      if (!response.ok) {
-        throw new Error("Hubo un error al eliminar el proveedor")
-      }
-
-      toast.success("Proveedor eliminado exitosamente")
-      fetchSuppliers() // Actualizar lista después de borrar
-    } catch (error) {
-      console.error("Error al eliminar proveedores:", error)
-      toast.error("Error al eliminar proveedores")
-    }
-  }
-
-  // Valores y funciones que expone el hook
   return {
     suppliers,
     loading,
+    fetch: refreshData,
     deleteSuppliers,
     fetchSuppliers,
     createHandlers
   }
 }
-
+// Exporta el hook para su uso en otros componentes
 export default useDataSuppliers

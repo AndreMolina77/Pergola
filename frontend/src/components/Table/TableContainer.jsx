@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import TableHeader from './TableHeader'
 import DataTable from './DataTable'
 import FormModal from './Modals/FormModal'
@@ -7,7 +7,7 @@ import DetailModal from './Modals/DetailModal'
 import ColumnToggleModal from './Modals/ColumnToggleModal'
 
 // Componente contenedor principal para la tabla y sus acciones/modales
-const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onUpdate, onExport, isLoading = false, isUpdating = false, className = "", categoriesData, subcategoriesData, collectionsData, suppliersData, customersData, rawMaterialsData, productsData, ordersData, refundsData, transactionsData, employeesData, designElementsData}) => {
+const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onUpdate, onExport, isLoading = false, isUpdating = false, className = "", categoriesData, subcategoriesData, collectionsData, suppliersData, customersData, rawMaterialsData, productsData, ordersData, refundsData, employeesData, designElementsData}) => {
   // Estados para búsqueda, ordenamiento, paginación y modales
   const [searchValue, setSearchValue] = useState("")
   const [sortBy, setSortBy] = useState(null)
@@ -24,15 +24,22 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onUpdate, o
   
   // ✅ NUEVOS ESTADOS PARA MANEJO DE COLUMNAS
   const [showColumnToggle, setShowColumnToggle] = useState(false)
-  const [visibleColumns, setVisibleColumns] = useState(() => {
-    // Inicializar columnas visibles basado en la configuración
+  const [visibleColumns, setVisibleColumns] = useState({})
+  // ✅ EFECTO PARA REINICIALIZAR COLUMNAS CUANDO CAMBIA LA CONFIGURACIÓN
+  useEffect(() => {
     const initialVisible = {}
     config.columns.forEach(col => {
-      // Por defecto, mostrar columnas que no estén marcadas como hidden
-      initialVisible[col.key] = !col.hidden
+      // PRIORIDAD 1: Siempre visible por defecto
+      // PRIORIDAD 2+: Solo visible si no está marcada como hidden
+      // SIN PRIORIDAD: Visible solo si no está hidden
+      if (col.priority === 1) {
+        initialVisible[col.key] = true
+      } else {
+        initialVisible[col.key] = !col.hidden
+      }
     })
-    return initialVisible
-  })
+    setVisibleColumns(initialVisible)
+  }, [config.columns])
 
   // ✅ FILTRAR COLUMNAS VISIBLES
   const filteredColumns = useMemo(() => {
@@ -61,20 +68,36 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onUpdate, o
 
   // ✅ COLUMNAS RESPONSIVAS AUTOMÁTICAS
   const responsiveColumns = useMemo(() => {
+    // Si estamos en desktop, mostrar todas las columnas visibles sin restricción
+    if (screenSize === 'desktop') {
+      return filteredColumns
+    }
+    
+    // Para mobile y tablet, aplicar filtros de prioridad
     const settings = {
       mobile: { maxColumns: 3, priorities: [1] },
-      tablet: { maxColumns: 5, priorities: [1, 2] },
-      desktop: { maxColumns: 8, priorities: [1, 2, 3] }
+      tablet: { maxColumns: 5, priorities: [1, 2] }
     }
     
     const currentSettings = settings[screenSize]
     
-    return filteredColumns.filter(col => {
-      // Siempre mostrar columnas sin prioridad definida
+    // Filtrar por prioridad PERO respetando el toggle del usuario
+    const priorityFiltered = filteredColumns.filter(col => {
+      // Si no tiene prioridad definida, incluirla
       if (!col.priority) return true
       // Filtrar por prioridad según el tamaño de pantalla
       return currentSettings.priorities.includes(col.priority)
-    }).slice(0, currentSettings.maxColumns)
+    })
+    
+    // Solo aplicar maxColumns si hay más columnas de las permitidas
+    if (priorityFiltered.length > currentSettings.maxColumns) {
+      // Priorizar columnas con priority menor (más importantes)
+      return priorityFiltered
+        .sort((a, b) => (a.priority || 999) - (b.priority || 999))
+        .slice(0, currentSettings.maxColumns)
+    }
+    
+    return priorityFiltered
   }, [filteredColumns, screenSize])
 
   // Procesa los campos del formulario con opciones dinámicas (categorías, proveedores, etc.)
@@ -180,16 +203,6 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onUpdate, o
           }))
         }
       }
-      // Opciones para transacciones
-      if (field.options === 'transactions' && transactionsData?.transactions) {
-        return {
-          ...field,
-          options: transactionsData.transactions.map(transaction => ({
-            value: transaction._id,
-            label: `${transaction.name} ${transaction.description}`
-          }))
-        }
-      }
       // Opciones para elementos de diseño
       if (field.options === 'designelements' && designElementsData?.designElements) {
         return {
@@ -213,7 +226,7 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onUpdate, o
       // Si no hay opciones dinámicas, retorna el campo tal cual
       return field
     })
-  }, [config.formFields, categoriesData?.categories, subcategoriesData?.subcategories, collectionsData?.collections, suppliersData?.suppliers, customersData?.customers, rawMaterialsData?.rawMaterials, productsData?.products, ordersData?.orders, refundsData?.refunds, transactionsData?.transactions, employeesData?.employees, designElementsData?.designElements])
+  }, [config.formFields, categoriesData?.categories, subcategoriesData?.subcategories, collectionsData?.collections, suppliersData?.suppliers, customersData?.customers, rawMaterialsData?.rawMaterials, productsData?.products, ordersData?.orders, refundsData?.refunds, employeesData?.employees, designElementsData?.designElements])
 
   // Función para obtener el valor buscable de cada columna/item
   const getSearchableValue = (item, column) => {
@@ -261,9 +274,6 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onUpdate, o
         return `${value.name || ''} ${value.description || ''} ${value.correlative || ''}`.toLowerCase()
       }
       if (column.key === 'refunds') {
-        return `${value.name || ''} ${value.description || ''} ${value.correlative || ''}`.toLowerCase()
-      }
-      if (column.key === 'transactions') {
         return `${value.name || ''} ${value.description || ''} ${value.correlative || ''}`.toLowerCase()
       }
       if (column.key === 'designelements') {
@@ -498,7 +508,6 @@ const TableContainer = ({config, data = [], onAdd, onEdit, onDelete, onUpdate, o
         'empleados': 'employees',
         'pedidos': 'orders',
         'reembolsos': 'refunds',
-        'transacciones': 'transactions',
         'elementosdediseño': 'designelements' // Sin tilde - CORREGIDO
       }
       modalType = typeMapping[normalizedTitle] || normalizedTitle
