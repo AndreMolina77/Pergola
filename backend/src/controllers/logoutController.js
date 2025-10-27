@@ -2,6 +2,7 @@ const logoutController = {}
 // POST (CREATE)
 logoutController.logout = async (req, res) => {
    try {
+    console.log("🔐 Iniciando proceso de logout en el servidor...")
     // Borrar la cookie con las MISMAS opciones que se usaron al crearla
     res.clearCookie("authToken", {
       httpOnly: true,
