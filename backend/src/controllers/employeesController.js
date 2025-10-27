@@ -4,6 +4,7 @@ import Employees from "../models/Employees.js";
 // Archivo config y librería cloudinary
 import { v2 as cloudinary } from 'cloudinary';
 import { config } from "../utils/config.js";
+import bcryptjs from "bcryptjs";
 // Función helper para validar
 import { validateEmployee } from "../validators/validator.js";
 
