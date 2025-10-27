@@ -1,9 +1,20 @@
 const logoutController = {}
 // POST (CREATE)
 logoutController.logout = async (req, res) => {
-  // Se borra la cookie que contiene el token para que el usuario tenga que volver a iniciar sesión
-  res.clearCookie("authToken")
-  // ESTADO DE OK
-  res.status(200).json({message: "Sesión cerrada correctamente"})
+   try {
+    // Borrar la cookie con las MISMAS opciones que se usaron al crearla
+    res.clearCookie("authToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/' // Asegurar que se borre desde la ruta raíz
+    })
+      
+    console.log("✅ Cookie authToken eliminada correctamente")
+    res.status(200).json({message: "Sesión cerrada correctamente"})
+  } catch (error) {
+    console.error("❌ Error al cerrar sesión:", error)
+    res.status(500).json({message: "Error al cerrar sesión"})
+  }
 }
 export default logoutController
