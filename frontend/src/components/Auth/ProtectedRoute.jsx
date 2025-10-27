@@ -5,76 +5,57 @@ import { toast } from 'react-hot-toast'
 
 // Componente para proteger rutas privadas
 const ProtectedRoute = ({ children }) => {
-  // Obtiene datos de autenticación y función de logout
-  const { user, authCookie, logout } = useAuth()
-  // Estado para saber si está validando la sesión
-  const [isValidating, setIsValidating] = useState(true)
-  // Estado para saber si el usuario está autenticado
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  // Estado para evitar mostrar el error varias veces
-  const [hasShownError, setHasShownError] = useState(false)
-  // Ubicación actual para redirección
+  const { user, isLoading: authLoading } = useAuth() // ← Remover authCookie
+  const [isValidating, setIsValidating] = useState(!authLoading && !user)
   const location = useLocation()
 
   useEffect(() => {
-    // Función para validar autenticación
+    // Solo validar si hay usuario pero queremos verificar con el servidor
     const validateAuth = async () => {
-      // Si no hay usuario ni token, no está autenticado
-      if (!user && !authCookie) {
-        setIsAuthenticated(false)
+      // Si no hay usuario, no validar
+      if (!user) {
         setIsValidating(false)
         return
       }
+
       try {
-        // Verifica el token con el servidor
-        const response = await fetch('https://pergola-production.up.railway.app/api/validateAuthToken', {
+        const response = await fetch('https://pergola.onrender.com/api/validateAuthToken', {
           method: 'POST',
           credentials: 'include',
           headers: {
             'Content-Type': 'application/json'
           }
         })
+
         if (response.ok) {
-          // Token válido
-          console.log("✅ Token válido - user authenticated")
-          setIsAuthenticated(true)
-          setHasShownError(false) // Reinicia el flag de error
+          // Token válido, todo está bien
+          setIsValidating(false)
         } else {
-          // Token inválido, limpia datos locales
-          await logout() // Limpia cookies
-          setIsAuthenticated(false)
-          // Solo muestra el error una vez
-          if (!hasShownError) {
-            setHasShownError(true)
-            if (response.status === 401) {
-              toast.error('Sesión expirada. Por favor, inicia sesión.')
-            } else if (response.status === 403) {
-              toast.error('Acceso no autorizado.')
-            } else {
-              toast.error('Error de autenticación.')
-            }
+          // Token inválido - NO llamar a logout aquí para evitar ciclos
+          console.warn("Token inválido en ProtectedRoute")
+          setIsValidating(false)
+          // Mostrar error pero no redirigir automáticamente
+          if (response.status === 401) {
+            toast.error('Sesión expirada. Por favor, inicia sesión.')
           }
         }
       } catch (error) {
-        // Error de conexión, limpia datos
         console.error('Error validando auth:', error)
-        await logout()
-        setIsAuthenticated(false)
-        // Solo muestra el error una vez
-        if (!hasShownError) {
-          setHasShownError(true)
-          toast.error('Error de conexión. Redirigiendo al login.')
-        }
-      } finally {
-        // Finaliza la validación
         setIsValidating(false)
+        toast.error('Error de conexión.')
       }
     }
-    validateAuth()
-  }, [user, authCookie, logout, hasShownError])
 
-  // Muestra loading mientras valida
-  if (isValidating) {
+    // Solo validar si hay usuario y no está cargando
+    if (user && !authLoading) {
+      validateAuth()
+    } else {
+      setIsValidating(false)
+    }
+  }, [user, authLoading]) 
+
+  // Mostrar loading mientras valida
+  if (authLoading || isValidating) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#E8E1D8]">
         <div className="text-center">
@@ -84,11 +65,14 @@ const ProtectedRoute = ({ children }) => {
       </div>
     )
   }
+
   // Si no está autenticado, redirige al login
-  if (!isAuthenticated) {
+  if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />
   }
+
   // Si está autenticado, muestra el contenido protegido
   return children
 }
+
 export default ProtectedRoute
