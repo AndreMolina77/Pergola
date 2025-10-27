@@ -23,6 +23,8 @@ employeesController.postEmployees = async (req, res) => {
         return res.status(400).json({ message: "Formato de imagen no válido (solo jpg, jpeg, png, webp, svg), gif" });
       }
     } 
+    // Encriptación de contraseña
+    const hashedPassword = await bcryptjs.hash(password, 10)
     // Link de imagen
     let profilePicURL = "";
     // Subir imagen a cloudinary si se proporciona una imagen en la solicitud
@@ -33,16 +35,16 @@ employeesController.postEmployees = async (req, res) => {
       });
       profilePicURL = result.secure_url;
     }
-    // Validar lo que venga en req.body
+    /* // Validar lo que venga en req.body
     const validationError = validateEmployee({name, lastName, username, email, phoneNumber, birthDate, DUI, password, profilePic: profilePicURL, hireDate});
     if (validationError) {
       return res.status(400).json({ message: validationError });
-    } 
-    const newEmployee = new Employees({ name, lastName, username, email, phoneNumber, birthDate: new Date(birthDate), DUI, password, profilePic: profilePicURL, hireDate: new Date(hireDate) });
+    } */
+    const newEmployee = new Employees({ name, lastName, username, email, phoneNumber, birthDate: new Date(birthDate), DUI, password: hashedPassword, profilePic: profilePicURL, hireDate: new Date(hireDate) });
     // Guardar empleado
     await newEmployee.save();
     // ESTADO DE CREACIÓN
-    res.status(201).json({ message: "Empleado creado con éxito", data: {...newEmployee.toObject(), password: undefined /* Excluir la contraseña de la respuesta */ }});
+    res.status(201).json({ message: "Empleado creado con éxito", data: {...newEmployee.toObject(), /* password: undefined  Excluir la contraseña de la respuesta */ }});
   } catch (error) {        
     // Error de duplicados
     if (error.code === 11000) {

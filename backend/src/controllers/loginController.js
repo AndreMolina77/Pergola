@@ -123,7 +123,7 @@ loginController.login = async (req, res) => {
         return res.status(401).json({message: "El usuario está bloqueado", remainingMinutes})
       }
     }
-    // Verificar si la cuenta está verificada (para empleados y clientes)
+    // Verificar si la cuenta está verificada (para clientes)
     if (userType === "customer" && !userFound.isVerified) {
       console.log("Cuenta no verificada")
       return res.status(403).json({ message: "Por favor verifica tu cuenta antes de iniciar sesión" })
