@@ -104,11 +104,12 @@ El proyecto utiliza el stack **MERN** (MongoDB, Express, React, Node.js) con her
 - Node.js (v18 o superior)
 - npm o yarn
 - MongoDB (local o MongoDB Atlas)
+- Expo CLI instalado VIA npm
 
 ### Instalación del Backend
 ```bash
 cd backend
-npm install
+npm install --force 
 npm run dev
 ```
 
@@ -117,6 +118,13 @@ npm run dev
 cd frontend
 npm install
 npm run dev
+```
+
+### Instalación de la aplicación móvil
+```bash
+cd mobile
+npm install 
+npx expo start
 ```
 
 ## 🎯 Características del Proyecto
