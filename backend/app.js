@@ -62,7 +62,7 @@ app.use("/api/public/orders", ordersRoutes);
 app.use("/api/public/refunds", refundsRoutes);
 
 // Ruta especial para validar token (acepta cualquier tipo de usuario válido)
-app.use("/api/validateAuthToken", validateAuthToken)
+app.use("/api/validateAuthToken", validateAuthTokenRoutes)
 // Rutas que SÍ requieren login (protegidas) 
 app.use("/api/products", validateAuthToken(["admin", "employee"]), productsRoutes)
 app.use("/api/rawmaterials", validateAuthToken(["admin", "employee"]), rawMaterialsRoutes)
