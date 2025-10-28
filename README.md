@@ -2,12 +2,7 @@
 
 Pérgola Joyería es una tienda de joyas y accesorios elaborados con productos de alta calidad con un proceso de producción artesanal. Inspirándose en los valores de la autenticidad, elegancia y empoderamiento. Este proyecto nace para ofrecer una experiencia personalizada, conectando el arte de la joyería tradicional con el estilo de vida contemporáneo, permitiendo a las clientas encontrar piezas que se conviertan en una extensión de su identidad.
 
-## 🧑🏻‍🎓 Integrantes del proyecto
-- Juan Pablo Ayala Menjívar 
-- Aldo André Molina Maldonado
-- Carlos Mateo Amaya Meléndez 
-- Rafael Alejandro Menéndez Alfaro
-- Rafael Alberto Vargas Landaverde
+#### Disponible en: [https://pergola-rose.vercel.app/](https://pergola-rose.vercel.app/)
 
 ## 🛍️ Descripción del proyecto
 
